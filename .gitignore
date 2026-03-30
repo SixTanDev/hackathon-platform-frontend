@@ -18,6 +18,9 @@
 # misc
 .DS_Store
 *.pem
+.idea/
+.abacus.donotdelete
+.project_instructions.md
 
 # debug
 npm-debug.log*
