@@ -1,0 +1,11 @@
+'use client';
+
+import { DashboardShell } from '@/components/dashboard/dashboard-shell';
+
+export default function TutorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <DashboardShell>{children}</DashboardShell>;
+}
