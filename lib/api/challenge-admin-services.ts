@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray, toListResult } from './response-utils';
 import type {
   Challenge,
   ChallengeCreate,
@@ -98,9 +99,10 @@ export interface ChallengeReview {
 
 export async function listChallenges(params?: ChallengeListParams): Promise<{ items: Challenge[]; total: number }> {
   const res = await apiClient.get('/challenges', { params });
-  const data = res.data;
-  if (Array.isArray(data)) return { items: data, total: data.length };
-  return { items: data.items ?? data.results ?? [], total: data.total ?? data.count ?? 0 };
+  return toListResult<Challenge>(res.data, {
+    arrayKeys: ['items', 'results', 'challenges'],
+    totalKeys: ['total', 'count'],
+  });
 }
 
 export async function getChallenge(id: string): Promise<Challenge> {
@@ -126,7 +128,7 @@ export async function deleteChallenge(id: string): Promise<void> {
 
 export async function listTestCases(challengeId: string): Promise<TestCase[]> {
   const res = await apiClient.get(`/challenges/${challengeId}/test-cases`);
-  return Array.isArray(res.data) ? res.data : res.data.items ?? [];
+  return toArray<TestCase>(res.data, ['items', 'test_cases', 'results']);
 }
 
 export async function addTestCase(challengeId: string, payload: TestCaseCreate): Promise<TestCase> {
@@ -183,13 +185,12 @@ export async function createTemplate(challengeId: string, payload: { language: s
 
 export async function findSimilarChallenges(challengeId: string): Promise<SimilarChallenge[]> {
   const res = await apiClient.get(`/challenges/${challengeId}/similar`);
-  return Array.isArray(res.data) ? res.data : res.data.items ?? [];
+  return toArray<SimilarChallenge>(res.data, ['items', 'results']);
 }
 
 export async function searchSimilarByText(title: string, category?: string): Promise<SimilarChallenge[]> {
   const res = await apiClient.get('/challenges', { params: { search: title, category, limit: 10 } }).catch(() => ({ data: [] }));
-  const d = res.data;
-  const items = Array.isArray(d) ? d : d?.items ?? [];
+  const items = toArray<Record<string, unknown>>(res.data, ['items', 'results']);
   return items.map((c: any) => ({ id: c.id, title: c.title, type: c.type, difficulty: c.difficulty, similarity_score: 0, category: c.category }));
 }
 
@@ -233,8 +234,7 @@ export async function listAIGeneratedChallenges(status?: ChallengeStatus): Promi
 export async function listChallengeReviews(status?: string): Promise<ChallengeReview[]> {
   const params = status ? { status } : undefined;
   const res = await apiClient.get('/admin/challenge-reviews', { params }).catch(() => ({ data: [] }));
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.reviews ?? [];
+  return toArray<ChallengeReview>(res.data, ['items', 'reviews', 'results']);
 }
 
 // ─── Import / Export ────────────────────────────────────────────────────────

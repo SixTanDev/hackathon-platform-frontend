@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray } from './response-utils';
 import type {
   DocumentCollection,
   DocumentCollectionCreate,
@@ -36,9 +37,7 @@ export interface HackathonAccessPayload {
 
 export async function listCollections(): Promise<DocumentCollection[]> {
   const res = await apiClient.get('/document-collections');
-  const data = res.data;
-  if (Array.isArray(data)) return data;
-  return data.collections ?? data.items ?? [];
+  return toArray<DocumentCollection>(res.data, ['collections', 'items', 'results']);
 }
 
 export async function getCollection(id: string): Promise<DocumentCollection> {
@@ -64,9 +63,7 @@ export async function deleteCollection(id: string): Promise<void> {
 
 export async function listDocuments(collectionId: string): Promise<DocumentItem[]> {
   const res = await apiClient.get(`/document-collections/${collectionId}/documents`);
-  const data = res.data;
-  if (Array.isArray(data)) return data;
-  return data.documents ?? data.items ?? [];
+  return toArray<DocumentItem>(res.data, ['documents', 'items', 'results']);
 }
 
 export async function uploadDocument(collectionId: string, file: File): Promise<DocumentItem> {
@@ -106,9 +103,7 @@ export async function searchDocuments(
     query,
     top_k: topK,
   });
-  const data = res.data;
-  if (Array.isArray(data)) return data;
-  return data.results ?? data.chunks ?? [];
+  return toArray<SemanticSearchResult>(res.data, ['results', 'chunks', 'items']);
 }
 
 // ─── Hackathon Access ───────────────────────────────────────────────────────

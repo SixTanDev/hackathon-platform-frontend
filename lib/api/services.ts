@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { toArray } from './response-utils';
 import type {
   ProfileResponse,
   Hackathon,
@@ -23,8 +24,8 @@ export interface HackathonListParams {
 }
 
 export async function getHackathons(params?: HackathonListParams): Promise<Hackathon[]> {
-  const { data } = await apiClient.get<Hackathon[]>('/hackathons', { params });
-  return data;
+  const { data } = await apiClient.get('/hackathons', { params });
+  return toArray<Hackathon>(data, ['items', 'results', 'hackathons']);
 }
 
 export async function getHackathon(id: string): Promise<Hackathon> {
@@ -41,13 +42,20 @@ export interface NotificationListParams {
 }
 
 export async function getNotifications(params?: NotificationListParams): Promise<Notification[]> {
-  const { data } = await apiClient.get<Notification[]>('/notifications', { params });
-  return data;
+  const { data } = await apiClient.get('/notifications', { params });
+  return toArray<Notification>(data, ['items', 'results', 'notifications']);
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
-  const { data } = await apiClient.get<UnreadCountResponse>('/notifications/unread-count');
-  return data?.count ?? 0;
+  const { data } = await apiClient.get<UnreadCountResponse | { unread_count?: number } | number>('/notifications/unread-count');
+  if (typeof data === 'number') return data;
+  if (data && typeof data === 'object' && 'count' in data && typeof data.count === 'number') {
+    return data.count;
+  }
+  if (data && typeof data === 'object' && 'unread_count' in data && typeof data.unread_count === 'number') {
+    return data.unread_count;
+  }
+  return 0;
 }
 
 export async function markNotificationsRead(ids: string[]): Promise<void> {
@@ -69,8 +77,8 @@ export interface SaveAIKeyPayload {
 }
 
 export async function getMyAIKeys(): Promise<AIKeyInfo[]> {
-  const { data } = await apiClient.get<AIKeyInfo[]>('/auth/users/me/ai-keys');
-  return data;
+  const { data } = await apiClient.get('/auth/users/me/ai-keys');
+  return toArray<AIKeyInfo>(data, ['keys', 'items', 'results']);
 }
 
 export async function saveAIKey(payload: SaveAIKeyPayload): Promise<void> {

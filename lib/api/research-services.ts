@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray } from './response-utils';
 
 // ─── Types matching real API schemas ─────────────────────────────────────────
 
@@ -158,8 +159,7 @@ const BASE = '/research-groups';
 
 export async function listMyResearchGroups(): Promise<ResearchGroup[]> {
   const res = await apiClient.get(BASE);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.groups ?? [];
+  return toArray<ResearchGroup>(res.data, ['items', 'groups', 'results']);
 }
 
 export async function getResearchGroup(id: string): Promise<ResearchGroup> {
@@ -224,8 +224,7 @@ export async function removeMember(groupId: string, userId: string): Promise<voi
 
 export async function searchUsersForGroup(query: string): Promise<{ user_id: string; full_name: string; email: string }[]> {
   const res = await apiClient.get('/admin/users', { params: { search: query, limit: 20 } });
-  const d = res.data;
-  const items = Array.isArray(d) ? d : d?.items ?? d?.users ?? [];
+  const items = toArray<Record<string, unknown>>(res.data, ['items', 'users', 'results']);
   return items.map((u: Record<string, unknown>) => ({
     user_id: (u.id ?? u.user_global_id) as string,
     full_name: u.full_name as string,
@@ -237,8 +236,7 @@ export async function searchUsersForGroup(query: string): Promise<{ user_id: str
 
 export async function listProjects(groupId: string): Promise<ResearchProject[]> {
   const res = await apiClient.get(`${BASE}/${groupId}/projects`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.projects ?? [];
+  return toArray<ResearchProject>(res.data, ['items', 'projects', 'results']);
 }
 
 export async function createProject(groupId: string, payload: ProjectCreate): Promise<ResearchProject> {
@@ -257,8 +255,7 @@ export async function deleteProject(projectId: string): Promise<void> {
 
 export async function getProjectTasks(_groupId: string, projectId: string): Promise<ProjectTask[]> {
   const res = await apiClient.get(`${BASE}/projects/${projectId}/tasks`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.tasks ?? [];
+  return toArray<ProjectTask>(res.data, ['items', 'tasks', 'results']);
 }
 
 export async function createTask(_groupId: string, projectId: string, payload: TaskCreate): Promise<ProjectTask> {
@@ -286,8 +283,7 @@ export async function listGroupChallenges(groupId: string): Promise<ResearchChal
   try {
     // There's no dedicated list endpoint; try dashboard as fallback
     const res = await apiClient.get(`${BASE}/${groupId}/challenges`);
-    const d = res.data;
-    return Array.isArray(d) ? d : d?.items ?? d?.challenges ?? [];
+    return toArray<ResearchChallenge>(res.data, ['items', 'challenges', 'results']);
   } catch {
     return [];
   }
@@ -302,14 +298,12 @@ export async function createGroupChallenge(groupId: string, payload: ResearchCha
 
 export async function listDiscussions(groupId: string): Promise<DiscussionThread[]> {
   const res = await apiClient.get(`${BASE}/${groupId}/discussions`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.threads ?? d?.discussions ?? [];
+  return toArray<DiscussionThread>(res.data, ['items', 'threads', 'discussions', 'results']);
 }
 
 export async function getDiscussionMessages(_groupId: string, threadId: string): Promise<DiscussionMessage[]> {
   const res = await apiClient.get(`${BASE}/discussions/${threadId}/messages`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.messages ?? [];
+  return toArray<DiscussionMessage>(res.data, ['items', 'messages', 'results']);
 }
 
 export async function createDiscussion(groupId: string, payload: ThreadCreate): Promise<DiscussionThread> {

@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { toArray } from './response-utils';
 import type {
   ChallengePublic,
   TestCasePublic,
@@ -21,8 +22,8 @@ export async function getChallengeDetail(id: string): Promise<ChallengePublic> {
 }
 
 export async function getChallengeTestCases(id: string): Promise<TestCasePublic[]> {
-  const { data } = await apiClient.get<TestCasePublic[]>(`/challenges/${id}/test-cases`);
-  return data;
+  const { data } = await apiClient.get(`/challenges/${id}/test-cases`);
+  return toArray<TestCasePublic>(data, ['items', 'test_cases', 'results']);
 }
 
 // ─── Run Code (dry run, example tests only) ─────────────────────
@@ -79,8 +80,8 @@ export interface SubmissionListParams {
 }
 
 export async function getSubmissions(params?: SubmissionListParams): Promise<Submission[]> {
-  const { data } = await apiClient.get<Submission[]>('/submissions', { params });
-  return Array.isArray(data) ? data : [];
+  const { data } = await apiClient.get('/submissions', { params });
+  return toArray<Submission>(data, ['items', 'submissions', 'results']);
 }
 
 export async function getSubmissionDetail(id: string): Promise<SubmissionDetail> {
@@ -89,8 +90,8 @@ export async function getSubmissionDetail(id: string): Promise<SubmissionDetail>
 }
 
 export async function getSubmissionTestResults(id: string): Promise<SubmissionTestResult[]> {
-  const { data } = await apiClient.get<SubmissionTestResult[]>(`/submissions/${id}/test-results`);
-  return data;
+  const { data } = await apiClient.get(`/submissions/${id}/test-results`);
+  return toArray<SubmissionTestResult>(data, ['items', 'test_results', 'results']);
 }
 
 // ─── Hints ─────────────────────────────────────────────────────
@@ -135,13 +136,11 @@ export async function getDocumentSubmissions(params: {
   hackathon_id: string;
   challenge_id: string;
 }): Promise<DocumentSubmission[]> {
-  const { data } = await apiClient.get<DocumentSubmission[] | { submissions: DocumentSubmission[] } | { items: DocumentSubmission[] }>(
+  const { data } = await apiClient.get(
     '/submissions',
     { params }
   );
-  // Handle both array and wrapped response
-  if (Array.isArray(data)) return data;
-  return (data as any).submissions ?? (data as any).items ?? [];
+  return toArray<DocumentSubmission>(data, ['submissions', 'items', 'results']);
 }
 
 export async function getDocumentSubmissionDetail(
