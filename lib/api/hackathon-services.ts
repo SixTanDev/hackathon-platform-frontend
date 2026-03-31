@@ -33,7 +33,7 @@ export async function getHackathonChallenges(hackathonId: string): Promise<Hacka
     `/hackathons/${hackathonId}/challenges`
   );
   return Array.isArray(data) ? data : data?.challenges ?? [];
-
+}
 
 // ─── Registrations ──────────────────────────────────────────────────────────
 
@@ -43,7 +43,7 @@ export async function getHackathonRegistrations(hackathonId: string): Promise<Re
     `/hackathons/${hackathonId}/registrations`
   );
   return Array.isArray(data) ? data : data?.registrations ?? [];
-
+}
 
 export async function registerForHackathon(
   hackathonId: string,
