@@ -58,8 +58,10 @@ export function NotificationPanel() {
   const { data: notifData } = useNotifications({ limit: 20 });
   const markRead = useMarkRead();
 
-  const unreadCount = (countData as any)?.unread_count ?? 0;
-  const notifications: Notification[] = (notifData as any)?.items ?? (notifData as any) ?? [];
+  const unreadCount = typeof countData === 'number'
+    ? countData
+    : Number((countData as any)?.unread_count ?? 0);
+  const notifications: Notification[] = Array.isArray(notifData) ? notifData : [];
 
   // Close on outside click
   useEffect(() => {

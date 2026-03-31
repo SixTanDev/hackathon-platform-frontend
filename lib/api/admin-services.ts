@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray, toListResult } from './response-utils';
 import type {
   Sede,
   SedeUpdate,
@@ -191,9 +192,10 @@ export interface AIKeyInfo {
 /** GET /admin/users — returns global users visible to admin */
 export async function listAdminUsers(params?: { skip?: number; limit?: number }): Promise<{ items: AdminUser[]; total: number }> {
   const res = await apiClient.get('/admin/users', { params });
-  const d = res.data;
-  if (Array.isArray(d)) return { items: d, total: d.length };
-  return { items: d?.items ?? d?.users ?? [], total: d?.total ?? 0 };
+  return toListResult<AdminUser>(res.data, {
+    arrayKeys: ['items', 'users', 'results'],
+    totalKeys: ['total', 'count'],
+  });
 }
 
 /** GET /admin/sedes/{sedeId}/members — returns memberships for this sede */
@@ -208,8 +210,7 @@ export interface SedeMemberEntry {
 
 export async function listSedeMembers(sedeId: string): Promise<SedeMemberEntry[]> {
   const res = await apiClient.get(`/admin/sedes/${sedeId}/members`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.members ?? [];
+  return toArray<SedeMemberEntry>(res.data, ['items', 'members', 'results']);
 }
 
 /** Legacy: list sede users — combines /admin/users + /admin/sedes/{id}/members client-side */
@@ -219,8 +220,8 @@ export async function listSedeUsers(sedeId: string, params?: { role?: string; se
     apiClient.get(`/admin/sedes/${sedeId}/members`),
   ]);
 
-  const rawUsers = Array.isArray(usersRes.data) ? usersRes.data : usersRes.data?.items ?? usersRes.data?.users ?? [];
-  const rawMembers: SedeMemberEntry[] = Array.isArray(membersRes.data) ? membersRes.data : membersRes.data?.items ?? membersRes.data?.members ?? [];
+  const rawUsers = toArray<Record<string, unknown>>(usersRes.data, ['items', 'users', 'results']);
+  const rawMembers = toArray<SedeMemberEntry>(membersRes.data, ['items', 'members', 'results']);
 
   // Build a map of user_global_id -> membership info
   const memberMap = new Map<string, SedeMemberEntry>();
@@ -371,17 +372,17 @@ export async function getHealth(): Promise<HealthCheck> {
 
 export async function getAuditLog(params?: { page?: number; page_size?: number }): Promise<{ items: AuditLogEntry[]; total: number }> {
   const res = await apiClient.get('/admin/audit-log', { params });
-  const d = res.data;
-  if (Array.isArray(d)) return { items: d, total: d.length };
-  return { items: d?.items ?? d?.logs ?? [], total: d?.total ?? 0 };
+  return toListResult<AuditLogEntry>(res.data, {
+    arrayKeys: ['items', 'logs', 'entries', 'results'],
+    totalKeys: ['total', 'count'],
+  });
 }
 
 // ─── Challenge Reviews ──────────────────────────────────────────────────────
 
 export async function getChallengeReviews(params?: { status?: string }): Promise<ChallengeReview[]> {
   const res = await apiClient.get('/admin/challenge-reviews', { params });
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.reviews ?? [];
+  return toArray<ChallengeReview>(res.data, ['items', 'reviews', 'results']);
 }
 
 // ─── Resource Requests ──────────────────────────────────────────────────────
@@ -395,8 +396,7 @@ export async function getChallengeReviews(params?: { status?: string }): Promise
 export async function listResourceRequests(): Promise<ResourceRequest[]> {
   try {
     const res = await apiClient.get('/admin/resource-requests');
-    const d = res.data;
-    return Array.isArray(d) ? d : d?.items ?? d?.requests ?? [];
+    return toArray<ResourceRequest>(res.data, ['items', 'requests', 'results']);
   } catch {
     // No list endpoint for admin — return empty
     return [];
@@ -413,13 +413,11 @@ export async function createResourceRequest(payload: ResourceRequestCreate): Pro
 export async function getPersonalAIKeys(): Promise<AIKeyInfo[]> {
   try {
     const res = await apiClient.get('/auth/users/me/ai-keys');
-    const d = res.data;
-    return Array.isArray(d) ? d : d?.keys ?? [];
+    return toArray<AIKeyInfo>(res.data, ['keys', 'items', 'results']);
   } catch {
     try {
       const res = await apiClient.get('/ai/personal-keys');
-      const d = res.data;
-      return Array.isArray(d) ? d : d?.keys ?? [];
+      return toArray<AIKeyInfo>(res.data, ['keys', 'items', 'results']);
     } catch {
       return [];
     }

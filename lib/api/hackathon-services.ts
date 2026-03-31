@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { toArray } from './response-utils';
 import type {
   Hackathon,
   HackathonChallenge,
@@ -27,20 +28,22 @@ export interface HackathonChallengeWithDetail extends HackathonChallenge {
 }
 
 export async function getHackathonChallenges(hackathonId: string): Promise<HackathonChallengeWithDetail[]> {
+
   const { data } = await apiClient.get<HackathonChallengeWithDetail[] | { challenges: HackathonChallengeWithDetail[] }>(
     `/hackathons/${hackathonId}/challenges`
   );
   return Array.isArray(data) ? data : data?.challenges ?? [];
-}
+
 
 // ─── Registrations ──────────────────────────────────────────────────────────
 
 export async function getHackathonRegistrations(hackathonId: string): Promise<Registration[]> {
+
   const { data } = await apiClient.get<Registration[] | { registrations: Registration[] }>(
     `/hackathons/${hackathonId}/registrations`
   );
   return Array.isArray(data) ? data : data?.registrations ?? [];
-}
+
 
 export async function registerForHackathon(
   hackathonId: string,
@@ -63,7 +66,7 @@ export async function getHackathonTeams(hackathonId: string): Promise<Team[]> {
   const { data } = await apiClient.get<Team[] | TeamListResponse>(
     `/hackathons/${hackathonId}/teams`
   );
-  return Array.isArray(data) ? data : data?.teams ?? [];
+  return toArray<Team>(data, ['teams', 'items', 'results']);
 }
 
 export async function createTeam(hackathonId: string, payload: TeamCreate): Promise<Team> {
@@ -106,8 +109,8 @@ export interface TeamMessage {
 }
 
 export async function getTeamMessages(teamId: string): Promise<TeamMessage[]> {
-  const { data } = await apiClient.get<TeamMessage[]>(`/teams/${teamId}/messages`);
-  return data;
+  const { data } = await apiClient.get(`/teams/${teamId}/messages`);
+  return toArray<TeamMessage>(data, ['items', 'messages', 'results']);
 }
 
 export async function sendTeamMessage(teamId: string, content: string): Promise<TeamMessage> {
@@ -126,8 +129,8 @@ export interface TeamProgressEntry {
 }
 
 export async function getTeamProgress(teamId: string): Promise<TeamProgressEntry[]> {
-  const { data } = await apiClient.get<TeamProgressEntry[]>(`/teams/${teamId}/progress`);
-  return Array.isArray(data) ? data : [];
+  const { data } = await apiClient.get(`/teams/${teamId}/progress`);
+  return toArray<TeamProgressEntry>(data, ['items', 'progress', 'results']);
 }
 
 // ─── Leaderboard ────────────────────────────────────────────────────────────
@@ -136,11 +139,11 @@ export async function getHackathonLeaderboard(
   hackathonId: string,
   type: 'individual' | 'team' = 'individual'
 ): Promise<LeaderboardEntry[]> {
-  const { data } = await apiClient.get<LeaderboardEntry[] | { entries: LeaderboardEntry[] }>(
+  const { data } = await apiClient.get(
     `/hackathons/${hackathonId}/leaderboard`,
     { params: { type } }
   );
-  return Array.isArray(data) ? data : data?.entries ?? [];
+  return toArray<LeaderboardEntry>(data, ['entries', 'items', 'results']);
 }
 
 // ─── Team Member Removal ─────────────────────────────────────────────────
@@ -160,11 +163,11 @@ export interface SedeUserResult {
 
 export async function searchSedeMembers(query: string): Promise<SedeUserResult[]> {
   // Use admin users endpoint with search to find sede members
-  const { data } = await apiClient.get<SedeUserResult[] | { items: SedeUserResult[] }>(
+  const { data } = await apiClient.get(
     '/admin/users',
     { params: { search: query, limit: 10 } }
   );
-  return Array.isArray(data) ? data : data?.items ?? [];
+  return toArray<SedeUserResult>(data, ['items', 'users', 'results']);
 }
 
 // ─── Mentor: My Assigned Teams ───────────────────────────────────────────
@@ -180,10 +183,10 @@ export interface MentorTeamSummary {
 }
 
 export async function getMentorTeams(): Promise<MentorTeamSummary[]> {
-  const { data } = await apiClient.get<MentorTeamSummary[] | { items: MentorTeamSummary[] }>(
+  const { data } = await apiClient.get(
     '/teams/assigned'
   );
-  return Array.isArray(data) ? data : data?.items ?? [];
+  return toArray<MentorTeamSummary>(data, ['items', 'teams', 'results']);
 }
 
 // ─── Sede / Zone Leaderboard ──────────────────────────────────────────────

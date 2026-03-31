@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api/client';
+import { toArray } from '@/lib/api/response-utils';
 import { getDashboardPathForRole } from '@/lib/auth-helpers';
 import type { TokenResponse, User, ZoneMembershipInfo, ContextTokenResponse } from '@/types/api';
 import { Zap, Loader2, Eye, EyeOff } from 'lucide-react';
@@ -59,17 +60,19 @@ export default function LoginPage() {
       login?.(userData, accessToken, refreshToken);
 
       // Step 3: Get memberships
-      const { data: membershipsData } = await apiClient.get<ZoneMembershipInfo[]>('/auth/my-memberships', {
+      const { data: membershipsData } = await apiClient.get('/auth/my-memberships', {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      setMemberships?.(membershipsData ?? []);
+      const memberships = toArray<ZoneMembershipInfo>(membershipsData, ['items', 'zones', 'results']);
+
+      setMemberships?.(memberships);
 
       toast.success(`¡Bienvenido, ${userData?.full_name ?? 'usuario'}!`);
 
       // Flatten all sede memberships
-      const allSedes = (membershipsData ?? []).flatMap((z) =>
-        (z?.sedes ?? []).map((s) => ({ zone: z, sede: s }))
+      const allSedes = memberships.flatMap((z) =>
+        (Array.isArray(z?.sedes) ? z.sedes : []).map((s) => ({ zone: z, sede: s }))
       );
 
       // SuperAdmin with no memberships → admin panel

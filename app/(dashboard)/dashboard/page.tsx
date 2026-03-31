@@ -168,9 +168,12 @@ export default function DashboardPage() {
   const { data: openHackathons } = useOpenHackathons();
   const { data: notifications, isLoading: notificationsLoading } = useNotifications({ limit: 8 });
 
+  const safeActiveHackathons = Array.isArray(activeHackathons) ? activeHackathons : [];
+  const safeOpenHackathons = Array.isArray(openHackathons) ? openHackathons : [];
+
   const allHackathons = [
-    ...(activeHackathons ?? []),
-    ...(openHackathons ?? []),
+    ...safeActiveHackathons,
+    ...safeOpenHackathons,
   ].filter(
     (h, i, arr) => arr.findIndex((x) => x.id === h.id) === i
   ).slice(0, 6);

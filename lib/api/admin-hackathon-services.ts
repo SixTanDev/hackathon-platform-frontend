@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray, toListResult } from './response-utils';
 import type {
   Hackathon,
   HackathonCreate,
@@ -38,9 +39,10 @@ export async function listHackathons(params?: {
   search?: string;
 }): Promise<{ items: Hackathon[]; total: number }> {
   const res = await apiClient.get('/hackathons', { params });
-  const d = res.data;
-  if (Array.isArray(d)) return { items: d, total: d.length };
-  return { items: d?.items ?? d?.hackathons ?? [], total: d?.total ?? 0 };
+  return toListResult<Hackathon>(res.data, {
+    arrayKeys: ['items', 'hackathons', 'results'],
+    totalKeys: ['total', 'count'],
+  });
 }
 
 // ─── State Transitions ───────────────────────────────────────────────────────
@@ -73,8 +75,7 @@ export async function listHackathonChallenges(
   hackathonId: string
 ): Promise<HackathonChallenge[]> {
   const res = await apiClient.get(`/hackathons/${hackathonId}/challenges`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.challenges ?? [];
+  return toArray<HackathonChallenge>(res.data, ['items', 'challenges', 'results']);
 }
 
 export async function addChallengeToHackathon(
@@ -110,8 +111,7 @@ export async function getChallengeLibrary(
   params?: ChallengeLibraryParams
 ): Promise<ChallengePublic[]> {
   const res = await apiClient.get('/challenges', { params });
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? [];
+  return toArray<ChallengePublic>(res.data, ['items', 'results', 'challenges']);
 }
 
 // ─── Registrations ───────────────────────────────────────────────────────────
@@ -128,8 +128,7 @@ export interface RegistrationEntry {
 
 export async function listRegistrations(hackathonId: string): Promise<RegistrationEntry[]> {
   const res = await apiClient.get(`/hackathons/${hackathonId}/registrations`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.registrations ?? [];
+  return toArray<RegistrationEntry>(res.data, ['items', 'registrations', 'results']);
 }
 
 // ─── Mentors / Judges ────────────────────────────────────────────────────────
@@ -144,8 +143,7 @@ export interface HackathonMentor {
 
 export async function getHackathonMentors(hackathonId: string): Promise<HackathonMentor[]> {
   const res = await apiClient.get(`/hackathons/${hackathonId}/mentors`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? d?.mentors ?? [];
+  return toArray<HackathonMentor>(res.data, ['items', 'mentors', 'results']);
 }
 
 export async function addHackathonMentor(
@@ -172,8 +170,7 @@ export interface SedeAccessEntry {
 
 export async function listSedeAccess(hackathonId: string): Promise<SedeAccessEntry[]> {
   const res = await apiClient.get(`/hackathons/${hackathonId}/sede-access`);
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.items ?? [];
+  return toArray<SedeAccessEntry>(res.data, ['items', 'sedes', 'results']);
 }
 
 export async function grantSedeAccess(
@@ -250,6 +247,5 @@ export async function getMonitorStats(hackathonId: string): Promise<MonitorStats
 
 export async function getDocumentCollections(): Promise<DocumentCollection[]> {
   const res = await apiClient.get('/document-collections');
-  const d = res.data;
-  return Array.isArray(d) ? d : d?.collections ?? d?.items ?? [];
+  return toArray<DocumentCollection>(res.data, ['collections', 'items', 'results']);
 }

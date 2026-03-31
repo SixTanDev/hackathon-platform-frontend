@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toArray, toListResult } from './response-utils';
 import type { Zone, ZoneCreate, ZoneUpdate, ZoneWithStats, Sede, SedeCreate, SedeUpdate, RoleName } from '@/types/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -261,7 +262,7 @@ export async function getHealthDetailed(): Promise<HealthDetailed> {
 
 export async function listZones(): Promise<ZoneListItem[]> {
   const { data } = await apiClient.get('/admin/zones');
-  const items = Array.isArray(data) ? data : data?.items ?? data?.zones ?? [];
+  const items = toArray<Record<string, unknown>>(data, ['items', 'zones', 'results']);
   // Map API fields to expected ZoneListItem shape
   return items.map((z: any) => ({
     ...z,
@@ -306,13 +307,17 @@ export async function getZoneProvisionStatus(zoneId: string): Promise<ZoneProvis
 
 export async function listAllSedes(params?: { zone_id?: string; search?: string; skip?: number; limit?: number }): Promise<{ items: CrossZoneSede[]; total: number }> {
   const { data } = await apiClient.get('/admin/sedes', { params });
-  const raw = Array.isArray(data) ? data : data?.items ?? data?.sedes ?? [];
+  const raw = toArray<Record<string, unknown>>(data, ['items', 'sedes', 'results']);
   const items: CrossZoneSede[] = raw.map((s: any) => ({
     ...s,
     users_total: s.users_total ?? s.user_count ?? 0,
     hackathons_total: s.hackathons_total ?? s.hackathon_count ?? 0,
   }));
-  return { items, total: Array.isArray(data) ? data.length : data?.total ?? items.length };
+  const normalized = toListResult<CrossZoneSede>(data, {
+    arrayKeys: ['items', 'sedes', 'results'],
+    totalKeys: ['total', 'count'],
+  });
+  return { items, total: normalized.total };
 }
 
 /**
@@ -363,7 +368,7 @@ export async function createSedeAdmin(sedeId: string, payload: CreateSedeAdminPa
  */
 export async function listSedeMembers(sedeId: string): Promise<SedeMember[]> {
   const { data } = await apiClient.get(`/admin/sedes/${sedeId}/members`);
-  const items = Array.isArray(data) ? data : data?.items ?? data?.members ?? [];
+  const items = toArray<SedeMember>(data, ['items', 'members', 'results']);
   return items;
 }
 
@@ -390,7 +395,10 @@ export async function endImpersonation(): Promise<void> {
 
 export async function listAllResourceRequests(params?: { status?: string; skip?: number; limit?: number }): Promise<{ items: SuperAdminResourceRequest[]; total: number }> {
   const { data } = await apiClient.get('/superadmin/resource-requests', { params });
-  return data;
+  return toListResult<SuperAdminResourceRequest>(data, {
+    arrayKeys: ['items', 'requests', 'resource_requests', 'results'],
+    totalKeys: ['total', 'count'],
+  });
 }
 
 export async function approveResourceRequest(id: string, payload: ApproveResourcePayload): Promise<SuperAdminResourceRequest> {
@@ -408,5 +416,8 @@ export async function rejectResourceRequest(id: string, reason: string): Promise
 
 export async function getAuditLog(params?: AuditLogParams): Promise<{ items: AuditLogEntry[]; total: number }> {
   const { data } = await apiClient.get('/admin/audit-log', { params });
-  return data;
+  return toListResult<AuditLogEntry>(data, {
+    arrayKeys: ['items', 'logs', 'entries', 'results'],
+    totalKeys: ['total', 'count'],
+  });
 }

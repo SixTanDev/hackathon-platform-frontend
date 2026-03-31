@@ -880,4 +880,9 @@ export interface ApiError {
   detail: string;
   error_code?: string;
   field_errors?: ValidationError[];
+  status?: number;
+  response?: {
+    status?: number;
+    data?: unknown;
+  };
 }

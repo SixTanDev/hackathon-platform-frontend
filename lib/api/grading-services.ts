@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { toListResult } from './response-utils';
 import type { GradeResult, RubricJson } from '@/types/api';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -98,22 +99,21 @@ export interface GradingSubmissionDetail {
 export async function getGradingInbox(params?: GradingInboxParams): Promise<GradingInboxResponse> {
   const res = await apiClient.get('/grading/inbox', { params });
   const data = res.data;
-  // Normalize response shape
-  if (Array.isArray(data)) {
-    return {
-      items: data,
-      total: data.length,
-      counts: {
-        pending: data.filter((i: GradingInboxItem) => i.status === 'pending').length,
-        under_review: data.filter((i: GradingInboxItem) => i.status === 'under_review').length,
-        graded: data.filter((i: GradingInboxItem) => i.status === 'graded').length,
-      },
-    };
-  }
+  const list = toListResult<GradingInboxItem>(data, {
+    arrayKeys: ['items', 'submissions', 'results'],
+    totalKeys: ['total', 'count'],
+  });
+  const items = list.items;
+  // Normalize counts when backend does not provide them.
+  const fallbackCounts = {
+    pending: items.filter((i) => i.status === 'pending').length,
+    under_review: items.filter((i) => i.status === 'under_review').length,
+    graded: items.filter((i) => i.status === 'graded').length,
+  };
   return {
-    items: data.items ?? data.submissions ?? [],
-    total: data.total ?? 0,
-    counts: data.counts ?? { pending: 0, under_review: 0, graded: 0 },
+    items,
+    total: list.total,
+    counts: (data as any)?.counts ?? fallbackCounts,
   };
 }
 
