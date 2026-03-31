@@ -74,7 +74,7 @@ async function ensureFreshToken(): Promise<string | null> {
     return store.accessToken;
   }
 
-  // Already refreshing — wait for the shared promise
+  // Already refreshing - wait for the shared promise
   if (isRefreshing && refreshPromise) {
     return refreshPromise;
   }
@@ -107,11 +107,11 @@ apiClient.interceptors.request.use(
     }
 
     if (store?.contextToken) {
-      // Backend expects "Bearer <context_token>" format
-      const ctxValue = store.contextToken.startsWith('Bearer ')
-        ? store.contextToken
-        : `Bearer ${store.contextToken}`;
-      config.headers.set('X-Context-Token', ctxValue);
+      // The backend expects the raw context token value.
+      const ctxValue = store.contextToken.replace(/^Bearer\s+/i, '').trim();
+      if (ctxValue) {
+        config.headers.set('X-Context-Token', ctxValue);
+      }
     }
 
     // Send X-Zone-Id: superadmin override takes priority, then context-based zone
@@ -140,17 +140,25 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       }
 
-      // Refresh failed — already handled in doRefresh
+      // Refresh failed - already handled in doRefresh
       return Promise.reject(error);
     }
 
     // Normalize error
+    const responseData = error?.response?.data as ApiError | undefined;
     const apiError: ApiError = {
-      detail: error?.response?.data?.detail ?? error?.message ?? 'Ocurrió un error inesperado',
-      error_code: (error?.response?.data as any)?.error_code,
-      field_errors: Array.isArray(error?.response?.data?.detail)
-        ? (error?.response?.data?.detail as any)
+      detail: (typeof responseData?.detail === 'string'
+        ? responseData.detail
+        : error?.message) ?? 'An unexpected error occurred',
+      error_code: responseData?.error_code,
+      field_errors: Array.isArray(responseData?.detail)
+        ? (responseData?.detail as any)
         : undefined,
+      status: error?.response?.status,
+      response: {
+        status: error?.response?.status,
+        data: responseData,
+      },
     };
 
     return Promise.reject(apiError);

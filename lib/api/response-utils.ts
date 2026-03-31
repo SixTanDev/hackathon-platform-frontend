@@ -22,6 +22,7 @@ const DEFAULT_ARRAY_KEYS = [
   'reviews',
   'logs',
   'users',
+  'groups',
   'keys',
   'zones',
   'sedes',
