@@ -69,8 +69,8 @@ export interface SaveAIKeyPayload {
 }
 
 export async function getMyAIKeys(): Promise<AIKeyInfo[]> {
-  const { data } = await apiClient.get<AIKeyInfo[]>('/auth/users/me/ai-keys');
-  return data;
+  const { data } = await apiClient.get<AIKeyInfo[] | { keys: AIKeyInfo[] }>('/auth/users/me/ai-keys');
+  return Array.isArray(data) ? data : data?.keys ?? [];
 }
 
 export async function saveAIKey(payload: SaveAIKeyPayload): Promise<void> {

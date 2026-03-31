@@ -27,19 +27,19 @@ export interface HackathonChallengeWithDetail extends HackathonChallenge {
 }
 
 export async function getHackathonChallenges(hackathonId: string): Promise<HackathonChallengeWithDetail[]> {
-  const { data } = await apiClient.get<HackathonChallengeWithDetail[]>(
+  const { data } = await apiClient.get<HackathonChallengeWithDetail[] | { challenges: HackathonChallengeWithDetail[] }>(
     `/hackathons/${hackathonId}/challenges`
   );
-  return data;
+  return Array.isArray(data) ? data : data?.challenges ?? [];
 }
 
 // ─── Registrations ──────────────────────────────────────────────────────────
 
 export async function getHackathonRegistrations(hackathonId: string): Promise<Registration[]> {
-  const { data } = await apiClient.get<Registration[]>(
+  const { data } = await apiClient.get<Registration[] | { registrations: Registration[] }>(
     `/hackathons/${hackathonId}/registrations`
   );
-  return data;
+  return Array.isArray(data) ? data : data?.registrations ?? [];
 }
 
 export async function registerForHackathon(
