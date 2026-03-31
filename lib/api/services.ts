@@ -24,7 +24,7 @@ export interface HackathonListParams {
 
 export async function getHackathons(params?: HackathonListParams): Promise<Hackathon[]> {
   const { data } = await apiClient.get<Hackathon[]>('/hackathons', { params });
-  return data;
+  return Array.isArray(data) ? data : (data as any)?.hackathons ?? [];
 }
 
 export async function getHackathon(id: string): Promise<Hackathon> {
@@ -42,7 +42,7 @@ export interface NotificationListParams {
 
 export async function getNotifications(params?: NotificationListParams): Promise<Notification[]> {
   const { data } = await apiClient.get<Notification[]>('/notifications', { params });
-  return data;
+  return Array.isArray(data) ? data : (data as any)?.notifications ?? [];
 }
 
 export async function getUnreadNotificationCount(): Promise<number> {
