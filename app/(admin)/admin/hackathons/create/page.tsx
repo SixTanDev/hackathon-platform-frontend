@@ -397,10 +397,10 @@ export default function CreateHackathonPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input placeholder="Buscar reto..." value={challengeSearch} onChange={(e) => setChallengeSearch(e.target.value)} className="pl-9" />
                   </div>
-                  <Select value={challengeFilter.difficulty ?? ''} onValueChange={(v) => setChallengeFilter((p) => ({ ...p, difficulty: v || undefined }))}>
+                  <Select value={challengeFilter.difficulty ?? ''} onValueChange={(v) => setChallengeFilter((p) => ({ ...p, difficulty: v === 'all' ? undefined : v as any }))}>
                     <SelectTrigger className="w-28"><SelectValue placeholder="Nivel" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
+                      <SelectItem value="all">Todos</SelectItem>
                       <SelectItem value="easy">Fácil</SelectItem>
                       <SelectItem value="medium">Medio</SelectItem>
                       <SelectItem value="hard">Difícil</SelectItem>
