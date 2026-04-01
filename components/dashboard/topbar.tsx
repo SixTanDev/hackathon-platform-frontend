@@ -50,7 +50,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
     document.cookie = 'hackathon-context-token=; path=/; max-age=0';
     logout?.();
     // Use window.location for a full page navigation to ensure middleware runs fresh
-    window.location.href = '/login';
+    window.location.href = '/';
   }
 
   const initials = (user?.full_name ?? 'U')

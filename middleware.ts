@@ -27,7 +27,7 @@ export function middleware(request: NextRequest) {
 
   const isPublicRoute = PUBLIC_ROUTES.some((route: string) => pathname.startsWith(route));
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.some((route: string) => pathname.startsWith(route));
-  const isProtectedRoute = pathname === '/' || PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   // Redirect authenticated users away from login
   if (isPublicRoute && isAuthenticated) {
