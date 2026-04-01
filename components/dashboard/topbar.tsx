@@ -69,7 +69,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 md:hidden"
+              className="h-9 w-9 lg:hidden"
               onClick={onMobileMenuToggle}
               aria-label="Abrir menú de navegación"
             >
@@ -140,7 +140,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
                 <UserIcon className="w-4 h-4 mr-2" />
                 {t('nav.profile')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
+              <DropdownMenuItem onClick={() => router.push('/dashboard/profile/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 {t('nav.settings')}
               </DropdownMenuItem>

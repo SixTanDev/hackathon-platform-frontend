@@ -29,7 +29,7 @@ export function DashboardShell({ children, allowNoContext = false }: DashboardSh
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const isMobile = useMediaQuery('(max-width: 767px)');
+  const isMobile = useMediaQuery('(max-width: 1023px)');
 
   useEffect(() => {
     setMounted(true);
@@ -64,7 +64,7 @@ export function DashboardShell({ children, allowNoContext = false }: DashboardSh
       <AuthCookieSync />
 
       {/* Desktop sidebar */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <DashboardSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}

@@ -50,7 +50,7 @@ export default function StudentDetailPage() {
   const router = useRouter();
   const userId = params.id as string;
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: queryKeys.admin.studentDetail(userId),
     queryFn: () => getStudentAnalytics(userId),
   });
@@ -73,7 +73,7 @@ export default function StudentDetailPage() {
     );
   }
 
-  if (!d) {
+  if (!d || isError) {
     return (
       <div className="space-y-6 animate-fade-in">
         <Button variant="ghost" onClick={() => router.push('/admin/users')}>
@@ -85,7 +85,7 @@ export default function StudentDetailPage() {
     );
   }
 
-  const aiUsage = d.ai_usage;
+  const aiUsage = d.ai_usage ?? { hints_requested: 0, document_interactions: 0, total_interactions: 0 };
   const totalSolved = Object.values(d.solved_by_category ?? {}).reduce((a, b) => a + b, 0);
   const categoryData = Object.entries(d.solved_by_category ?? {}).map(([cat, solved]) => ({ category: cat, solved }));
   const difficultyData = Object.entries(d.solved_by_difficulty ?? {}).map(([diff, count]) => ({ difficulty: diff, count }));

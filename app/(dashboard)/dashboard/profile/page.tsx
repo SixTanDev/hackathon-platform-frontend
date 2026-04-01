@@ -7,8 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
-import { PageHeader } from '@/components/shared/page-header';
 import { EmptyState } from '@/components/shared/empty-state';
 import Link from 'next/link';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -22,7 +20,6 @@ import {
 } from 'recharts';
 import {
   User,
-  Mail,
   Zap,
   Flame,
   Code2,
@@ -30,19 +27,66 @@ import {
   Trophy,
   Star,
   Settings,
-  Calendar,
   TrendingUp,
-  Award,
+  MapPin,
+  ArrowRight,
 } from 'lucide-react';
 import type { ProfileResponse, BadgeResponse, ChallengeBreakdown, PointTransaction } from '@/types/api';
 
 // ─── Chart Colors ────────────────────────────────────────
 
-const CHART_COLORS = ['#004669', '#248F8B', '#F47920', '#E7B200', '#6366f1', '#ec4899'];
+const CHART_COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#E7B200', '#6366f1', '#ec4899'];
 
-// ─── Profile Header Card ─────────────────────────────────
+// ─── Focus Icons Helper ──────────────────────────────────
+function Target(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
 
-function ProfileHeader({
+// ─── Mesh Gradient SubComponent ──────────────────────────
+function ActivityCoverMesh() {
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .activity-cover-mesh {
+            background: linear-gradient(135deg, hsl(var(--primary)/0.65) 0%, hsl(var(--secondary)/0.8) 100%);
+            position: relative;
+        }
+        .activity-cover-mesh::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.15;
+            pointer-events: none;
+        }
+      `}} />
+      <div className="h-44 w-full rounded-3xl activity-cover-mesh overflow-hidden shadow-xl border border-border/10">
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent"></div>
+      </div>
+    </>
+  );
+}
+
+// ─── Profile Header Grid ─────────────────────────────────
+
+function ProfileIdentity({
   profile,
   loading,
 }: {
@@ -61,70 +105,74 @@ function ProfileHeader({
     .toUpperCase();
 
   return (
-    <Card className="border-border/50 overflow-hidden">
-      {/* Gradient Banner */}
-      <div className="h-24 bg-gradient-to-r from-primary via-secondary to-accent relative">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PGNpcmNsZSBjeD0iMTAiIGN5PSIxMCIgcj0iMSIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjEpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCBmaWxsPSJ1cmwoI2cpIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIi8+PC9zdmc+')] opacity-50" />
-      </div>
-      <CardContent className="-mt-12 relative pb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
-          {/* Avatar */}
-          <div className="w-20 h-20 rounded-xl bg-background border-4 border-background shadow-lg flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary">{initials || '?'}</span>
-          </div>
+    <section className="relative">
+      {/* Activity Cover */}
+      <ActivityCoverMesh />
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-bold truncate">{user?.full_name ?? 'Usuario'}</h2>
-            <div className="flex flex-wrap items-center gap-3 mt-1 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Mail className="w-3.5 h-3.5" /> {user?.email ?? ''}
-              </span>
-              {currentSede ? (
-                <span className="flex items-center gap-1">
-                  <Medal className="w-3.5 h-3.5" /> {currentSede.name}
-                </span>
-              ) : null}
-              {currentRole ? (
-                <Badge variant="secondary" className="text-xs capitalize">{currentRole}</Badge>
-              ) : null}
+      {/* Profile Info Overlay */}
+      <div className="relative -mt-16 px-6 flex flex-col items-center text-center">
+        <div className="relative group">
+          <div className="w-32 h-32 rounded-full border-4 border-background overflow-hidden shadow-2xl bg-card flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
+            <span className="text-4xl font-bold text-primary">{initials || '?'}</span>
+          </div>
+          {currentRole && (
+            <span className="absolute bottom-1 right-1 bg-secondary text-secondary-foreground text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border-2 border-background uppercase tracking-widest">
+              {currentRole.replace('_', ' ')}
+            </span>
+          )}
+        </div>
+        
+        <div className="mt-4 space-y-1">
+          <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
+            {user?.full_name ?? 'Usuario'}
+          </h2>
+          <p className="text-muted-foreground text-sm font-medium">
+            {user?.email ?? ''}
+          </p>
+          {currentSede && (
+            <div className="flex items-center justify-center gap-1.5 text-secondary pt-1">
+              <MapPin className="text-sm w-4 h-4" />
+              <span className="text-xs font-semibold uppercase tracking-widest">{currentSede.name}</span>
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* Settings Shortcut relative to container */}
+      <div className="absolute top-4 right-4">
+        <Link href="/dashboard/profile/settings">
+          <Button variant="secondary" size="icon" className="rounded-full shadow-md bg-background/50 backdrop-blur-md hover:bg-background/80 transition-colors">
+            <Settings className="w-5 h-5 text-foreground" />
+          </Button>
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function ProfileBentoStats({ profile, loading }: { profile: ProfileResponse | undefined, loading: boolean }) {
+  return (
+    <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+      {[
+        { label: 'Puntos', value: profile?.total_points ?? 0, icon: Zap, color: 'text-primary' },
+        { label: 'Racha', value: `${profile?.current_streak_days ?? 0}`, icon: Flame, color: 'text-secondary' },
+        { label: 'Retos', value: profile?.challenges_solved ?? 0, icon: Code2, color: 'text-accent' },
+        { label: 'Ranking', value: profile?.sede_rank != null ? `#${profile.sede_rank}` : '—', icon: Trophy, color: 'text-unad-gold' },
+      ].map((stat) => {
+        const Icon = stat.icon;
+        return (
+          <div key={stat.label} className="bg-card hover:bg-card/80 transition-colors p-5 rounded-2xl flex flex-col items-center justify-center space-y-2 shadow-sm border border-border/40">
+            <Icon className={`w-7 h-7 ${stat.color} drop-shadow-sm`} />
+            <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+              {loading ? <Skeleton className="h-8 w-12" /> : stat.value}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              {stat.label}
+            </span>
           </div>
-
-          {/* Settings link */}
-          <Link href="/dashboard/profile/settings">
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-1" /> Configuración
-            </Button>
-          </Link>
-        </div>
-
-        {/* Quick Stats Row */}
-        <Separator className="my-4" />
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { label: 'Puntos', value: profile?.total_points ?? 0, icon: Zap, color: 'text-primary' },
-            { label: 'Racha', value: `${profile?.current_streak_days ?? 0}d`, icon: Flame, color: 'text-accent' },
-            { label: 'Retos', value: profile?.challenges_solved ?? 0, icon: Code2, color: 'text-secondary' },
-            { label: 'Ranking', value: profile?.sede_rank != null ? `#${profile.sede_rank}` : '—', icon: Trophy, color: 'text-unad-gold' },
-          ].map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="text-center">
-                {loading ? (
-                  <Skeleton className="h-6 w-12 mx-auto" />
-                ) : (
-                  <p className={`text-lg font-bold ${stat.color}`}>{stat.value}</p>
-                )}
-                <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
-                  <Icon className="w-3 h-3" /> {stat.label}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+        );
+      })}
+    </section>
   );
 }
 
@@ -133,35 +181,45 @@ function ProfileHeader({
 function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boolean }) {
   if (loading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-        {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-lg" />)}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-32 rounded-3xl" />)}
       </div>
     );
   }
 
   if (!badges?.length) {
     return (
-      <EmptyState
-        icon={Award}
-        title="Sin insignias aún"
-        description="Completa retos y participa en hackathones para ganar insignias."
-        className="py-8"
-      />
+      <div className="bg-card/40 rounded-3xl p-10 flex flex-col items-center text-center space-y-6 border border-dashed border-border/50">
+        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center shadow-inner">
+          <Medal className="w-10 h-10 text-muted-foreground/40" />
+        </div>
+        <div className="space-y-2">
+          <p className="font-semibold text-foreground text-lg">Sin insignias aún</p>
+          <p className="text-sm text-muted-foreground leading-relaxed px-4 max-w-sm">
+            Completa retos y participa en hackathones para ganar insignias y brillar en tu perfil.
+          </p>
+        </div>
+        <Link href="/dashboard/challenges">
+          <Button className="rounded-full shadow-lg font-bold px-8" size="lg">
+            Ver Retos
+          </Button>
+        </Link>
+      </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {badges.map((badge) => (
         <div
           key={badge.badge_id}
-          className="relative flex flex-col items-center justify-center p-4 rounded-lg border border-border/50 bg-muted/30 hover:bg-muted/50 transition-colors group"
+          className="relative flex flex-col items-center justify-center p-6 rounded-3xl border border-border/40 bg-card hover:bg-muted/30 transition-all shadow-[0_4px_16px_-4px_rgba(0,0,0,0.05)] cursor-default group"
         >
-          <div className="w-10 h-10 rounded-full bg-unad-gold/20 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-            <Star className="w-5 h-5 text-unad-gold" />
+          <div className="w-14 h-14 rounded-full bg-unad-gold/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-inner">
+            <Star className="w-7 h-7 text-unad-gold drop-shadow-sm" />
           </div>
-          <p className="text-xs font-medium text-center leading-tight">{badge.badge_name}</p>
-          <p className="text-[10px] text-muted-foreground mt-1">
+          <p className="text-sm font-bold text-center leading-tight mb-1.5">{badge.badge_name}</p>
+          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
             {format(new Date(badge.awarded_at), "d MMM yyyy", { locale: es })}
           </p>
         </div>
@@ -170,96 +228,62 @@ function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boo
   );
 }
 
-// ─── Category Donut Chart ────────────────────────────────
+// ─── Charts ──────────────────────────────────────────────
 
 function CategoryDonutChart({ categories }: { categories: ChallengeBreakdown[] }) {
   if (!categories?.length) {
     return (
-      <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
-        Sin datos de categorías
+      <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">
+        Recopilando datos...
       </div>
     );
   }
-
   const data = categories.map((c) => ({ name: c.category, value: c.count }));
-
   return (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          innerRadius={50}
-          outerRadius={80}
-          paddingAngle={3}
-          dataKey="value"
-          stroke="none"
-        >
-          {data.map((_, idx) => (
-            <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-          ))}
+        <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value" stroke="none" cornerRadius={4}>
+          {data.map((_, idx) => <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />)}
         </Pie>
-        <Tooltip
-          contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
-        />
-        <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 12, boxShadow: '0 8px 24px -4px rgba(0,0,0,0.1)' }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
+        <Legend iconSize={8} wrapperStyle={{ fontSize: 11, fontWeight: 600, paddingTop: '10px' }} />
       </PieChart>
     </ResponsiveContainer>
   );
 }
 
-// ─── Points Bar Chart ───────────────────────────────────
-
 function PointsBarChart({ transactions }: { transactions: PointTransaction[] }) {
-  // Group transactions by day (last 7 entries)
   const data = useMemo(() => {
     if (!transactions?.length) return [];
-
     const grouped: Record<string, number> = {};
     for (const tx of transactions) {
       const day = format(new Date(tx.created_at), 'dd/MM');
       grouped[day] = (grouped[day] ?? 0) + tx.points;
     }
-    return Object.entries(grouped)
-      .slice(-7)
-      .map(([day, points]) => ({ day, points }));
+    return Object.entries(grouped).slice(-7).map(([day, points]) => ({ day, points }));
   }, [transactions]);
 
   if (!data.length) {
-    return (
-      <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
-        Sin transacciones recientes
-      </div>
-    );
+    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">Recopilando datos...</div>;
   }
 
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-        <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-        <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
-        <Tooltip
-          contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
-        />
-        <Bar dataKey="points" fill="#248F8B" radius={[4, 4, 0, 0]} name="Puntos" />
+        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} opacity={0.5} />
+        <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} dy={8} />
+        <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} dx={-8} />
+        <Tooltip cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 12, boxShadow: '0 8px 24px -4px rgba(0,0,0,0.1)' }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
+        <Bar dataKey="points" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Puntos" />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-// ─── Category Radar Chart ────────────────────────────────
-
 function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }) {
   if (!categories?.length) {
-    return (
-      <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground">
-        Sin datos de categorías
-      </div>
-    );
+    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">Recopilando datos...</div>;
   }
-
   const data = categories.map((c) => ({
     category: c.category.length > 12 ? c.category.slice(0, 12) + '…' : c.category,
     count: c.count,
@@ -270,9 +294,10 @@ function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }
     <ResponsiveContainer width="100%" height={220}>
       <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
         <PolarGrid stroke="hsl(var(--border))" />
-        <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-        <PolarRadiusAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} />
-        <Radar name="Retos" dataKey="count" stroke="#F47920" fill="#F47920" fillOpacity={0.3} />
+        <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} />
+        <PolarRadiusAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} />
+        <Radar name="Retos" dataKey="count" stroke="hsl(var(--secondary))" fill="hsl(var(--secondary))" fillOpacity={0.35} />
+        <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 12 }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
       </RadarChart>
     </ResponsiveContainer>
   );
@@ -282,43 +307,35 @@ function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }
 
 function TransactionHistory({ transactions, loading }: { transactions: PointTransaction[]; loading: boolean }) {
   if (loading) {
-    return (
-      <div className="space-y-2">
-        {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-10 w-full" />)}
-      </div>
-    );
+    return <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}</div>;
   }
 
   if (!transactions?.length) {
-    return (
-      <EmptyState
-        icon={TrendingUp}
-        title="Sin transacciones"
-        description="Tus movimientos de puntos aparecerán aquí."
-        className="py-6"
-      />
-    );
+    return <EmptyState icon={TrendingUp} title="Sin transacciones" description="Tus movimientos de puntos aparecerán aquí." className="py-8 bg-card/20 border-dashed rounded-3xl border-border/50" />;
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-2xl border border-border/40 bg-card shadow-sm">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border/50">
-            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">Razón</th>
-            <th className="text-left py-2 px-2 text-xs font-medium text-muted-foreground">Fecha</th>
-            <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground">Puntos</th>
+          <tr className="border-b border-border/50 bg-muted/30">
+            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Detalle</th>
+            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Fecha</th>
+            <th className="text-right py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Puntos</th>
           </tr>
         </thead>
         <tbody>
           {transactions.map((tx) => (
-            <tr key={tx.id} className="border-b border-border/30 last:border-0 hover:bg-muted/30">
-              <td className="py-2 px-2 capitalize">{tx.reason?.replace(/_/g, ' ') ?? '—'}</td>
-              <td className="py-2 px-2 text-muted-foreground">
+            <tr key={tx.id} className="border-b border-border/30 last:border-0 hover:bg-muted/40 transition-colors">
+              <td className="py-3.5 px-5 font-semibold capitalize flex items-center gap-2 text-foreground">
+                <div className={`w-2 h-2 rounded-full ${tx.points > 0 ? 'bg-primary' : 'bg-destructive'}`} />
+                {tx.reason?.replace(/_/g, ' ') ?? '—'}
+              </td>
+              <td className="py-3.5 px-5 text-muted-foreground text-xs font-medium">
                 {format(new Date(tx.created_at), "d MMM yyyy, HH:mm", { locale: es })}
               </td>
-              <td className="py-2 px-2 text-right">
-                <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="text-xs">
+              <td className="py-3.5 px-5 text-right">
+                <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="font-bold py-0.5 px-2">
                   {tx.points > 0 ? '+' : ''}{tx.points}
                 </Badge>
               </td>
@@ -330,79 +347,84 @@ function TransactionHistory({ transactions, loading }: { transactions: PointTran
   );
 }
 
-// ─── Profile Page ────────────────────────────────────────
+// ─── Profile Page Main Context ───────────────────────────
 
 export default function ProfilePage() {
   const { data: profile, isLoading } = useProfile();
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <PageHeader
-        title="Mi Perfil"
-        description="Tu resumen de actividad, insignias y estadísticas."
-      />
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 animate-fade-in pb-12">
+      
+      {/* Visual Identity Section */}
+      <ProfileIdentity profile={profile} loading={isLoading} />
 
-      {/* Header Card */}
-      <ProfileHeader profile={profile} loading={isLoading} />
+      {/* Bento Grid Stats */}
+      <ProfileBentoStats profile={profile} loading={isLoading} />
 
-      {/* Badges */}
-      <Card className="border-border/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Award className="w-4 h-4 text-unad-gold" />
-            Insignias ({profile?.badge_count ?? 0})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BadgesGrid badges={profile?.badges ?? []} loading={isLoading} />
-        </CardContent>
-      </Card>
+      {/* Badges Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-extrabold tracking-tight">Insignias</h3>
+          <Link href="/dashboard/challenges" className="text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted rounded-full">
+            <ArrowRight className="w-5 h-5 pointer-events-none" />
+          </Link>
+        </div>
+        <BadgesGrid badges={profile?.badges ?? []} loading={isLoading} />
+      </section>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Retos por categoría</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CategoryDonutChart categories={profile?.challenges_by_category ?? []} />
-          </CardContent>
-        </Card>
+      {/* Analytics Section */}
+      <section className="space-y-6">
+        <div>
+           <h3 className="text-xl font-extrabold tracking-tight">Análisis de Progreso</h3>
+           <p className="text-sm text-muted-foreground mt-1 font-medium">Resumen de tu evolución en la plataforma.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                 <Code2 className="w-4 h-4 text-primary" /> Distribución
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-2">
+              <CategoryDonutChart categories={profile?.challenges_by_category ?? []} />
+            </CardContent>
+          </Card>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Puntos recientes</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PointsBarChart transactions={profile?.recent_transactions ?? []} />
-          </CardContent>
-        </Card>
+          <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                 <TrendingUp className="w-4 h-4 text-secondary" /> Puntos Recientes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-2">
+              <PointsBarChart transactions={profile?.recent_transactions ?? []} />
+            </CardContent>
+          </Card>
 
-        <Card className="border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Habilidades</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CategoryRadarChart categories={profile?.challenges_by_category ?? []} />
-          </CardContent>
-        </Card>
-      </div>
+          <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
+            <CardHeader className="pb-1 pt-6 px-6">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                 <Target className="w-4 h-4 text-accent" /> Habilidades
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="px-2">
+              <CategoryRadarChart categories={profile?.challenges_by_category ?? []} />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
 
-      {/* Transaction History */}
-      <Card className="border-border/50">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-secondary" />
-            Historial de puntos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TransactionHistory
-            transactions={profile?.recent_transactions ?? []}
-            loading={isLoading}
-          />
-        </CardContent>
-      </Card>
+      {/* Transaction History Section */}
+      <section className="space-y-5">
+         <div>
+           <h3 className="text-xl font-extrabold tracking-tight">Historial Transaccional</h3>
+        </div>
+        <TransactionHistory
+          transactions={profile?.recent_transactions ?? []}
+          loading={isLoading}
+        />
+      </section>
     </div>
   );
 }
