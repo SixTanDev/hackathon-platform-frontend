@@ -45,19 +45,13 @@ export default function HomePage() {
 
       <header className="absolute top-0 z-50 w-full border-b border-slate-200/70 bg-white/40 backdrop-blur-xl transition-colors duration-500 hover:bg-white/90 dark:border-[#3b494c]/20 dark:bg-[#0d141d]/20 dark:hover:bg-[#0d141d]/80">
         <nav className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-6 pb-1.5 pt-3 md:px-8 lg:px-10">
-          <Link href="#" className="-ml-3 group flex items-center gap-2 rounded-full pr-2 transition-transform duration-300 hover:scale-[1.01] md:-ml-4">
-            <Image
-              src="/samp-logo.png"
-              alt="SAMP"
-              width={86}
-              height={86}
-              className="h-auto w-[3.5rem] object-contain object-left opacity-95 drop-shadow-[0_0_10px_rgba(26,127,179,0.16)] transition-all duration-300 group-hover:opacity-100 group-hover:drop-shadow-[0_0_18px_rgba(26,127,179,0.22)]"
-            />
-            <div className="flex flex-col justify-center">
-              <span className="translate-y-[1px] text-[1.58rem] font-extrabold leading-none tracking-[-0.055em] text-slate-100 transition-colors duration-300 group-hover:text-white dark:text-[#eaf8ff] dark:group-hover:text-white">
-                SAMP
-              </span>
-            </div>
+          <Link
+            href="#"
+            className="-ml-3 group flex items-center rounded-full pr-2 transition-transform duration-300 hover:scale-[1.01] md:-ml-4"
+          >
+            <span className="translate-y-[1px] text-[1.45rem] font-black leading-none tracking-[-0.06em] text-[#f59a23] drop-shadow-[0_0_10px_rgba(245,154,35,0.16)] transition-colors duration-300 group-hover:text-[#ffb15c] dark:text-[#f59a23] dark:group-hover:text-[#ffb15c]">
+              SAMP
+            </span>
           </Link>
 
           <div className="hidden items-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
@@ -18,6 +19,7 @@ import {
 import { SedeSwitcher } from '@/components/sede-switcher';
 import { NotificationPanel } from '@/components/notifications/notification-panel';
 import {
+  ArrowLeft,
   Sun,
   Moon,
   LogOut,
@@ -72,11 +74,21 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
               className="h-9 w-9 lg:hidden"
               onClick={onMobileMenuToggle}
               aria-label="Abrir menú de navegación"
-            >
+              >
               <Menu className="h-5 w-5" />
             </Button>
           )}
           <SedeSwitcher />
+          <Button
+            asChild
+            variant="ghost"
+            className="h-9 gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 text-sm font-medium text-primary transition-all duration-300 hover:border-[#f59a23]/45 hover:bg-[#f59a23] hover:text-[#1f1404]"
+          >
+            <Link href="/" aria-label="Volver a inicio">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Inicio</span>
+            </Link>
+          </Button>
         </div>
 
         {/* Right: Actions */}
