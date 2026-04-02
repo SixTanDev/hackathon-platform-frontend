@@ -1,4 +1,4 @@
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono, Anton } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/lib/providers';
 
@@ -11,6 +11,13 @@ const inter = Inter({
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
+  display: 'swap',
+});
+
+const brandFont = Anton({
+  subsets: ['latin'],
+  variable: '--font-brand',
+  weight: '400',
   display: 'swap',
 });
 
@@ -49,7 +56,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} ${brandFont.variable} font-sans`}>
         <Providers>{children}</Providers>
       </body>
     </html>

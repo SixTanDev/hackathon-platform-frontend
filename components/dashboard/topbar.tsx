@@ -86,7 +86,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
           >
             <Link href="/" aria-label="Volver a inicio">
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Inicio</span>
+              <span className="hidden sm:inline">{t('nav.home')}</span>
             </Link>
           </Button>
         </div>
@@ -100,7 +100,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
             className="h-9 w-9"
             onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
             aria-label={t('common.language')}
-            title={locale === 'es' ? 'Switch to English' : 'Cambiar a Español'}
+            title={locale === 'es' ? t('common.switchToEnglish') : t('common.switchToSpanish')}
           >
             <span className="text-xs font-bold">{locale === 'es' ? 'EN' : 'ES'}</span>
           </Button>

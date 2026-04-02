@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useProfile } from '@/hooks/use-profile';
 import { useActiveHackathons, useOpenHackathons } from '@/hooks/use-hackathons';
 import { useNotifications } from '@/hooks/use-notifications';
+import { useTranslation } from '@/lib/i18n/context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import { PageHeader } from '@/components/shared/page-header';
 import { EmptyState } from '@/components/shared/empty-state';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 import {
   Zap,
   Trophy,
@@ -75,22 +76,25 @@ function MetricCard({
 
 // ─── Hackathon Status Badge ──────────────────────────────
 
-const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  active: { label: 'En curso', variant: 'default' },
-  registration_open: { label: 'Inscripciones', variant: 'secondary' },
-  paused: { label: 'Pausado', variant: 'outline' },
-  finished: { label: 'Finalizado', variant: 'destructive' },
-  draft: { label: 'Borrador', variant: 'outline' },
+const STATUS_CONFIG: Record<string, { labelKey: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  active: { labelKey: 'status.active', variant: 'default' },
+  registration_open: { labelKey: 'status.registrationOpen', variant: 'secondary' },
+  paused: { labelKey: 'status.paused', variant: 'outline' },
+  finished: { labelKey: 'status.finished', variant: 'destructive' },
+  draft: { labelKey: 'status.draft', variant: 'outline' },
 };
 
 function HackathonStatusBadge({ status }: { status: HackathonStatus }) {
-  const cfg = STATUS_CONFIG[status] ?? { label: status, variant: 'outline' as const };
-  return <Badge variant={cfg.variant}>{cfg.label}</Badge>;
+  const { t } = useTranslation();
+  const cfg = STATUS_CONFIG[status] ?? { labelKey: status, variant: 'outline' as const };
+  return <Badge variant={cfg.variant}>{t(cfg.labelKey)}</Badge>;
 }
 
 // ─── Hackathon Card ──────────────────────────────────────
 
 function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
+  const { t, locale } = useTranslation();
+  const dfLocale = locale === 'es' ? es : enUS;
   const isActive = hackathon.status === 'active';
   const isOpen = hackathon.status === 'registration_open';
 
@@ -104,20 +108,22 @@ function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {hackathon.is_team_based ? (
             <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" /> Equipos
+              <Users className="w-3 h-3" /> {t('common.teams')}
             </span>
           ) : null}
           {hackathon.ends_at ? (
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
-              Finaliza {formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: es })}
+              {t('dashboard.endsAt', {
+                time: formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale }),
+              })}
             </span>
           ) : null}
         </div>
       </div>
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
         <Button size="sm" variant={isActive ? 'default' : isOpen ? 'secondary' : 'outline'}>
-          {isActive ? 'Ver' : isOpen ? 'Inscribirse' : 'Detalles'}
+          {isActive ? t('common.view') : isOpen ? t('dashboard.enroll') : t('common.details')}
           <ChevronRight className="w-3 h-3 ml-1" />
         </Button>
       </Link>
@@ -137,6 +143,8 @@ const NOTIFICATION_ICONS: Record<string, React.ElementType> = {
 };
 
 function ActivityItem({ notification }: { notification: ApiNotification }) {
+  const { locale } = useTranslation();
+  const dfLocale = locale === 'es' ? es : enUS;
   const Icon = NOTIFICATION_ICONS[notification.type] ?? Bell;
   return (
     <div className="flex gap-3 py-2">
@@ -147,7 +155,7 @@ function ActivityItem({ notification }: { notification: ApiNotification }) {
         <p className="text-sm font-medium leading-tight">{notification.title}</p>
         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notification.message}</p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: es })}
+          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: dfLocale })}
         </p>
       </div>
       {!notification.is_read ? (
@@ -162,6 +170,7 @@ function ActivityItem({ notification }: { notification: ApiNotification }) {
 export default function DashboardPage() {
   const user = useAuthStore((s) => s?.user);
   const currentSede = useAuthStore((s) => s?.currentSede);
+  const { t, locale } = useTranslation();
 
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: activeHackathons, isLoading: hackathonsLoading } = useActiveHackathons();
@@ -181,14 +190,14 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title={`¡Hola, ${user?.full_name?.split?.(' ')?.[0] ?? 'usuario'}!`}
-        description={`Panel de ${currentSede?.name ?? 'sede'}. Aquí tienes un resumen de tu actividad.`}
+        title={t('dashboard.greeting', { name: user?.full_name?.split?.(' ')?.[0] ?? t('common.user') })}
+        description={t('dashboard.subtitle', { sede: currentSede?.name ?? t('common.campus') })}
       />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          label="Puntos totales"
+          label={t('dashboard.totalPoints')}
           value={profile?.total_points ?? 0}
           icon={Zap}
           color="text-primary"
@@ -196,16 +205,16 @@ export default function DashboardPage() {
           loading={profileLoading}
         />
         <MetricCard
-          label="Racha actual"
-          value={`${profile?.current_streak_days ?? 0} días`}
+          label={t('dashboard.currentStreak')}
+          value={t('dashboard.days', { count: profile?.current_streak_days ?? 0 })}
           icon={Flame}
           color="text-accent"
           bg="bg-accent/10"
-          subtitle={profile?.longest_streak_days ? `Récord: ${profile.longest_streak_days} días` : undefined}
+          subtitle={profile?.longest_streak_days ? t('dashboard.record', { count: profile.longest_streak_days }) : undefined}
           loading={profileLoading}
         />
         <MetricCard
-          label="Retos resueltos"
+          label={t('dashboard.challengesSolved')}
           value={profile?.challenges_solved ?? 0}
           icon={Code2}
           color="text-secondary"
@@ -213,12 +222,12 @@ export default function DashboardPage() {
           loading={profileLoading}
         />
         <MetricCard
-          label="Ranking sede"
-          value={profile?.sede_rank != null ? `#${profile.sede_rank}` : '—'}
+          label={t('dashboard.campusRank')}
+          value={profile?.sede_rank != null ? `#${profile.sede_rank}` : t('common.na')}
           icon={Medal}
           color="text-unad-gold"
           bg="bg-unad-gold/10"
-          subtitle={profile?.hackathons_participated ? `${profile.hackathons_participated} hackathones` : undefined}
+          subtitle={profile?.hackathons_participated ? t('dashboard.hackathonsParticipated', { count: profile.hackathons_participated }) : undefined}
           loading={profileLoading}
         />
       </div>
@@ -232,11 +241,11 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-primary" />
-                  Hackathones
+                  {t('nav.hackathons')}
                 </CardTitle>
                 <Link href="/dashboard/hackathons">
                   <Button variant="ghost" size="sm" className="text-xs">
-                    Ver todos <ArrowRight className="w-3 h-3 ml-1" />
+                    {t('common.viewAll')} <ArrowRight className="w-3 h-3 ml-1" />
                   </Button>
                 </Link>
               </div>
@@ -253,8 +262,8 @@ export default function DashboardPage() {
               ) : (
                 <EmptyState
                   icon={Calendar}
-                  title="Sin hackathones activos"
-                  description="No hay hackathones en curso o con inscripciones abiertas por ahora."
+                  title={t('dashboard.noActiveHackathons')}
+                  description={t('dashboard.noActiveHackathonsDescription')}
                   className="py-8"
                 />
               )}
@@ -267,7 +276,7 @@ export default function DashboardPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-secondary" />
-                  Últimos puntos
+                  {t('dashboard.recentPoints')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -277,11 +286,11 @@ export default function DashboardPage() {
                       <div className="min-w-0">
                         <p className="text-sm capitalize">{tx.reason?.replace(/_/g, ' ') ?? ''}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true, locale: es })}
+                          {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true, locale: locale === 'es' ? es : enUS })}
                         </p>
                       </div>
                       <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="shrink-0">
-                        {tx.points > 0 ? '+' : ''}{tx.points} pts
+                        {tx.points > 0 ? '+' : ''}{tx.points} {t('common.points')}
                       </Badge>
                     </div>
                   ))}
@@ -298,7 +307,7 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Bell className="w-4 h-4 text-accent" />
-                  Actividad reciente
+                  {t('dashboard.recentActivity')}
                 </CardTitle>
               </div>
             </CardHeader>
@@ -324,8 +333,8 @@ export default function DashboardPage() {
               ) : (
                 <EmptyState
                   icon={Bell}
-                  title="Sin notificaciones"
-                  description="Tu actividad reciente aparecerá aquí."
+                  title={t('dashboard.noNotifications')}
+                  description={t('dashboard.noNotificationsDescription')}
                   className="py-8"
                 />
               )}
@@ -337,15 +346,15 @@ export default function DashboardPage() {
             <Card className="border-border/50 mt-4">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Star className="w-4 h-4 text-unad-gold" />
-                    Insignias ({profile?.badge_count ?? 0})
-                  </CardTitle>
-                  <Link href="/dashboard/profile">
-                    <Button variant="ghost" size="sm" className="text-xs">
-                      Ver perfil <ArrowRight className="w-3 h-3 ml-1" />
-                    </Button>
-                  </Link>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Star className="w-4 h-4 text-unad-gold" />
+                  {t('dashboard.badges', { count: profile?.badge_count ?? 0 })}
+                </CardTitle>
+                <Link href="/dashboard/profile">
+                  <Button variant="ghost" size="sm" className="text-xs">
+                    {t('dashboard.viewProfile')} <ArrowRight className="w-3 h-3 ml-1" />
+                  </Button>
+                </Link>
                 </div>
               </CardHeader>
               <CardContent>
@@ -357,7 +366,9 @@ export default function DashboardPage() {
                     </Badge>
                   ))}
                   {(profile?.badge_count ?? 0) > 6 ? (
-                    <Badge variant="outline" className="text-xs">+{(profile?.badge_count ?? 0) - 6} más</Badge>
+                    <Badge variant="outline" className="text-xs">
+                      +{(profile?.badge_count ?? 0) - 6} {t('common.more')}
+                    </Badge>
                   ) : null}
                 </div>
               </CardContent>

@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { RoleName } from '@/types/api';
@@ -39,55 +40,55 @@ interface NavItem {
 }
 
 const STUDENT_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Hackathones', href: '/dashboard/hackathons', icon: Trophy },
-  { label: 'Mis Retos', href: '/dashboard/challenges', icon: Code2 },
-  { label: 'Equipos', href: '/dashboard/teams', icon: Users },
-  { label: 'Tabla de Posiciones', href: '/dashboard/leaderboard', icon: BarChart3 },
-  { label: 'Mi Perfil', href: '/dashboard/profile', icon: UserIcon },
+  { label: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'nav.hackathons', href: '/dashboard/hackathons', icon: Trophy },
+  { label: 'nav.challenges', href: '/dashboard/challenges', icon: Code2 },
+  { label: 'nav.teams', href: '/dashboard/teams', icon: Users },
+  { label: 'nav.leaderboard', href: '/dashboard/leaderboard', icon: BarChart3 },
+  { label: 'nav.profile', href: '/dashboard/profile', icon: UserIcon },
 ];
 
 const TUTOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/tutor/dashboard', icon: LayoutDashboard },
-  { label: 'Hackathones', href: '/tutor/hackathons', icon: Trophy },
-  { label: 'Biblioteca de Retos', href: '/tutor/challenges', icon: BookOpen },
-  { label: 'Calificación', href: '/tutor/grading', icon: Inbox },
-  { label: 'Documentos', href: '/tutor/documents', icon: FileText },
-  { label: 'Mis Equipos', href: '/tutor/teams', icon: Users },
-  { label: 'Estudiantes', href: '/tutor/students', icon: GraduationCap },
-  { label: 'Generación IA', href: '/tutor/ai-generation', icon: Cpu },
+  { label: 'nav.dashboard', href: '/tutor/dashboard', icon: LayoutDashboard },
+  { label: 'nav.hackathons', href: '/tutor/hackathons', icon: Trophy },
+  { label: 'nav.challengeLibrary', href: '/tutor/challenges', icon: BookOpen },
+  { label: 'nav.grading', href: '/tutor/grading', icon: Inbox },
+  { label: 'nav.documents', href: '/tutor/documents', icon: FileText },
+  { label: 'nav.myTeams', href: '/tutor/teams', icon: Users },
+  { label: 'nav.students', href: '/tutor/students', icon: GraduationCap },
+  { label: 'nav.aiGeneration', href: '/tutor/ai-generation', icon: Cpu },
 ];
 
 const ADMIN_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-  { label: 'Hackathones', href: '/admin/hackathons', icon: Trophy },
-  { label: 'Retos', href: '/admin/challenges', icon: Code2 },
-  { label: 'Usuarios', href: '/admin/users', icon: Users },
-  { label: 'Documentos', href: '/admin/documents', icon: FileText },
-  { label: 'Analíticas', href: '/admin/analytics', icon: BarChart3 },
-  { label: 'Grupos de Investigación', href: '/admin/research-groups', icon: Beaker },
-  { label: 'Configuración de Sede', href: '/admin/settings', icon: Settings },
-  { label: 'Solicitudes de Recursos', href: '/admin/resources', icon: ClipboardList },
+  { label: 'nav.dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+  { label: 'nav.hackathons', href: '/admin/hackathons', icon: Trophy },
+  { label: 'nav.challenges', href: '/admin/challenges', icon: Code2 },
+  { label: 'nav.users', href: '/admin/users', icon: Users },
+  { label: 'nav.documents', href: '/admin/documents', icon: FileText },
+  { label: 'nav.analytics', href: '/admin/analytics', icon: BarChart3 },
+  { label: 'nav.research', href: '/admin/research-groups', icon: Beaker },
+  { label: 'nav.sedeSettings', href: '/admin/settings', icon: Settings },
+  { label: 'nav.resources', href: '/admin/resources', icon: ClipboardList },
 ];
 
 const SUPERADMIN_NAV: NavItem[] = [
-  { label: 'Dashboard Global', href: '/superadmin', icon: LayoutDashboard },
-  { label: 'Zonas', href: '/superadmin/zones', icon: Globe },
-  { label: 'Sedes', href: '/superadmin/sedes', icon: Shield },
-  { label: 'Solicitudes de Recursos', href: '/superadmin/resources', icon: ClipboardList },
-  { label: 'Logs de Auditoría', href: '/superadmin/audit', icon: ScrollText },
+  { label: 'nav.globalDashboard', href: '/superadmin', icon: LayoutDashboard },
+  { label: 'nav.zones', href: '/superadmin/zones', icon: Globe },
+  { label: 'nav.sedes', href: '/superadmin/sedes', icon: Shield },
+  { label: 'nav.resources', href: '/superadmin/resources', icon: ClipboardList },
+  { label: 'nav.audit', href: '/superadmin/audit', icon: ScrollText },
 ];
 
 const DIRECTOR_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/research/dashboard', icon: LayoutDashboard },
-  { label: 'Mis Grupos', href: '/research/groups', icon: Beaker },
-  { label: 'Hackathones', href: '/research/hackathons', icon: Trophy },
+  { label: 'nav.dashboard', href: '/research/dashboard', icon: LayoutDashboard },
+  { label: 'nav.myGroups', href: '/research/groups', icon: Beaker },
+  { label: 'nav.hackathons', href: '/research/hackathons', icon: Trophy },
 ];
 
 const GUEST_NAV: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Hackathones', href: '/dashboard/hackathons', icon: Trophy },
-  { label: 'Tabla de Posiciones', href: '/dashboard/leaderboard', icon: BarChart3 },
+  { label: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'nav.hackathons', href: '/dashboard/hackathons', icon: Trophy },
+  { label: 'nav.leaderboard', href: '/dashboard/leaderboard', icon: BarChart3 },
 ];
 
 function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean): NavItem[] {
@@ -115,6 +116,7 @@ interface SidebarProps {
 
 export function DashboardSidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const { t } = useTranslation();
   const currentRole = useAuthStore((s) => s?.currentRole);
   const user = useAuthStore((s) => s?.user);
   const isSuperAdmin = user?.is_superadmin ?? false;
@@ -135,7 +137,7 @@ export function DashboardSidebar({ collapsed, onToggle }: SidebarProps) {
             <Zap className="w-4 h-4 text-primary" />
           </div>
           {!collapsed && (
-            <span className="font-bold text-sm truncate">Hackathon Platform</span>
+            <span className="font-semibold text-[0.82rem] tracking-wide truncate">{t('brand.title')}</span>
           )}
         </Link>
       </div>
@@ -155,10 +157,10 @@ export function DashboardSidebar({ collapsed, onToggle }: SidebarProps) {
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   collapsed && 'justify-center px-0'
                 )}
-                title={collapsed ? (item?.label ?? '') : undefined}
+                title={collapsed ? t(item?.label ?? '') : undefined}
               >
                 {Icon ? <Icon className="w-4 h-4 flex-shrink-0" /> : null}
-                {!collapsed && <span className="truncate">{item?.label ?? ''}</span>}
+                {!collapsed && <span className="truncate">{t(item?.label ?? '')}</span>}
               </div>
             </Link>
           );
@@ -178,7 +180,7 @@ export function DashboardSidebar({ collapsed, onToggle }: SidebarProps) {
           ) : (
             <>
               <ChevronLeft className="w-4 h-4 mr-2" />
-              <span className="text-xs">Colapsar</span>
+              <span className="text-xs">{t('sidebar.collapse')}</span>
             </>
           )}
         </Button>

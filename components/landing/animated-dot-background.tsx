@@ -173,7 +173,7 @@ export function AnimatedDotBackground() {
     <canvas
       ref={canvasRef}
       className={`absolute inset-0 w-full h-full pointer-events-none z-0 ${
-        resolvedTheme === 'light' ? 'mix-blend-multiply opacity-50' : 'mix-blend-screen opacity-70'
+        resolvedTheme === 'light' ? 'mix-blend-multiply opacity-30' : 'mix-blend-screen opacity-70'
       }`}
     />
   );

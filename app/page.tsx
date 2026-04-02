@@ -16,7 +16,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="bg-slate-50 dark:bg-[#0d141d] text-slate-900 dark:text-[#dce3f0] selection:bg-[#1a7fb3] selection:text-white min-h-screen font-sans transition-colors duration-500">
+    <div className="bg-[#eef2f7] dark:bg-[#0d141d] text-slate-900 dark:text-[#dce3f0] selection:bg-[#1a7fb3] selection:text-white min-h-screen font-sans transition-colors duration-500">
       <style
         dangerouslySetInnerHTML={{
           __html: `
@@ -44,17 +44,17 @@ export default function HomePage() {
       />
 
       <header className="absolute top-0 z-50 w-full border-b border-slate-200/70 bg-white/40 backdrop-blur-xl transition-colors duration-500 hover:bg-white/90 dark:border-[#3b494c]/20 dark:bg-[#0d141d]/20 dark:hover:bg-[#0d141d]/80">
-        <nav className="mx-auto flex max-w-[1440px] items-center justify-between gap-6 px-6 pb-1.5 pt-3 md:px-8 lg:px-10">
+        <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 pb-1.5 pt-3 md:px-8 lg:px-10">
           <Link
             href="#"
             className="-ml-3 group flex items-center rounded-full pr-2 transition-transform duration-300 hover:scale-[1.01] md:-ml-4"
           >
-            <span className="translate-y-[1px] text-[1.45rem] font-black leading-none tracking-[-0.06em] text-[#f59a23] drop-shadow-[0_0_10px_rgba(245,154,35,0.16)] transition-colors duration-300 group-hover:text-[#ffb15c] dark:text-[#f59a23] dark:group-hover:text-[#ffb15c]">
+            <span className="font-brand translate-y-[1px] text-[1.5rem] font-normal leading-none tracking-[0.04em] text-[#f59a23] drop-shadow-[0_0_12px_rgba(245,154,35,0.22)] transition-colors duration-300 group-hover:text-[#ffb15c] dark:text-[#f59a23] dark:group-hover:text-[#ffb15c]">
               SAMP
             </span>
           </Link>
 
-          <div className="hidden items-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+          <div className="hidden items-center justify-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
             <Link
               className="rounded-full border border-[#1a7fb3]/50 bg-[#1a7fb3]/10 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-900 shadow-[0_8px_24px_rgba(26,127,179,0.12)] transition-all duration-300 dark:border-[#1a7fb3]/20 dark:bg-[#1a7fb3]/8 dark:text-[#dffbff]"
               href="#"
@@ -62,20 +62,20 @@ export default function HomePage() {
               Hackathones
             </Link>
             <Link
-              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
+              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
               href="#"
             >
               Líderes
             </Link>
             <Link
-              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
+              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
               href="#"
             >
               Reglamento
             </Link>
           </div>
 
-          <div className="flex items-center gap-3 md:gap-4">
+          <div className="flex items-center justify-end gap-3 md:gap-4">
             {mounted && (
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -94,7 +94,7 @@ export default function HomePage() {
         </nav>
 
         <div className="mx-auto hidden max-w-[1440px] px-6 pb-2.5 text-center md:block md:px-8 lg:px-10">
-          <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-[#7f939a]">
+          <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600 dark:text-[#7f939a]">
             Sistema Académico de Maratones de Programación
           </span>
         </div>
@@ -135,17 +135,17 @@ export default function HomePage() {
             </div>
 
             <div className="space-y-4 flex flex-col items-center">
-              <span className="inline-block text-[#35a19d]/90 dark:text-[#c3f5ff]/80 tracking-[0.2em] text-[10px] md:text-xs font-bold py-2 px-6 rounded-full bg-[#35a19d]/8 dark:bg-[#35a19d]/8 border border-[#35a19d]/15 dark:border-[#35a19d]/15 backdrop-blur-sm shadow-sm mb-1">
+              <span className="inline-block text-[#1a7fb3] dark:text-[#c3f5ff]/80 tracking-[0.2em] text-[10px] md:text-xs font-bold py-2 px-6 rounded-full bg-[#1a7fb3]/8 dark:bg-[#35a19d]/8 border border-[#1a7fb3]/15 dark:border-[#35a19d]/15 backdrop-blur-sm shadow-sm mb-1">
                 Próximo evento · mayo 2026
               </span>
 
               <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#eef2f7] via-[#c3f5ff] to-[#1a7fb3] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#004669] via-[#1a7fb3] to-[#248f8b] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2">
                   Compite y crece en <br className="hidden lg:block" /> maratones universitarias
                 </h1>
               </div>
 
-              <p className="text-slate-600 dark:text-[#bac9cc] text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
+              <p className="text-slate-700 dark:text-[#bac9cc] text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
                 Gestiona equipos, retos y rankings desde una sola plataforma.
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function HomePage() {
               </Link>
 
               <Link href="#" className="w-full sm:w-auto">
-                <button className="w-full px-10 py-5 bg-transparent text-slate-600 dark:text-white/60 hover:text-white font-bold rounded-2xl border border-slate-200 dark:border-white/10 hover:border-white/20 hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 group">
+                <button className="w-full px-10 py-5 bg-transparent text-slate-700 dark:text-white/60 hover:text-[#1a7fb3] dark:hover:text-white font-bold rounded-2xl border border-slate-300/80 dark:border-white/10 hover:border-[#1a7fb3]/30 dark:hover:border-white/20 hover:bg-[#1a7fb3]/5 dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 group">
                   <span className="tracking-tight text-sm">Ver hackathones</span>
                 </button>
               </Link>
@@ -167,7 +167,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-slate-50 dark:bg-[#0d141d] py-24 px-6 md:px-10 max-w-[1440px] mx-auto z-20 relative border-t border-slate-200 dark:border-[#3b494c]/20 transition-colors duration-500">
+        <section className="bg-[#eef2f7] dark:bg-[#0d141d] py-24 px-6 md:px-10 max-w-[1440px] mx-auto z-20 relative border-t border-slate-200 dark:border-[#3b494c]/20 transition-colors duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-2 lg:row-span-2 bg-white dark:bg-[#151c26] rounded-[2rem] p-10 flex flex-col justify-between relative overflow-hidden group border border-slate-200 dark:border-[#3b494c]/20 shadow-xl dark:shadow-none transition-colors duration-500">
               <div className="absolute -right-20 -top-20 w-80 h-80 bg-[#1a7fb3]/10 dark:bg-[#1a7fb3]/5 blur-[100px] group-hover:bg-[#1a7fb3]/20 dark:group-hover:bg-[#1a7fb3]/15 transition-colors duration-1000" />
