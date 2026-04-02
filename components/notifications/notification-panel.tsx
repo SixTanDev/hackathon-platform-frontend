@@ -18,23 +18,23 @@ import {
   CheckCircle2,
   ChevronRight,
 } from 'lucide-react';
-import type { Notification } from '@/types/api';
+import type { Notification, NotificationType } from '@/types/api';
 
-const NOTIFICATION_ICONS: Record<string, React.ElementType> = {
+const NOTIFICATION_ICONS: Partial<Record<NotificationType, React.ElementType>> = {
   hackathon_start: Zap,
   hackathon_end: Trophy,
   team_invite: Users,
-  team_accepted: Users,
+  team_member_joined: Users,
   badge_earned: Award,
   submission_graded: FileCheck,
   flash_challenge: Zap,
-  leaderboard_update: Trophy,
-  hint_response: MessageSquare,
-  system_announcement: AlertCircle,
+  leaderboard_updated: Trophy,
+  hint_available: MessageSquare,
+  system_alert: AlertCircle,
 };
 
 function getIcon(type: string) {
-  return NOTIFICATION_ICONS[type] || Bell;
+  return NOTIFICATION_ICONS[type as NotificationType] || Bell;
 }
 
 function timeAgo(dateStr: string): string {

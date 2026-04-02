@@ -242,10 +242,10 @@ export default function AdminResearchGroupsPage() {
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     accessToken,
     contextToken,
-    memberships,
     currentZone?.id,
     currentSede?.id,
     setMemberships,

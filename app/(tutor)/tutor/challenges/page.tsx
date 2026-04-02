@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
 import apiClient from '@/lib/api/client';
-import type { ChallengeRead, ChallengeType, ChallengeDifficulty } from '@/types/api';
+import type { ChallengeListItem, ChallengeType, ChallengeDifficulty } from '@/types/api';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,11 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, Code2, FileText, BookOpen, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Code2, FileText, BookOpen, Filter, X, ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 
 /* ── OpenAPI: GET /challenges ── */
 interface PaginatedChallenges {
-  items: ChallengeRead[];
+  items: ChallengeListItem[];
   total: number;
   page: number;
   page_size: number;
@@ -51,7 +51,7 @@ export default function TutorChallengesPage() {
   const pageSize = 9;
 
   // OpenAPI: GET /challenges with exact query params
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: queryKeys.challenges.library({ page, pageSize, search, type: typeFilter, difficulty: difficultyFilter }),
     queryFn: () => listChallengesOpenAPI({
       page,
@@ -103,6 +103,13 @@ export default function TutorChallengesPage() {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
         </div>
+      ) : isError ? (
+        <Card>
+          <CardContent className="py-16 text-center text-destructive">
+            <AlertCircle className="w-10 h-10 mx-auto opacity-50 mb-3" />
+            <p>Error al cargar la biblioteca de retos. Intenta nuevamente.</p>
+          </CardContent>
+        </Card>
       ) : challenges.length === 0 ? (
         <Card><CardContent className="py-16 text-center text-muted-foreground"><BookOpen className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" /> No se encontraron retos</CardContent></Card>
       ) : (

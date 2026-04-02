@@ -1,3 +1,5 @@
+import type { NotificationType } from '@/types/api';
+
 // ─── Connection States ──────────────────────────────────────────────────────
 
 export type ConnectionState = 'CONNECTING' | 'CONNECTED' | 'DISCONNECTING' | 'DISCONNECTED';
@@ -119,10 +121,12 @@ export interface TypingPayload {
 
 export interface NotificationPayload {
   id: string;
-  type: string;
+  type: NotificationType | string;
   title: string;
   message: string;
-  priority: 'low' | 'normal' | 'high' | 'urgent';
+  action_url?: string | null;
+  is_read?: boolean;
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
   data?: Record<string, unknown>;
   created_at: string;
 }

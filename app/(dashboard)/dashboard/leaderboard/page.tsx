@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StreakIndicator } from '@/components/gamification/streak-indicator';
-import { Trophy, Award, MapPin, Globe } from 'lucide-react';
+import { Trophy, Award, MapPin, Globe, AlertCircle } from 'lucide-react';
 import type { LeaderboardEntryResponse } from '@/types/api';
 
 function LeaderboardTable({ entries, currentUserId }: { entries: LeaderboardEntryResponse[]; currentUserId?: string }) {
@@ -138,7 +138,10 @@ export default function SedeLeaderboardPage() {
                   {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                 </div>
               ) : sedeQuery.error ? (
-                <div className="py-10 text-center text-muted-foreground text-sm">Error al cargar la tabla</div>
+                <div className="py-10 text-center text-destructive">
+                  <AlertCircle className="w-8 h-8 mx-auto opacity-50 mb-2" />
+                  <p className="text-sm">Error al cargar la tabla de la sede</p>
+                </div>
               ) : (
                 <LeaderboardTable entries={sedeEntries} currentUserId={userId} />
               )}
@@ -160,7 +163,10 @@ export default function SedeLeaderboardPage() {
                   {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
                 </div>
               ) : zoneQuery.error ? (
-                <div className="py-10 text-center text-muted-foreground text-sm">Error al cargar la tabla</div>
+                <div className="py-10 text-center text-destructive">
+                  <AlertCircle className="w-8 h-8 mx-auto opacity-50 mb-2" />
+                  <p className="text-sm">Error al cargar la tabla de la zona</p>
+                </div>
               ) : (
                 <LeaderboardTable entries={zoneEntries} currentUserId={userId} />
               )}

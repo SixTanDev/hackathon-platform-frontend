@@ -238,7 +238,7 @@ export function useHackathonLive(hackathonId: string | null) {
       c.off('hackathon_resumed', onStatusChange as (d: unknown) => void);
       c.off('submission_result', onSubmissionResult as (d: unknown) => void);
     };
-  }, [client, hackathonId, queryClient, userId]);
+  }, [client, connectionState, hackathonId, queryClient, userId]);
 
   return {
     leaderboard,
@@ -274,7 +274,7 @@ export function useHackathonMonitor(hackathonId: string | null) {
       c.off('monitor_stats', onStats as (d: unknown) => void);
       c.off('monitor_alert', onAlert as (d: unknown) => void);
     };
-  }, [client]);
+  }, [client, connectionState]);
 
   return { stats, alerts, isConnected: connectionState === 'CONNECTED', connectionState };
 }
@@ -337,7 +337,7 @@ export function useTeamChat(teamId: string | null) {
       c.off('typing', onTyping as (d: unknown) => void);
       typingTimers.current.forEach(clearTimeout);
     };
-  }, [client, userId]);
+  }, [client, connectionState, userId]);
 
   const sendMessage = useCallback(
     (content: string, messageType: 'text' | 'code' = 'text') => {
@@ -418,7 +418,7 @@ export function useWSNotifications() {
     return () => {
       c.off('notification', onNotification as (d: unknown) => void);
     };
-  }, [client, queryClient]);
+  }, [client, connectionState, queryClient]);
 
   const markAsRead = useCallback((ids: string[]) => {
     setRealtimeNotifications((prev) =>
@@ -488,7 +488,7 @@ export function useWSLeaderboard(hackathonId: string | null) {
         throttleTimer.current = null;
       }
     };
-  }, [client, applyUpdate]);
+  }, [client, connectionState, applyUpdate]);
 
   return {
     entries,

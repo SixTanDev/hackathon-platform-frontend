@@ -1,7 +1,7 @@
 import { render, screen } from './test-utils';
 import userEvent from '@testing-library/user-event';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 import { expect, test, describe, vi } from 'vitest';
 
 describe('Base Components Smoke Tests', () => {

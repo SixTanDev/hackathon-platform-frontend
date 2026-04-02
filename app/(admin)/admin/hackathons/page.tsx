@@ -43,6 +43,7 @@ import {
   Trash2,
   Trophy,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import type { Hackathon, HackathonStatus } from '@/types/api';
 
@@ -76,7 +77,7 @@ export default function AdminHackathonsPage() {
   const [search, setSearch] = useState('');
   const [confirmDialog, setConfirmDialog] = useState<{ action: string; hackathon: Hackathon; targetStatus?: HackathonStatus } | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: queryKeys.hackathons.list({ scope: 'admin' }),
     queryFn: () => getHackathons({ limit: 200 }),
   });
@@ -164,6 +165,11 @@ export default function AdminHackathonsPage() {
           {isLoading ? (
             <div className="p-6 space-y-3">
               {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+            </div>
+          ) : isError ? (
+            <div className="py-16 text-center text-destructive">
+              <AlertCircle className="w-10 h-10 mx-auto opacity-50 mb-3" />
+              <p>Error al cargar hackathones. Intenta nuevamente.</p>
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-16 text-center">
