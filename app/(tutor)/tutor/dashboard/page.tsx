@@ -69,7 +69,7 @@ export default function TutorDashboardPage() {
             <Users className="w-4 h-4 text-unad-gold" />
             {t('tutor.dashboard.assignedTeamsTitle')}
           </CardTitle>
-        </Header>
+        </CardHeader>
         <CardContent>
           {teamsLoading ? (
             <div className="space-y-3">
