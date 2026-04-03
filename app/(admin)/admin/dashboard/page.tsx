@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { queryKeys } from '@/lib/query-client';
 import {
   getSedeOverviewAnalytics,
@@ -34,7 +35,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
 
 function StatCard({
   label,
@@ -70,6 +71,7 @@ function StatCard({
 }
 
 export default function AdminDashboardPage() {
+  const { t, locale } = useTranslation();
   const currentSede = useAuthStore((s) => s?.currentSede);
   const sedeId = currentSede?.id ?? '';
 
@@ -104,8 +106,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Panel de Administración"
-        description={`Administración de ${currentSede?.name ?? 'sede'}`}
+        title={t('admin.hero.title')}
+        description={t('admin.hero.subtitle', { sede: currentSede?.name ?? t('common.campus') })}
       />
 
       {/* Stat Cards */}
@@ -118,7 +120,7 @@ export default function AdminDashboardPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
-            label="Usuarios totales"
+            label={t('admin.metrics.usersTotal')}
             value={overview?.users_total ?? 0}
             icon={Users}
             color="text-primary"
@@ -126,15 +128,15 @@ export default function AdminDashboardPage() {
             sub={overview?.users_by_role ? Object.entries(overview.users_by_role).map(([r, c]) => `${r}: ${c}`).join(' · ') : undefined}
           />
           <StatCard
-            label="Hackathones activos"
+            label={t('tutor.dashboard.activeHackathons')}
             value={overview?.hackathons_active ?? 0}
             icon={Trophy}
             color="text-unad-gold"
             bg="bg-unad-gold/10"
-            sub={`${overview?.hackathons_completed ?? 0} completados · ${overview?.hackathons_total ?? 0} total`}
+            sub={`${overview?.hackathons_completed ?? 0} ${t('admin.metrics.completed')} · ${overview?.hackathons_total ?? 0} ${t('admin.metrics.total')}`}
           />
           <StatCard
-            label="Retos totales"
+            label={t('admin.metrics.challengesTotal')}
             value={overview?.challenges_total ?? 0}
             icon={Code2}
             color="text-accent"
@@ -142,22 +144,22 @@ export default function AdminDashboardPage() {
             sub={overview?.challenges_by_difficulty ? Object.entries(overview.challenges_by_difficulty).map(([d, c]) => `${d}: ${c}`).join(' · ') : undefined}
           />
           <StatCard
-            label="Interacciones IA"
+            label={t('admin.metrics.aiInteractions')}
             value={overview?.ai_interactions_total ?? 0}
             icon={Brain}
             color="text-secondary"
             bg="bg-secondary/10"
-            sub={`~${(overview?.ai_interactions_avg_per_student ?? 0).toFixed(1)} por estudiante`}
+            sub={`~${(overview?.ai_interactions_avg_per_student ?? 0).toFixed(1)} ${t('admin.metrics.perStudent')}`}
           />
           <StatCard
-            label="Tasa de resolución"
+            label={t('admin.metrics.resolutionRate')}
             value={`${((overview?.average_resolution_rate ?? 0) * 100).toFixed(0)}%`}
             icon={Percent}
             color="text-green-400"
             bg="bg-green-500/10"
           />
           <StatCard
-            label="Revisiones pendientes"
+            label={t('tutor.dashboard.pendingReviews')}
             value={pendingCount}
             icon={ShieldCheck}
             color={pendingCount > 0 ? 'text-unad-orange' : 'text-muted-foreground'}
@@ -172,7 +174,7 @@ export default function AdminDashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Server className="w-4 h-4 text-primary" />
-              Estado de Infraestructura
+              {t('admin.infra.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -184,7 +186,7 @@ export default function AdminDashboardPage() {
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4" />
-                  <span className="text-sm font-medium">Estado general:</span>
+                  <span className="text-sm font-medium">{t('admin.infra.status.general')}:</span>
                   <Badge
                     variant="outline"
                     className={health.status === 'healthy' || health.status === 'ok'
@@ -198,7 +200,7 @@ export default function AdminDashboardPage() {
 
                 {health.checks && Object.entries(health.checks).length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">Servicios:</p>
+                    <p className="text-xs text-muted-foreground font-medium">{t('admin.infra.services')}:</p>
                     {Object.entries(health.checks).map(([name, info]) => (
                       <div key={name} className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground capitalize">{name.replace(/_/g, ' ')}</span>
@@ -219,7 +221,7 @@ export default function AdminDashboardPage() {
 
                 {health.services && Object.entries(health.services).length > 0 && (
                   <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">Servicios externos:</p>
+                    <p className="text-xs text-muted-foreground font-medium">{t('admin.infra.externalServices')}:</p>
                     {Object.entries(health.services).map(([name, info]) => (
                       <div key={name} className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground capitalize">{name.replace(/_/g, ' ')}</span>
@@ -237,17 +239,17 @@ export default function AdminDashboardPage() {
 
                 {health.server?.uptime != null && (
                   <p className="text-[11px] text-muted-foreground">
-                    Uptime: {Math.floor(health.server.uptime / 3600)}h {Math.floor((health.server.uptime % 3600) / 60)}m
+                    {t('admin.infra.uptime')}: {Math.floor(health.server.uptime / 3600)}h {Math.floor((health.server.uptime % 3600) / 60)}m
                     {health.server.version && ` · v${health.server.version}`}
                   </p>
                 )}
 
                 {!health.checks && !health.services && (
-                  <p className="text-sm text-muted-foreground">Todos los sistemas operativos.</p>
+                  <p className="text-sm text-muted-foreground">{t('admin.infra.noSystems')}</p>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No se pudo obtener el estado del sistema.</p>
+              <p className="text-sm text-muted-foreground">{t('admin.infra.error')}</p>
             )}
           </CardContent>
         </Card>
@@ -257,7 +259,7 @@ export default function AdminDashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <ScrollText className="w-4 h-4 text-secondary" />
-              Actividad Reciente
+              {t('admin.activity.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -266,7 +268,7 @@ export default function AdminDashboardPage() {
                 {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
               </div>
             ) : auditEntries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sin actividad registrada aún.</p>
+              <p className="text-sm text-muted-foreground">{t('admin.activity.noData')}</p>
             ) : (
               <div className="space-y-2 max-h-[280px] overflow-y-auto pr-1">
                 {auditEntries.map((entry) => (
@@ -282,7 +284,7 @@ export default function AdminDashboardPage() {
                       </p>
                     </div>
                     <span className="text-muted-foreground shrink-0">
-                      {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: es })}
+                      {formatDistanceToNow(new Date(entry.timestamp), { addSuffix: true, locale: locale === 'es' ? es : enUS })}
                     </span>
                   </div>
                 ))}
@@ -298,7 +300,7 @@ export default function AdminDashboardPage() {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Brain className="w-4 h-4 text-secondary" />
-              Temas Más Consultados (IA)
+              {t('admin.aiTopics.title')}
             </CardTitle>
           </CardHeader>
           <CardContent>
