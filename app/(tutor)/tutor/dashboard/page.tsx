@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
 import { getMentorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
@@ -11,9 +12,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
-import { Trophy, Inbox, BookOpen, GraduationCap, Cpu, TrendingUp, Users, ArrowRight, MessageSquare } from 'lucide-react';
+import { Trophy, Inbox, BookOpen, Cpu, TrendingUp, Users, ArrowRight } from 'lucide-react';
 
 export default function TutorDashboardPage() {
+  const { t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
   const currentSede = useAuthStore((s) => s?.currentSede);
 
@@ -23,17 +25,20 @@ export default function TutorDashboardPage() {
   });
 
   const stats = [
-    { label: 'Hackathones activos', value: '—', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: 'Entregas por revisar', value: '—', icon: Inbox, color: 'text-accent', bg: 'bg-accent/10' },
-    { label: 'Retos creados', value: '—', icon: BookOpen, color: 'text-secondary', bg: 'bg-secondary/10' },
-    { label: 'Equipos asignados', value: String(mentorTeams?.length ?? '—'), icon: Users, color: 'text-unad-gold', bg: 'bg-unad-gold/10' },
+    { label: t('tutor.dashboard.activeHackathons'), value: '—', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: t('tutor.dashboard.pendingReviews'), value: '—', icon: Inbox, color: 'text-accent', bg: 'bg-accent/10' },
+    { label: t('tutor.dashboard.createdChallenges'), value: '—', icon: BookOpen, color: 'text-secondary', bg: 'bg-secondary/10' },
+    { label: t('tutor.dashboard.assignedTeams'), value: String(mentorTeams?.length ?? '—'), icon: Users, color: 'text-unad-gold', bg: 'bg-unad-gold/10' },
   ];
 
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Panel del Tutor"
-        description={`Hola, ${user?.full_name?.split?.(' ')?.[0] ?? 'Tutor'}. Sede: ${currentSede?.name ?? 'sede'}`}
+        title={t('tutor.dashboard.title')}
+        description={t('tutor.dashboard.greeting', { 
+          name: user?.full_name?.split?.(' ')?.[0] ?? t('common.user'),
+          sede: currentSede?.name ?? t('common.campus')
+        })}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -62,37 +67,37 @@ export default function TutorDashboardPage() {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Users className="w-4 h-4 text-unad-gold" />
-            Mis Equipos Asignados
+            {t('tutor.dashboard.assignedTeamsTitle')}
           </CardTitle>
-        </CardHeader>
+        </Header>
         <CardContent>
           {teamsLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
             </div>
           ) : !mentorTeams?.length ? (
-            <p className="text-sm text-muted-foreground py-4 text-center">No tienes equipos asignados actualmente.</p>
+            <p className="text-sm text-muted-foreground py-4 text-center">{t('tutor.teams.noTeams')}</p>
           ) : (
             <div className="space-y-3">
-              {mentorTeams.map((t: MentorTeamSummary) => (
-                <div key={t.id} className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
+              {mentorTeams.map((t_item: MentorTeamSummary) => (
+                <div key={t_item.id} className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-colors">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold truncate">{t.name}</p>
-                      <Badge variant="outline" className="text-[10px] capitalize">{t.status}</Badge>
+                      <p className="text-sm font-semibold truncate">{t_item.name}</p>
+                      <Badge variant="outline" className="text-[10px] capitalize">{t_item.status}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {t.hackathon_name ?? 'Hackathon'} · {t.member_count} miembros
+                      {t_item.hackathon_name ?? t('common.hackathon')} · {t_item.member_count} {t('tutor.dashboard.members')}
                     </p>
-                    {typeof t.progress_percent === 'number' && (
+                    {typeof t_item.progress_percent === 'number' && (
                       <div className="mt-2 flex items-center gap-2">
-                        <Progress value={t.progress_percent} className="h-1.5 flex-1" />
-                        <span className="text-[10px] text-muted-foreground">{t.progress_percent}%</span>
+                        <Progress value={t_item.progress_percent} className="h-1.5 flex-1" />
+                        <span className="text-[10px] text-muted-foreground">{t_item.progress_percent}%</span>
                       </div>
                     )}
                   </div>
                   <div className="flex items-center gap-1 ml-3">
-                    <Link href={`/dashboard/teams/${t.id}/progress`}>
+                    <Link href="/tutor/teams">
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <ArrowRight className="w-4 h-4" />
                       </Button>
@@ -110,11 +115,11 @@ export default function TutorDashboardPage() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Cpu className="w-4 h-4 text-primary" />
-              Generación IA reciente
+              {t('tutor.dashboard.recentAI')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Sin generaciones recientes.</p>
+            <p className="text-sm text-muted-foreground">{t('tutor.dashboard.noRecentAI')}</p>
           </CardContent>
         </Card>
 
@@ -122,11 +127,11 @@ export default function TutorDashboardPage() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-secondary" />
-              Rendimiento de estudiantes
+              {t('tutor.dashboard.studentPerformance')}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">Sin datos disponibles aún.</p>
+            <p className="text-sm text-muted-foreground">{t('tutor.dashboard.noStatsAvailable')}</p>
           </CardContent>
         </Card>
       </div>
