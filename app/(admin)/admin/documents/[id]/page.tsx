@@ -59,6 +59,7 @@ export default function CollectionDetailPage() {
   const [uploading, setUploading] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; docId: string; name: string }>({ open: false, docId: '', name: '' });
   const [processingDocs, setProcessingDocs] = useState<Set<string>>(new Set());
+  const rateLimitUntilRef = useRef<number>(0);
 
   // Data
   const { data: collection, isLoading: loadingCollection } = useQuery({
@@ -92,7 +93,18 @@ export default function CollectionDetailPage() {
     const processing = documents.filter(d => d.processing_status === 'processing' || d.processing_status === 'uploaded');
     if (processing.length === 0) { setProcessingDocs(new Set()); return; }
     setProcessingDocs(new Set(processing.map(d => d.id)));
-    const interval = setInterval(async () => {
+
+    let cancelled = false;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
+    const poll = async () => {
+      if (cancelled) return;
+      const now = Date.now();
+      if (rateLimitUntilRef.current > now) {
+        timeoutId = setTimeout(poll, rateLimitUntilRef.current - now);
+        return;
+      }
+
       let changed = false;
       for (const doc of processing) {
         try {
@@ -100,13 +112,31 @@ export default function CollectionDetailPage() {
           if (status.processing_status === 'ready' || status.processing_status === 'error') {
             changed = true;
           }
-        } catch { /* ignore */ }
+        } catch (err: any) {
+          const status = err?.status ?? err?.response?.status;
+          const detail = err?.detail ?? err?.response?.data?.detail ?? '';
+          if (status === 429) {
+            rateLimitUntilRef.current = Date.now() + 60_000;
+            break;
+          }
+          if ((status === 400 || status === 404) && String(detail).toLowerCase().includes('not found')) {
+            changed = true;
+          }
+        }
       }
+
       if (changed) {
         qc.invalidateQueries({ queryKey: queryKeys.documents.collectionDocs(id) });
       }
-    }, 5000);
-    return () => clearInterval(interval);
+
+      timeoutId = setTimeout(poll, 15_000);
+    };
+
+    timeoutId = setTimeout(poll, 15_000);
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [documents, id, qc]);
 
   // Mutations

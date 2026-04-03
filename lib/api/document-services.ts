@@ -75,15 +75,49 @@ export async function uploadDocument(collectionId: string, file: File): Promise<
   return res.data;
 }
 
-export async function getDocumentStatus(documentId: string): Promise<DocumentStatusResponse> {
-  const res = await apiClient.get(`/documents/${documentId}/status`).catch(() => ({
-    data: { id: documentId, processing_status: 'processing' as const, processing_error: null, chunk_count: 0 },
-  }));
-  return res.data;
+export async function getDocumentStatus(documentId: string, collectionId?: string): Promise<DocumentStatusResponse> {
+  try {
+    // Try global route first
+    const res = await apiClient.get(`/documents/${documentId}/status`);
+    return res.data;
+  } catch (err: any) {
+    const status = err?.status ?? err?.response?.status;
+    // If not found or bad request, and we have a collectionId, try the collection-specific route
+    if ((status === 404 || status === 400) && collectionId) {
+      console.log(`[DocumentService] Fallback for status: trying collection-specific route for ${documentId} in ${collectionId}`);
+      try {
+        const res = await apiClient.get(`/document-collections/${collectionId}/documents/${documentId}/status`);
+        return res.data;
+      } catch (fallbackErr: any) {
+        console.error(`[DocumentService] Status fallback failed for ${documentId}:`, fallbackErr?.message);
+        throw fallbackErr;
+      }
+    }
+    throw err;
+  }
 }
 
-export async function deleteDocument(_collectionId: string, documentId: string): Promise<void> {
-  await apiClient.delete(`/documents/${documentId}`);
+export async function deleteDocument(collectionId: string, documentId: string): Promise<void> {
+  try {
+    await apiClient.delete(`/document-collections/${collectionId}/documents/${documentId}`);
+  } catch (err: any) {
+    const status = err?.status ?? err?.response?.status;
+    if (status !== 404) throw err;
+    // Fallback for backends that still use the legacy endpoint
+    try {
+      await apiClient.delete(`/documents/${documentId}`);
+    } catch (fallbackErr: any) {
+      const fallbackStatus = fallbackErr?.status ?? fallbackErr?.response?.status;
+      const detail = fallbackErr?.detail ?? fallbackErr?.response?.data?.detail ?? '';
+      const notFound =
+        fallbackStatus === 400 || fallbackStatus === 404
+          ? String(detail).toLowerCase().includes('not found')
+          : false;
+      // Some backends delete successfully but return an invalid/abrupt response through the proxy.
+      if (fallbackStatus === 502 || notFound) return;
+      throw fallbackErr;
+    }
+  }
 }
 
 export async function getDocumentDownloadUrl(documentId: string): Promise<string> {

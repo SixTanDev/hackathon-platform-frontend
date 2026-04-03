@@ -10,10 +10,8 @@ async function proxyRequest(req: NextRequest) {
   const proxyPath = url.pathname.replace(/^\/api\/proxy/, '');
   const targetUrl = `${API_BACKEND_URL}/api/v1${proxyPath}${url.search}`;
 
-  // Forward relevant headers
-  const headers: Record<string, string> = {
-    'Content-Type': req.headers.get('content-type') || 'application/json',
-  };
+  // Forward relevant headers (exclude Content-Type initially)
+  const headers: Record<string, string> = {};
 
   const auth = req.headers.get('authorization');
   if (auth) headers['Authorization'] = auth;
@@ -28,9 +26,16 @@ async function proxyRequest(req: NextRequest) {
   if (accept) headers['Accept'] = accept;
 
   try {
-    const body = req.method !== 'GET' && req.method !== 'HEAD'
-      ? await req.text()
-      : undefined;
+    // Only read body if method usually requires it
+    let body: string | undefined = undefined;
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      const text = await req.text();
+      if (text && text.length > 0) {
+        body = text;
+        // Only set Content-Type if we actually have a body to send
+        headers['Content-Type'] = req.headers.get('content-type') || 'application/json';
+      }
+    }
 
     const response = await fetch(targetUrl, {
       method: req.method,
