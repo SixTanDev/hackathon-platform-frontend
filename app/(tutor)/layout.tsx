@@ -7,5 +7,5 @@ export default function TutorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardShell>{children}</DashboardShell>;
+  return <DashboardShell role="tutor">{children}</DashboardShell>;
 }

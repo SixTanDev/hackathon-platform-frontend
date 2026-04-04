@@ -14,14 +14,17 @@ import { ImpersonationBanner } from '@/components/superadmin/impersonation-banne
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Loader2 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import type { RoleName } from '@/types/api';
 
 interface DashboardShellProps {
   children: React.ReactNode;
   /** If true, allows access without a context token (SuperAdmin global) */
   allowNoContext?: boolean;
+  /** Force a specific role for navigation and badges */
+  role?: RoleName;
 }
 
-export function DashboardShell({ children, allowNoContext = false }: DashboardShellProps) {
+export function DashboardShell({ children, allowNoContext = false, role }: DashboardShellProps) {
   const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = useAuthStore((s) => s?.isAuthenticated);
@@ -68,13 +71,18 @@ export function DashboardShell({ children, allowNoContext = false }: DashboardSh
         <DashboardSidebar
           collapsed={sidebarCollapsed}
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          role={role}
         />
       </div>
 
       {/* Mobile sidebar via Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="p-0 w-64">
-          <DashboardSidebar collapsed={false} onToggle={() => setMobileOpen(false)} />
+          <DashboardSidebar 
+            collapsed={false} 
+            onToggle={() => setMobileOpen(false)} 
+            role={role}
+          />
         </SheetContent>
       </Sheet>
 
@@ -85,7 +93,7 @@ export function DashboardShell({ children, allowNoContext = false }: DashboardSh
       >
         <ImpersonationBanner />
         <HackathonLiveBanner />
-        <DashboardTopbar onMobileMenuToggle={toggleMobile} />
+        <DashboardTopbar onMobileMenuToggle={toggleMobile} role={role} />
         <main className="p-4 md:p-6 max-w-[1200px] mx-auto" role="main">
           {children}
         </main>

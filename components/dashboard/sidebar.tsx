@@ -112,15 +112,17 @@ function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean)
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
+  role?: RoleName;
 }
 
-export function DashboardSidebar({ collapsed, onToggle }: SidebarProps) {
+export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const currentRole = useAuthStore((s) => s?.currentRole);
+  const storeRole = useAuthStore((s) => s?.currentRole);
   const user = useAuthStore((s) => s?.user);
   const isSuperAdmin = user?.is_superadmin ?? false;
 
+  const currentRole = role || storeRole;
   const navItems = getNavForRole(currentRole, isSuperAdmin);
 
   return (

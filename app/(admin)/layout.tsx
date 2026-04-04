@@ -7,6 +7,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // allowNoContext for SuperAdmin global access
-  return <DashboardShell allowNoContext>{children}</DashboardShell>;
+  return <DashboardShell role="admin" allowNoContext>{children}</DashboardShell>;
 }

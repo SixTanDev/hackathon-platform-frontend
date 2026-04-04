@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
-import { useTranslation, type Locale } from '@/lib/i18n/context';
+import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -26,19 +26,21 @@ import {
   User as UserIcon,
   Settings,
   ChevronDown,
-  Languages,
   Menu,
 } from 'lucide-react';
+import type { RoleName } from '@/types/api';
 
 interface DashboardTopbarProps {
   onMobileMenuToggle?: () => void;
+  role?: RoleName;
 }
 
-export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
+export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
+  const storeRole = useAuthStore((s) => s?.currentRole);
   const logout = useAuthStore((s) => s?.logout);
   const [mounted, setMounted] = useState(false);
 
@@ -46,12 +48,13 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
     setMounted(true);
   }, []);
 
+  const currentRole = role || storeRole;
+
   function handleLogout() {
-    // Clear cookies synchronously BEFORE clearing store, so middleware sees unauthenticated state
     document.cookie = 'hackathon-auth-token=; path=/; max-age=0';
     document.cookie = 'hackathon-context-token=; path=/; max-age=0';
+    document.cookie = 'hackathon-role=; path=/; max-age=0';
     logout?.();
-    // Use window.location for a full page navigation to ensure middleware runs fresh
     window.location.href = '/';
   }
 
@@ -65,7 +68,6 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
   return (
     <header className="h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-30" role="banner">
       <div className="h-full flex items-center justify-between px-4 md:px-6">
-        {/* Left: Mobile hamburger + Sede switcher */}
         <div className="flex items-center gap-2">
           {onMobileMenuToggle && (
             <Button
@@ -74,7 +76,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
               className="h-9 w-9 lg:hidden"
               onClick={onMobileMenuToggle}
               aria-label="Abrir menú de navegación"
-              >
+            >
               <Menu className="h-5 w-5" />
             </Button>
           )}
@@ -91,21 +93,17 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
           </Button>
         </div>
 
-        {/* Right: Actions */}
         <div className="flex items-center gap-1 sm:gap-2">
-          {/* Language Toggle */}
           <Button
             variant="ghost"
             size="icon"
             className="h-9 w-9"
             onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
             aria-label={t('common.language')}
-            title={locale === 'es' ? t('common.switchToEnglish') : t('common.switchToSpanish')}
           >
             <span className="text-xs font-bold">{locale === 'es' ? 'EN' : 'ES'}</span>
           </Button>
 
-          {/* Theme Toggle */}
           {mounted && (
             <Button
               variant="ghost"
@@ -114,18 +112,21 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
               className="h-9 w-9"
               aria-label={t('theme.toggle')}
             >
-              {theme === 'dark' ? (
-                <Sun className="h-4 w-4" />
-              ) : (
-                <Moon className="h-4 w-4" />
-              )}
+              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           )}
 
-          {/* Notifications */}
           <NotificationPanel />
 
-          {/* User Menu */}
+          {/* Context Display (Hidden on very small screens) */}
+          <div className="hidden sm:flex items-center gap-2 px-3 h-8 rounded-full bg-muted/50 border border-border/50 ml-2">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                {currentRole === 'admin' ? t('roles.admin') 
+                 : currentRole === 'tutor' ? t('roles.tutor')
+                 : t('roles.student')}
+             </span>
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Menú de usuario">

@@ -5,7 +5,7 @@ import { useTranslation } from '@/lib/i18n/context';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
 import { getMentorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
-import { PageHeader } from '@/components/shared/page-header';
+import { TutorHero } from '@/components/dashboard/tutor-hero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -24,21 +24,29 @@ export default function TutorDashboardPage() {
     queryFn: getMentorTeams,
   });
 
+  // Calculate metrics for TutorHero
+  const mentorTeamsCount = mentorTeams?.length ?? 0;
+  const averageProgress = mentorTeamsCount > 0 && mentorTeams 
+    ? mentorTeams.reduce((acc, team) => acc + (team.progress_percent || 0), 0) / mentorTeamsCount
+    : 0;
+  const stuckTeamsCount = mentorTeams?.filter(team => (team.progress_percent || 0) < 20).length ?? 0;
+
   const stats = [
-    { label: t('tutor.dashboard.activeHackathons'), value: '—', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10' },
-    { label: t('tutor.dashboard.pendingReviews'), value: '—', icon: Inbox, color: 'text-accent', bg: 'bg-accent/10' },
-    { label: t('tutor.dashboard.createdChallenges'), value: '—', icon: BookOpen, color: 'text-secondary', bg: 'bg-secondary/10' },
-    { label: t('tutor.dashboard.assignedTeams'), value: String(mentorTeams?.length ?? '—'), icon: Users, color: 'text-unad-gold', bg: 'bg-unad-gold/10' },
+    { label: t('tutor.dashboard.activeHackathons'), value: '1', icon: Trophy, color: 'text-primary', bg: 'bg-primary/10' },
+    { label: t('tutor.dashboard.pendingReviews'), value: '0', icon: Inbox, color: 'text-accent', bg: 'bg-accent/10' },
+    { label: t('tutor.dashboard.createdChallenges'), value: '0', icon: BookOpen, color: 'text-secondary', bg: 'bg-secondary/10' },
+    { label: t('tutor.dashboard.assignedTeams'), value: String(mentorTeamsCount), icon: Users, color: 'text-unad-gold', bg: 'bg-unad-gold/10' },
   ];
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader
-        title={t('tutor.dashboard.title')}
-        description={t('tutor.dashboard.greeting', { 
-          name: user?.full_name?.split?.(' ')?.[0] ?? t('common.user'),
-          sede: currentSede?.name ?? t('common.campus')
-        })}
+      <TutorHero 
+        user={user}
+        currentSede={currentSede || null}
+        mentorTeamsCount={mentorTeamsCount}
+        averageProgress={averageProgress}
+        stuckTeamsCount={stuckTeamsCount}
+        loading={teamsLoading}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
