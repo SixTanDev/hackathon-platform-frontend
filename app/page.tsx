@@ -15,6 +15,8 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
+  if (!mounted) return null;
+
   return (
     <div className="bg-[#eef2f7] dark:bg-[#0d141d] text-slate-900 dark:text-[#dce3f0] selection:bg-[#1a7fb3] selection:text-white min-h-screen font-sans transition-colors duration-500">
       <style
@@ -44,17 +46,18 @@ export default function HomePage() {
       />
 
       <header className="absolute top-0 z-50 w-full border-b border-slate-200/70 bg-white/40 backdrop-blur-xl transition-colors duration-500 hover:bg-white/90 dark:border-[#3b494c]/20 dark:bg-[#0d141d]/20 dark:hover:bg-[#0d141d]/80">
-        <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 pb-1.5 pt-3 md:px-8 lg:px-10">
-          <Link
-            href="#"
-            className="-ml-3 group flex items-center rounded-full pr-2 transition-transform duration-300 hover:scale-[1.01] md:-ml-4"
-          >
-            <span className="font-brand translate-y-[1px] text-[1.5rem] font-normal leading-none tracking-[0.04em] text-[#f59a23] drop-shadow-[0_0_12px_rgba(245,154,35,0.22)] transition-colors duration-300 group-hover:text-[#ffb15c] dark:text-[#f59a23] dark:group-hover:text-[#ffb15c]">
-              SAMP
-            </span>
-          </Link>
+        <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-3 md:px-8 lg:px-10">
+          <div className="flex w-28 items-center justify-start self-center">
+            <Image
+              src="/samp-logo.png"
+              alt="SAMP Logo"
+              width={80}
+              height={80}
+              className="h-[4.5rem] w-auto shrink-0 object-contain drop-shadow-sm brightness-110"
+            />
+          </div>
 
-          <div className="hidden items-center justify-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+          <div className="hidden items-center justify-self-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
             <Link
               className="rounded-full border border-[#1a7fb3]/50 bg-[#1a7fb3]/10 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-900 shadow-[0_8px_24px_rgba(26,127,179,0.12)] transition-all duration-300 dark:border-[#1a7fb3]/20 dark:bg-[#1a7fb3]/8 dark:text-[#dffbff]"
               href="#"
@@ -75,7 +78,7 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div className="flex items-center justify-end gap-3 md:gap-4">
+          <div className="flex items-center justify-end justify-self-end gap-3 md:gap-4">
             {mounted && (
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -93,15 +96,21 @@ export default function HomePage() {
           </div>
         </nav>
 
-        <div className="mx-auto hidden max-w-[1440px] px-6 pb-2.5 text-center md:block md:px-8 lg:px-10">
-          <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600 dark:text-[#7f939a]">
+        <div className="pointer-events-none absolute inset-x-0 top-[5.4rem] hidden md:block">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 md:px-8 lg:px-10">
+            <div />
+            <div className="justify-self-center text-center">
+              <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600 dark:text-[#7f939a]">
             Sistema Académico de Maratones de Programación
           </span>
+        </div>
+            <div />
+          </div>
         </div>
       </header>
 
       <main>
-        <section className="relative min-h-screen animated-mesh flex flex-col items-center justify-center pt-10 pb-6">
+        <section className="relative min-h-screen animated-mesh flex flex-col items-center justify-center pt-24 pb-6">
           <AnimatedDotBackground />
 
           <svg className="wave-svg text-[#1a7fb3]/20 dark:text-[#1a7fb3]/10" preserveAspectRatio="none" viewBox="0 0 1440 320">
@@ -123,16 +132,6 @@ export default function HomePage() {
           </svg>
 
           <div className="relative z-10 max-w-5xl w-full px-6 flex flex-col items-center text-center">
-            <div className="mb-4 mt-2 relative opacity-80">
-              <div className="absolute inset-0 bg-[#1a7fb3]/10 dark:bg-[#1a7fb3]/5 blur-[70px] rounded-full scale-110" />
-              <Image
-                src="/samp-logo.png"
-                alt="SAMP Logo"
-                width={300}
-                height={160}
-                className="w-[140px] md:w-[160px] h-auto object-contain relative z-10 drop-shadow-[0_0_15px_rgba(26,127,179,0.22)] dark:drop-shadow-[0_0_20px_rgba(26,127,179,0.2)] scale-100"
-              />
-            </div>
 
             <div className="space-y-4 flex flex-col items-center">
               <span className="inline-block text-[#1a7fb3] dark:text-[#c3f5ff]/80 tracking-[0.2em] text-[10px] md:text-xs font-bold py-2 px-6 rounded-full bg-[#1a7fb3]/8 dark:bg-[#35a19d]/8 border border-[#1a7fb3]/15 dark:border-[#35a19d]/15 backdrop-blur-sm shadow-sm mb-1">

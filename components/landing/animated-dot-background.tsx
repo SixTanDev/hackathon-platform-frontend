@@ -28,7 +28,7 @@ export function AnimatedDotBackground() {
 
     const MOUSE_RADIUS = 200; // repel radius increased slightly
     const DOT_SPACING = 35;   // density
-    const DOT_RADIUS = resolvedTheme === 'light' ? 2.5 : 1.5;   // slightly larger in light mode so colors pop
+    const DOT_RADIUS = resolvedTheme === 'light' ? 1.2 : 0.8;   // reduced for a more subtle, sophisticated feel
 
     // Light mode colorful palette
     const lightPalette = ['#00e5ff', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];

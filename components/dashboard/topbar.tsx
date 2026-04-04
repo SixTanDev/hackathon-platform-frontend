@@ -81,19 +81,20 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
             </Button>
           )}
           <SedeSwitcher />
-          <Button
-            asChild
-            variant="ghost"
-            className="h-9 gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 text-sm font-medium text-primary transition-all duration-300 hover:border-[#f59a23]/45 hover:bg-[#f59a23] hover:text-[#1f1404]"
-          >
-            <Link href="/" aria-label="Volver a inicio">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('nav.home')}</span>
-            </Link>
-          </Button>
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2">
+          <Button
+            asChild
+            variant="ghost"
+            className="h-9 gap-2 rounded-full border border-border bg-background px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 hover:text-primary mr-1"
+          >
+            <Link href="/" aria-label="Volver a inicio">
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Inicio</span>
+            </Link>
+          </Button>
+
           <Button
             variant="ghost"
             size="icon"
