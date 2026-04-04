@@ -12,8 +12,9 @@ import type { ContextTokenResponse, ZoneMembershipInfo, SedeMembershipInfo } fro
 import { Building2, MapPin, ChevronRight, LogOut, Loader2, Zap, Shield, Globe } from 'lucide-react';
 
 /** Set auth cookies immediately so middleware allows navigation */
-function syncCookies(accessToken: string, contextToken?: string) {
+function syncCookies(accessToken: string, role: string, contextToken?: string) {
   document.cookie = `hackathon-auth-token=${accessToken}; path=/; SameSite=Lax; max-age=86400`;
+  document.cookie = `hackathon-role=${role}; path=/; SameSite=Lax; max-age=86400`;
   if (contextToken) {
     document.cookie = `hackathon-context-token=${contextToken}; path=/; SameSite=Lax; max-age=86400`;
   }
@@ -62,7 +63,7 @@ export default function SelectSedePage() {
       });
 
       toast.success(`Contexto seleccionado: ${sede?.sede_name ?? 'Sede'}`);
-      syncCookies(accessToken ?? '', data?.context_token ?? '');
+      syncCookies(accessToken ?? '', role, data?.context_token ?? '');
       router.replace(getDashboardPathForRole(role));
     } catch (err: any) {
       toast.error(err?.detail ?? 'Error al seleccionar contexto');

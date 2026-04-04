@@ -5,6 +5,9 @@ import { useProfile } from '@/hooks/use-profile';
 import { useActiveHackathons, useOpenHackathons } from '@/hooks/use-hackathons';
 import { useNotifications } from '@/hooks/use-notifications';
 import { useTranslation } from '@/lib/i18n/context';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getDashboardPathForRole } from '@/lib/auth-helpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -168,8 +171,17 @@ function ActivityItem({ notification }: { notification: ApiNotification }) {
 // ─── Dashboard Page ──────────────────────────────────────
 
 export default function DashboardPage() {
+  const router = useRouter();
   const user = useAuthStore((s) => s?.user);
+  const role = useAuthStore((s) => s?.currentRole);
   const { t, locale } = useTranslation();
+
+  // Role Guard: Redirect non-students
+  useEffect(() => {
+    if (user && role && role !== 'student' && role !== 'guest') {
+      router.replace(getDashboardPathForRole(role));
+    }
+  }, [user, role, router]);
 
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: activeHackathons, isLoading: hackathonsLoading } = useActiveHackathons();

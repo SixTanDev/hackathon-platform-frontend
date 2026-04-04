@@ -21,6 +21,7 @@ export function middleware(request: NextRequest) {
 
   const authCookie = request.cookies.get('hackathon-auth-token')?.value;
   const contextCookie = request.cookies.get('hackathon-context-token')?.value;
+  const roleCookie = request.cookies.get('hackathon-role')?.value;
 
   const isAuthenticated = !!authCookie;
   const hasContext = !!contextCookie;
@@ -32,7 +33,10 @@ export function middleware(request: NextRequest) {
   // Redirect authenticated users away from login
   if (isPublicRoute && isAuthenticated) {
     if (hasContext) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+      const targetPath = roleCookie === 'admin' ? '/admin/dashboard' 
+                       : roleCookie === 'tutor' ? '/tutor/dashboard'
+                       : '/dashboard';
+      return NextResponse.redirect(new URL(targetPath, request.url));
     }
     return NextResponse.redirect(new URL('/select-sede', request.url));
   }
