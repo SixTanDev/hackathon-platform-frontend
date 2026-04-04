@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PageHeader } from '@/components/shared/page-header';
+import { DashboardHero } from '@/components/dashboard/dashboard-hero';
 import { EmptyState } from '@/components/shared/empty-state';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
@@ -169,7 +169,6 @@ function ActivityItem({ notification }: { notification: ApiNotification }) {
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s?.user);
-  const currentSede = useAuthStore((s) => s?.currentSede);
   const { t, locale } = useTranslation();
 
   const { data: profile, isLoading: profileLoading } = useProfile();
@@ -189,9 +188,11 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader
-        title={t('dashboard.greeting', { name: user?.full_name?.split?.(' ')?.[0] ?? t('common.user') })}
-        description={t('dashboard.subtitle', { sede: currentSede?.name ?? t('common.campus') })}
+      <DashboardHero 
+        user={user} 
+        profile={profile || null} 
+        activeHackathons={safeActiveHackathons} 
+        loading={profileLoading || hackathonsLoading} 
       />
 
       {/* Stats Grid */}

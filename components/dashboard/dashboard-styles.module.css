@@ -1,0 +1,109 @@
+/* Dashboard Style System - Vanilla CSS Modules */
+
+.container, .detailContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.container {
+  max-width: 1440px;
+}
+
+.detailContainer {
+  max-width: 1200px;
+}
+
+.surfaceBase {
+  background-color: hsl(var(--surface-base));
+  min-height: 100vh;
+}
+
+.surfaceRaised {
+  background-color: hsl(var(--surface-raised));
+  border: 1px solid hsl(var(--surface-border) / 0.5);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-premium);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.surfaceRaised:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+.surfaceFeatured {
+  background: linear-gradient(135deg, hsl(var(--surface-featured)), hsl(var(--surface-base)));
+  border: 1px solid hsl(var(--surface-accent) / 0.1);
+  border-radius: calc(var(--radius) * 2);
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Python-centric background pattern */
+.surfaceFeatured::before {
+  content: "def solve(problem):";
+  position: absolute;
+  top: -10px;
+  right: -20px;
+  font-family: var(--font-mono);
+  font-size: 5rem;
+  font-weight: 800;
+  opacity: 0.03;
+  transform: rotate(-5deg);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 1.5rem;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Grid Layouts */
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .dashboardGrid {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+.span12 { grid-column: span 12; }
+.span8 { grid-column: span 12; }
+.span4 { grid-column: span 12; }
+
+@media (min-width: 1024px) {
+  .span8 { grid-column: span 8; }
+  .span4 { grid-column: span 4; }
+}
