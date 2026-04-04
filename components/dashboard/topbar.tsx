@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
@@ -19,7 +18,6 @@ import {
 import { SedeSwitcher } from '@/components/sede-switcher';
 import { NotificationPanel } from '@/components/notifications/notification-panel';
 import {
-  ArrowLeft,
   Sun,
   Moon,
   LogOut,
@@ -35,20 +33,17 @@ interface DashboardTopbarProps {
   role?: RoleName;
 }
 
-export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarProps) {
+export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
-  const storeRole = useAuthStore((s) => s?.currentRole);
   const logout = useAuthStore((s) => s?.logout);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const currentRole = role || storeRole;
 
   function handleLogout() {
     document.cookie = 'hackathon-auth-token=; path=/; max-age=0';
@@ -66,8 +61,8 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
     ?.slice?.(0, 2) ?? 'U';
 
   return (
-    <header className="h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm sticky top-0 z-30" role="banner">
-      <div className="h-full flex items-center justify-between px-4 md:px-6">
+    <header className="sticky top-0 z-30 h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm" role="banner">
+      <div className="flex h-full items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-2">
           {onMobileMenuToggle && (
             <Button
@@ -83,18 +78,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
           <SedeSwitcher />
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2">
-          <Button
-            asChild
-            variant="ghost"
-            className="h-9 gap-2 rounded-full border border-border bg-background px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-all duration-300 hover:border-primary/30 hover:bg-primary/5 hover:text-primary mr-1"
-          >
-            <Link href="/" aria-label="Volver a inicio">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Inicio</span>
-            </Link>
-          </Button>
-
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
           <Button
             variant="ghost"
             size="icon"
@@ -102,7 +86,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
             onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
             aria-label={t('common.language')}
           >
-            <span className="text-[10px] font-bold">{locale === 'es' ? 'EN' : 'ES'}</span>
+            <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
           </Button>
 
           {mounted && (
@@ -119,28 +103,23 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
 
           <NotificationPanel />
 
-          {/* Context Display (Hidden on very small screens) */}
-          <div className="hidden sm:flex items-center gap-2 px-3 h-8 rounded-full bg-muted/50 border border-border/50 ml-2">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {currentRole === 'admin' ? t('roles.admin') 
-                 : currentRole === 'tutor' ? t('roles.tutor')
-                 : t('roles.student')}
-             </span>
-          </div>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Menú de usuario">
-                <Avatar className="h-7 w-7">
+              <Button
+                variant="ghost"
+                className="group h-10 gap-2 rounded-full border border-transparent px-2.5 hover:border-[#f7941d]/35 hover:bg-[#f7941d]/12 hover:text-[#8a4b00]"
+                aria-label="Menú de usuario"
+              >
+                <Avatar className="h-8 w-8 ring-1 ring-border/40">
                   <AvatarImage src={user?.avatar_url || ''} alt={user?.full_name || ''} />
                   <AvatarFallback className="text-xs bg-primary/10 text-primary">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium hidden md:inline max-w-[120px] truncate">
+                <span className="hidden max-w-[140px] truncate text-sm font-medium md:inline">
                   {user?.full_name ?? 'Usuario'}
                 </span>
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-[#8a4b00]" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -152,16 +131,16 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
-                <UserIcon className="w-4 h-4 mr-2" />
+                <UserIcon className="mr-2 h-4 w-4" />
                 {t('nav.profile')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push('/dashboard/profile/settings')}>
-                <Settings className="w-4 h-4 mr-2" />
+                <Settings className="mr-2 h-4 w-4" />
                 {t('nav.settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="mr-2 h-4 w-4" />
                 {t('nav.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>

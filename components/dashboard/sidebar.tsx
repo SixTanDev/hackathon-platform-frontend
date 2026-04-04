@@ -39,6 +39,23 @@ interface NavItem {
   icon: React.ElementType;
 }
 
+const ACTIVE_ITEM_STYLES: Record<string, string> = {
+  '/dashboard': 'border-[#0f5b82]/18 bg-gradient-to-r from-[#0f5b82]/18 via-[#1a7fb3]/10 to-transparent text-[#0f5b82] shadow-[inset_3px_0_0_0_rgb(15,91,130),0_8px_18px_rgba(15,91,130,0.09)] dark:border-[#35a19d]/18 dark:text-[#7ddce7]',
+  '/dashboard/hackathons': 'border-[#35a19d]/18 bg-gradient-to-r from-[#35a19d]/18 via-[#1a7fb3]/10 to-transparent text-[#127c8f] shadow-[inset_3px_0_0_0_rgb(18,124,143),0_8px_18px_rgba(18,124,143,0.08)] dark:border-[#35a19d]/20 dark:text-[#7ddce7]',
+  '/dashboard/challenges': 'border-violet-500/20 bg-gradient-to-r from-violet-500/16 via-fuchsia-500/8 to-transparent text-violet-700 shadow-[inset_3px_0_0_0_rgb(109,40,217),0_8px_18px_rgba(109,40,217,0.08)] dark:text-violet-300',
+  '/dashboard/teams': 'border-[#248f8b]/18 bg-gradient-to-r from-[#248f8b]/18 via-[#35a19d]/10 to-transparent text-[#1f7a77] shadow-[inset_3px_0_0_0_rgb(31,122,119),0_8px_18px_rgba(31,122,119,0.08)] dark:border-[#35a19d]/20 dark:text-[#86e2cf]',
+  '/dashboard/leaderboard': 'border-[#f0b429]/22 bg-gradient-to-r from-[#f0b429]/18 via-[#f7941d]/10 to-transparent text-[#b7791f] shadow-[inset_3px_0_0_0_rgb(183,121,31),0_8px_18px_rgba(240,180,41,0.1)] dark:border-[#f0b429]/24 dark:text-[#ffd36a]',
+  '/dashboard/profile': 'border-[#d96c8a]/20 bg-gradient-to-r from-[#d96c8a]/16 via-[#f2a7bb]/10 to-transparent text-[#b84f72] shadow-[inset_3px_0_0_0_rgb(184,79,114),0_8px_18px_rgba(217,108,138,0.08)] dark:text-[#f3b2c3]',
+  '/tutor/dashboard': 'border-sky-500/20 bg-gradient-to-r from-sky-500/16 via-sky-500/10 to-transparent text-sky-700 shadow-[inset_3px_0_0_0_rgb(14,116,144),0_8px_18px_rgba(14,116,144,0.08)] dark:text-sky-300',
+  '/tutor/hackathons': 'border-cyan-500/20 bg-gradient-to-r from-cyan-500/16 via-cyan-500/10 to-transparent text-cyan-700 shadow-[inset_3px_0_0_0_rgb(8,145,178),0_8px_18px_rgba(8,145,178,0.08)] dark:text-cyan-300',
+  '/tutor/challenges': 'border-violet-500/20 bg-gradient-to-r from-violet-500/16 via-violet-500/10 to-transparent text-violet-700 shadow-[inset_3px_0_0_0_rgb(109,40,217),0_8px_18px_rgba(109,40,217,0.08)] dark:text-violet-300',
+  '/tutor/grading': 'border-orange-500/20 bg-gradient-to-r from-orange-500/16 via-orange-500/10 to-transparent text-orange-700 shadow-[inset_3px_0_0_0_rgb(234,88,12),0_8px_18px_rgba(234,88,12,0.08)] dark:text-orange-300',
+  '/tutor/documents': 'border-indigo-500/20 bg-gradient-to-r from-indigo-500/16 via-indigo-500/10 to-transparent text-indigo-700 shadow-[inset_3px_0_0_0_rgb(79,70,229),0_8px_18px_rgba(79,70,229,0.08)] dark:text-indigo-300',
+  '/tutor/teams': 'border-emerald-500/20 bg-gradient-to-r from-emerald-500/16 via-emerald-500/10 to-transparent text-emerald-700 shadow-[inset_3px_0_0_0_rgb(5,150,105),0_8px_18px_rgba(5,150,105,0.08)] dark:text-emerald-300',
+  '/tutor/students': 'border-lime-500/20 bg-gradient-to-r from-lime-500/16 via-lime-500/10 to-transparent text-lime-700 shadow-[inset_3px_0_0_0_rgb(101,163,13),0_8px_18px_rgba(101,163,13,0.08)] dark:text-lime-300',
+  '/tutor/ai-generation': 'border-fuchsia-500/20 bg-gradient-to-r from-fuchsia-500/16 via-fuchsia-500/10 to-transparent text-fuchsia-700 shadow-[inset_3px_0_0_0_rgb(192,38,211),0_8px_18px_rgba(192,38,211,0.08)] dark:text-fuchsia-300',
+};
+
 const STUDENT_NAV: NavItem[] = [
   { label: 'nav.dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'nav.hackathons', href: '/dashboard/hackathons', icon: Trophy },
@@ -148,15 +165,19 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
       <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto scrollbar-thin" aria-label="Menú principal">
         {navItems.map((item: NavItem) => {
           const Icon = item?.icon;
-          const isActive = pathname === item?.href || pathname?.startsWith?.(`${item?.href}/`);
+          const isRootDashboardItem = item?.href === '/dashboard' || item?.href === '/admin/dashboard' || item?.href === '/tutor/dashboard' || item?.href === '/research/dashboard';
+          const isActive = isRootDashboardItem
+            ? pathname === item?.href
+            : pathname === item?.href || pathname?.startsWith?.(`${item?.href}/`);
+          const activeStyles = ACTIVE_ITEM_STYLES[item?.href] ?? 'border-primary/15 bg-gradient-to-r from-primary/16 via-primary/10 to-transparent text-primary shadow-[inset_3px_0_0_0_hsl(var(--primary)),0_8px_18px_rgba(26,127,179,0.08)]';
           return (
             <Link key={item?.href ?? ''} href={item?.href ?? '/dashboard'}>
               <div
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
                   isActive
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                    ? activeStyles
+                    : 'text-muted-foreground hover:bg-primary/6 hover:text-foreground hover:shadow-[inset_3px_0_0_0_rgba(26,127,179,0.18)]',
                   collapsed && 'justify-center px-0'
                 )}
                 title={collapsed ? t(item?.label ?? '') : undefined}

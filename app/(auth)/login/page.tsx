@@ -15,7 +15,8 @@ import { apiClient } from '@/lib/api/client';
 import { toArray } from '@/lib/api/response-utils';
 import { getDashboardPathForRole } from '@/lib/auth-helpers';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
-import type { ContextTokenResponse, TokenResponse, User, ZoneMembershipInfo } from '@/types/api';
+import { ContextTokenResponse, TokenResponse, User, ZoneMembershipInfo } from '@/types/api';
+import { Logo } from '@/components/shared/logo';
 import { ArrowLeft, Clock3, Eye, EyeOff, Loader2, Lock, LogIn, Mail, Moon, Network, Sun } from 'lucide-react';
 
 function syncCookies(accessToken: string, contextToken?: string, role?: string) {
@@ -116,6 +117,12 @@ export default function LoginPage() {
           router.replace(getDashboardPathForRole(targetRole));
           return;
         } catch {
+          syncCookies(accessToken);
+          const fallbackMessage = 'No se pudo seleccionar la sede automaticamente. Continúa manualmente.';
+          setErrorMsg(fallbackMessage);
+          toast.error(fallbackMessage);
+          router.replace('/select-sede');
+          return;
         }
       }
 
@@ -149,13 +156,7 @@ export default function LoginPage() {
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-6 py-5 lg:px-10">
         <header className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
           <Link href="/" className="flex items-center gap-4 transition-opacity hover:opacity-90 justify-start">
-            <Image
-              src="/samp-logo.png"
-              alt="SAMP Logo"
-              width={72}
-              height={72}
-              className="h-16 w-auto object-contain brightness-110 drop-shadow-sm"
-            />
+            <Logo size={64} className="brightness-110 drop-shadow-sm" />
           </Link>
 
           <div className="hidden justify-center text-center md:flex">
@@ -230,13 +231,7 @@ export default function LoginPage() {
 
             <section className="mx-auto w-full max-w-md lg:col-span-5 lg:max-w-[33rem] lg:justify-self-end">
               <div className="mb-8 text-center lg:hidden">
-                <Image
-                  src="/samp-logo.png"
-                  alt="SAMP"
-                  width={80}
-                  height={80}
-                  className="mx-auto h-auto w-14 object-contain opacity-95"
-                />
+                <Logo size={56} className="mx-auto opacity-95" />
                 <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-foreground">SAMP</h1>
                 <p className="mt-2 text-sm text-muted-foreground">Sistema Académico de Maratones de Programación</p>
               </div>

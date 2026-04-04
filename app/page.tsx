@@ -1,10 +1,11 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Terminal, ArrowRight, Brain, BarChart3, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { Logo } from '@/components/shared/logo';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
 import { Button } from '@/components/ui/button';
 
@@ -15,8 +16,6 @@ export default function HomePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  if (!mounted) return null;
 
   return (
     <div className="bg-[#eef2f7] dark:bg-[#0d141d] text-slate-900 dark:text-[#dce3f0] selection:bg-[#1a7fb3] selection:text-white min-h-screen font-sans transition-colors duration-500">
@@ -49,13 +48,7 @@ export default function HomePage() {
       <header className="absolute top-0 z-50 w-full border-b border-slate-200/70 bg-white/40 backdrop-blur-xl transition-colors duration-500 hover:bg-white/90 dark:border-[#3b494c]/20 dark:bg-[#0d141d]/20 dark:hover:bg-[#0d141d]/80">
         <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-3 md:px-8 lg:px-10">
           <div className="flex w-28 items-center justify-start self-center">
-            <Image
-              src="/samp-logo.png"
-              alt="SAMP Logo"
-              width={80}
-              height={80}
-              className="h-[4.5rem] w-auto shrink-0 object-contain drop-shadow-sm brightness-110"
-            />
+            <Logo size={56} className="shrink-0 drop-shadow-sm brightness-110" />
           </div>
 
           <div className="hidden items-center justify-self-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_12px_32px_rgba(148,163,184,0.1)] backdrop-blur-md md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
@@ -65,7 +58,7 @@ export default function HomePage() {
               className="rounded-full border-primary/40 bg-primary/10 text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary hover:bg-primary/20"
               asChild
             >
-              <Link href="#">Hackathones</Link>
+              <Link href="/dashboard/hackathons">Hackathones</Link>
             </Button>
             <Button
               variant="ghost"
@@ -73,7 +66,7 @@ export default function HomePage() {
               className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
               asChild
             >
-              <Link href="#">Líderes</Link>
+              <Link href="/dashboard/leaderboard">Líderes</Link>
             </Button>
             <Button
               variant="ghost"
@@ -81,7 +74,7 @@ export default function HomePage() {
               className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
               asChild
             >
-              <Link href="#">Reglamento</Link>
+              <Link href="/login">Reglamento</Link>
             </Button>
           </div>
 
@@ -157,7 +150,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-slate-700 dark:text-[#bac9cc] text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
-                Gestiona equipos, retos y rankings desde una sola plataforma.
+                Coordina equipos, resuelve retos y sigue el progreso de cada competencia en un solo lugar.
               </p>
             </div>
 
@@ -170,7 +163,7 @@ export default function HomePage() {
               </Button>
 
               <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px]" asChild>
-                <Link href="#" className="flex items-center justify-center gap-3 group">
+                <Link href="/dashboard/hackathons" className="flex items-center justify-center gap-3 group">
                   <span className="tracking-tight font-bold text-muted-foreground group-hover:text-foreground">Ver hackathones</span>
                 </Link>
               </Button>
@@ -294,13 +287,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-6 py-16 md:px-10">
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex flex-col items-center gap-3 text-center">
-              <Image
-                src="/samp-logo.png"
-                alt="SAMP"
-                width={72}
-                height={72}
-                className="h-auto w-[3.2rem] object-contain opacity-95 drop-shadow-[0_0_14px_rgba(26,127,179,0.14)]"
-              />
+              <Logo size={64} className="opacity-95 drop-shadow-[0_0_14px_rgba(26,127,179,0.14)]" />
               <div className="flex flex-col items-center text-center">
                 <span className="text-[1.75rem] font-extrabold leading-none tracking-[-0.06em] text-slate-900 dark:text-[#eaf8ff]">
                   SAMP
@@ -314,13 +301,13 @@ export default function HomePage() {
               Plataforma para competencia, práctica y seguimiento formativo en entornos académicos de la UNAD.
             </p>
             <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium">
-              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="#">
+              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
                 Política de privacidad
               </Link>
-              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="#">
+              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
                 Soporte técnico
               </Link>
-              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="#">
+              <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
                 Reglamento
               </Link>
               <Link className="text-slate-600 transition-colors hover:text-[#35a19d] dark:text-[#bac9cc] dark:hover:text-[#35a19d]" href="/login">
@@ -341,3 +328,5 @@ export default function HomePage() {
     </div>
   );
 }
+
+

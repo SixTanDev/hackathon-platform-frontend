@@ -9,7 +9,8 @@ import { useAuthStore } from '@/stores/auth-store';
 import { apiClient } from '@/lib/api/client';
 import { getDashboardPathForRole, ROLE_LABELS, ROLE_COLORS } from '@/lib/auth-helpers';
 import type { ContextTokenResponse, ZoneMembershipInfo, SedeMembershipInfo } from '@/types/api';
-import { Building2, MapPin, ChevronRight, LogOut, Loader2, Zap, Shield, Globe } from 'lucide-react';
+import { Logo } from '@/components/shared/logo';
+import { Building2, MapPin, ChevronRight, LogOut, Loader2, Shield, Globe } from 'lucide-react';
 
 /** Set auth cookies immediately so middleware allows navigation */
 function syncCookies(accessToken: string, role: string, contextToken?: string) {
@@ -86,9 +87,7 @@ export default function SelectSedePage() {
   return (
     <div className="animate-fade-in max-w-lg mx-auto">
       <div className="flex flex-col items-center mb-8">
-        <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-          <Zap className="w-7 h-7 text-primary" />
-        </div>
+        <Logo size={64} className="mb-4" />
         <h1 className="text-2xl font-bold tracking-tight">Selecciona tu sede</h1>
         <p className="text-muted-foreground text-sm mt-1">
           Hola, {user?.full_name ?? 'usuario'}. Elige dónde quieres trabajar.

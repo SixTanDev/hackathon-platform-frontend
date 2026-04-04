@@ -6,6 +6,15 @@ const AUTH_ONLY_ROUTES = ['/select-sede'];
 // All protected route prefixes that require both auth + context token
 const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/tutor', '/research', '/superadmin'];
 
+const ROLE_HOME: Record<string, string> = {
+  admin: '/admin/dashboard',
+  superadmin: '/superadmin',
+  tutor: '/tutor/dashboard',
+  director_semillero: '/research/dashboard',
+  student: '/dashboard',
+  guest: '/dashboard',
+};
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -30,16 +39,8 @@ export function middleware(request: NextRequest) {
   const isAuthOnlyRoute = AUTH_ONLY_ROUTES.some((route: string) => pathname.startsWith(route));
   const isProtectedRoute = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
-  // Redirect authenticated users away from login
-  if (isPublicRoute && isAuthenticated) {
-    if (hasContext) {
-      const targetPath = (roleCookie === 'admin' || roleCookie === 'superadmin') ? '/admin/dashboard' 
-                       : roleCookie === 'tutor' ? '/tutor/dashboard'
-                       : '/dashboard';
-      return NextResponse.redirect(new URL(targetPath, request.url));
-    }
-    return NextResponse.redirect(new URL('/select-sede', request.url));
-  }
+  // Removed automatic redirect away from login/register for authenticated users
+  // to prevent 'trapping' users with sessions but no memberships.
 
   // Protect protected routes
   if (isProtectedRoute && !isAuthenticated) {
@@ -56,24 +57,40 @@ export function middleware(request: NextRequest) {
 
   // --- STRICT ROLE ISOLATION CHECK ---
   if (isProtectedRoute && isAuthenticated && hasContext) {
-    const isAdmin = roleCookie === 'admin' || roleCookie === 'superadmin';
-    const isTutor = roleCookie === 'tutor';
-    const isStudent = roleCookie === 'student';
-
     // If role is missing but we have tokens, we need to re-sync
     if (!roleCookie && !isAuthOnlyRoute && !isPublicRoute) {
       return NextResponse.redirect(new URL('/select-sede', request.url));
     }
 
-    // Check mapping mismatch
-    if (isAdmin && (pathname.startsWith('/tutor') || pathname.startsWith('/dashboard'))) {
-      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-    }
-    if (isTutor && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))) {
-      return NextResponse.redirect(new URL('/tutor/dashboard', request.url));
-    }
-    if (isStudent && (pathname.startsWith('/admin') || pathname.startsWith('/tutor'))) {
-      return NextResponse.redirect(new URL('/dashboard', request.url));
+    const expectedHome = roleCookie ? ROLE_HOME[roleCookie] : undefined;
+    const rolePrefix =
+      pathname.startsWith('/superadmin')
+        ? 'superadmin'
+        : pathname.startsWith('/admin')
+          ? 'admin'
+          : pathname.startsWith('/tutor')
+          ? 'tutor'
+          : pathname.startsWith('/research')
+            ? 'research'
+            : pathname.startsWith('/dashboard')
+              ? 'dashboard'
+              : null;
+
+    const isAllowed =
+      roleCookie === 'superadmin'
+        ? rolePrefix === 'superadmin' || rolePrefix === 'admin'
+        : roleCookie === 'admin'
+          ? rolePrefix === 'admin'
+          : roleCookie === 'tutor'
+            ? rolePrefix === 'tutor'
+            : roleCookie === 'director_semillero'
+              ? rolePrefix === 'research'
+              : roleCookie === 'student' || roleCookie === 'guest'
+                ? rolePrefix === 'dashboard'
+                : true;
+
+    if (!isAllowed && expectedHome) {
+      return NextResponse.redirect(new URL(expectedHome, request.url));
     }
   }
 
