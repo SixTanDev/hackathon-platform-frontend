@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -132,6 +132,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 gap-2 px-2" aria-label="Menú de usuario">
                 <Avatar className="h-7 w-7">
+                  <AvatarImage src={user?.avatar_url || ''} alt={user?.full_name || ''} />
                   <AvatarFallback className="text-xs bg-primary/10 text-primary">
                     {initials}
                   </AvatarFallback>

@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Terminal, ArrowRight, Brain, BarChart3, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
+import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
   const { theme, setTheme } = useTheme();
@@ -57,42 +58,53 @@ export default function HomePage() {
             />
           </div>
 
-          <div className="hidden items-center justify-self-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_16px_40px_rgba(148,163,184,0.12)] backdrop-blur md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
-            <Link
-              className="rounded-full border border-[#1a7fb3]/50 bg-[#1a7fb3]/10 px-5 py-3 text-[11px] font-extrabold uppercase tracking-[0.22em] text-slate-900 shadow-[0_8px_24px_rgba(26,127,179,0.12)] transition-all duration-300 dark:border-[#1a7fb3]/20 dark:bg-[#1a7fb3]/8 dark:text-[#dffbff]"
-              href="#"
+          <div className="hidden items-center justify-self-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_12px_32px_rgba(148,163,184,0.1)] backdrop-blur-md md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-primary/40 bg-primary/10 text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary hover:bg-primary/20"
+              asChild
             >
-              Hackathones
-            </Link>
-            <Link
-              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
-              href="#"
+              <Link href="#">Hackathones</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              asChild
             >
-              Líderes
-            </Link>
-            <Link
-              className="rounded-full px-5 py-3 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600 transition-all duration-300 hover:bg-slate-100/90 hover:text-slate-800 dark:text-[#a8bcc2] dark:hover:bg-white/5 dark:hover:text-[#dffbff]"
-              href="#"
+              <Link href="#">Líderes</Link>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+              asChild
             >
-              Reglamento
-            </Link>
+              <Link href="#">Reglamento</Link>
+            </Button>
           </div>
 
           <div className="flex items-center justify-end justify-self-end gap-3 md:gap-4">
             {mounted && (
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/70 bg-white/75 text-slate-700 shadow-[0_10px_24px_rgba(148,163,184,0.12)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1a7fb3]/35 hover:text-[#1a7fb3] dark:border-[#3b494c]/30 dark:bg-[#111b25]/75 dark:text-[#c3f5ff] dark:shadow-[0_10px_28px_rgba(0,0,0,0.22)] dark:hover:border-[#1a7fb3]/25 dark:hover:text-white"
+                className="rounded-full border-border/70 bg-background/75 text-foreground shadow-sm hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-300"
                 aria-label="Toggle theme"
               >
                 {theme === 'dark' ? <Sun className="w-5 h-5 text-[#c3f5ff]" /> : <Moon className="w-5 h-5 text-slate-700" />}
-              </button>
+              </Button>
             )}
-            <Link href="/login">
-              <button className="rounded-full border border-[#1a7fb3]/45 bg-[#1a7fb3] px-7 py-3 text-[11px] font-black uppercase tracking-[0.24em] text-white shadow-[0_14px_34px_rgba(26,127,179,0.22)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f59a23]/55 hover:bg-[#f59a23] hover:shadow-[0_18px_38px_rgba(245,154,35,0.28)] active:translate-y-0 dark:border-[#1a7fb3]/35 dark:bg-[#1a7fb3] dark:text-white dark:hover:bg-[#f59a23]">
-                Acceder
-              </button>
-            </Link>
+            <Button
+              variant="premium"
+              size="default"
+              className="px-8 text-[10px] font-black uppercase tracking-[0.2em]"
+              asChild
+            >
+              <Link href="/login">Acceder</Link>
+            </Button>
           </div>
         </nav>
 
@@ -150,18 +162,18 @@ export default function HomePage() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 w-full">
-              <Link href="/login" className="w-full sm:w-auto">
-                <button className="w-full px-10 py-5 bg-[#1a7fb3] text-white font-extrabold rounded-2xl shadow-[0_0_40px_rgba(26,127,179,0.22)] hover:bg-[#166f9d] hover:scale-105 active:scale-95 transition-all duration-300 group flex items-center justify-center gap-3">
-                  <span className="tracking-tight text-sm">Entrar a la plataforma</span>
+              <Button size="lg" variant="premium" className="w-full sm:w-auto min-w-[240px] shadow-premium" asChild>
+                <Link href="/login" className="flex items-center justify-center gap-3 group">
+                  <span className="tracking-tight font-extrabold">Entrar a la plataforma</span>
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
-                </button>
-              </Link>
+                </Link>
+              </Button>
 
-              <Link href="#" className="w-full sm:w-auto">
-                <button className="w-full px-10 py-5 bg-transparent text-slate-700 dark:text-white/60 hover:text-[#1a7fb3] dark:hover:text-white font-bold rounded-2xl border border-slate-300/80 dark:border-white/10 hover:border-[#1a7fb3]/30 dark:hover:border-white/20 hover:bg-[#1a7fb3]/5 dark:hover:bg-white/5 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 group">
-                  <span className="tracking-tight text-sm">Ver hackathones</span>
-                </button>
-              </Link>
+              <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px]" asChild>
+                <Link href="#" className="flex items-center justify-center gap-3 group">
+                  <span className="tracking-tight font-bold text-muted-foreground group-hover:text-foreground">Ver hackathones</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </section>

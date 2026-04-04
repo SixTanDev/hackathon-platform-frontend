@@ -136,32 +136,35 @@ export default function LoginPage() {
       <AnimatedDotBackground />
       
       {/* Dynamic Radial Gradient Overlay */}
-      <div 
-        className={`pointer-events-none absolute inset-0 opacity-95 transition-all duration-700 ${
-          resolvedTheme === 'dark' 
-            ? 'bg-[radial-gradient(circle_at_top,#112434_0%,#07131b_52%,#050f16_100%)]' 
-            : 'bg-[radial-gradient(circle_at_top,rgba(186,201,204,0.4)_0%,rgba(210,220,224,0.2)_50%,transparent_100%)]'
-        }`} 
-      />
+      {mounted && (
+        <div 
+          className={`pointer-events-none absolute inset-0 opacity-95 transition-all duration-700 ${
+            resolvedTheme === 'dark' 
+              ? 'bg-[radial-gradient(circle_at_top,#112434_0%,#07131b_52%,#050f16_100%)]' 
+              : 'bg-[radial-gradient(circle_at_top,rgba(180,195,200,0.2)_0%,rgba(200,210,215,0.4)_40%,rgba(226,232,240,0.7)_100%)]'
+          }`} 
+        />
+      )}
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-6 py-5 lg:px-10">
-        <header className="flex items-center justify-between gap-4">
-          <Link href="/" className="inline-flex items-center gap-3 transition-opacity hover:opacity-90">
+        <header className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
+          <Link href="/" className="flex items-center gap-4 transition-opacity hover:opacity-90 justify-start">
             <Image
               src="/samp-logo.png"
-              alt="SAMP"
-              width={44}
-              height={44}
-              className="hidden h-auto w-8 object-contain opacity-95 md:block"
+              alt="SAMP Logo"
+              width={72}
+              height={72}
+              className="h-16 w-auto object-contain brightness-110 drop-shadow-sm"
             />
-            <span className="text-[2rem] font-extrabold leading-none tracking-[-0.07em] text-foreground">SAMP</span>
-            <span className="hidden h-4 w-px bg-[#ff9f43]/22 md:block" />
-            <span className="hidden text-[11px] font-medium tracking-[0.16em] text-muted-foreground md:block">
-              Sistema Académico de Maratones de Programación
-            </span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="hidden justify-center text-center md:flex">
+            <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-muted-foreground">
+              Sistema Académico de Maratones de Programación
+            </span>
+          </div>
+
+          <div className="flex items-center justify-end gap-3">
             {mounted && (
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
@@ -175,13 +178,17 @@ export default function LoginPage() {
                 )}
               </button>
             )}
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-2 text-xs font-medium tracking-[0.16em] text-muted-foreground transition-all hover:border-accent hover:bg-accent hover:text-accent-foreground"
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-full border-primary/30 bg-primary/10 px-4 py-2 text-xs font-bold tracking-[0.12em] text-primary transition-all duration-300 hover:bg-accent hover:text-white hover:border-accent hover:shadow-glow"
+              asChild
             >
-              <ArrowLeft className="h-4 w-4" />
-              Volver al inicio
-            </Link>
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+                Volver al inicio
+              </Link>
+            </Button>
           </div>
         </header>
 
@@ -189,13 +196,13 @@ export default function LoginPage() {
           <div className="grid w-full items-center gap-6 lg:grid-cols-12 xl:gap-8">
             <section className="lg:col-span-7">
               <span className="inline-flex items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
-                Acceso institucional
+                Portal Institucional
               </span>
-              <h1 className="mt-7 max-w-[40rem] text-[2.05rem] font-extrabold leading-[1.01] tracking-[-0.075em] text-foreground md:text-[2.45rem] xl:text-[2.75rem]">
-                Ingresa a la plataforma académica de maratones de programación.
+              <h1 className="mt-7 max-w-2xl text-[1.85rem] font-extrabold leading-tight tracking-[-0.04em] text-foreground md:text-[2.25rem] xl:text-[2.5rem]">
+                Maratones de Programación <span className="text-primary inline-block transform transition-transform hover:scale-105 cursor-default">UNAD</span>
               </h1>
               <p className="mt-4 max-w-lg text-[13px] leading-6 text-muted-foreground">
-                Accede con tus credenciales para participar en retos, monitorear el progreso formativo y
+                Inicia sesión con tus credenciales para participar en retos, monitorear el progreso formativo y
                 gestionar eventos académicos desde un mismo entorno.
               </p>
 
@@ -234,7 +241,7 @@ export default function LoginPage() {
                 <p className="mt-2 text-sm text-muted-foreground">Sistema Académico de Maratones de Programación</p>
               </div>
 
-              <Card className="overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+              <Card className="overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-500 hover:scale-[1.015] hover:shadow-[0_32px_96px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_32px_96px_rgba(0,0,0,0.45)]">
                 <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl" />
                 <CardHeader className="relative z-10 space-y-2 pb-4 pt-7">
                   <CardTitle className="text-[1.75rem] font-bold tracking-tight text-foreground">
@@ -270,7 +277,7 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="email"
-                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 text-base text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/35 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 text-base text-foreground placeholder:text-[#a3978a] dark:placeholder:text-[#a3978a] light:placeholder:text-[#7a6f62] focus-visible:border-primary/35 focus-visible:ring-primary/15"
                         />
                       </div>
                     </div>
@@ -293,7 +300,7 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="current-password"
-                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 pr-12 text-base text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/35 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 pr-12 text-base text-foreground placeholder:text-[#a3978a] dark:placeholder:text-[#a3978a] light:placeholder:text-[#7a6f62] focus-visible:border-primary/35 focus-visible:ring-primary/15"
                         />
                         <Button
                           type="button"
@@ -315,7 +322,8 @@ export default function LoginPage() {
 
                     <Button
                       type="submit"
-                      className="mt-1 h-12 w-full rounded-xl bg-[#1a7fb3] text-white shadow-[0_12px_28px_rgba(26,127,179,0.2)] hover:bg-[#f59a23] hover:shadow-[0_14px_32px_rgba(245,154,35,0.24)]"
+                      variant="premium"
+                      className="w-full mt-2 shadow-premium"
                       disabled={isSubmitting}
                     >
                       {isSubmitting ? (
