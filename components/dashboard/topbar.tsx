@@ -98,11 +98,11 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
           <Button
             variant="ghost"
             size="icon"
-            className="h-9 w-9"
+            className="h-8 w-8"
             onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
             aria-label={t('common.language')}
           >
-            <span className="text-xs font-bold">{locale === 'es' ? 'EN' : 'ES'}</span>
+            <span className="text-[10px] font-bold">{locale === 'es' ? 'EN' : 'ES'}</span>
           </Button>
 
           {mounted && (

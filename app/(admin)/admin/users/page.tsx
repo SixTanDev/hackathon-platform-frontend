@@ -70,40 +70,19 @@ import {
   ShieldCheck,
   UserX,
   Eye,
-  FileUp,
   CheckCircle2,
   XCircle,
   AlertCircle,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
-
-const ROLE_BADGE: Record<string, { label: string; color: string }> = {
-  admin: { label: 'Admin', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-  tutor: { label: 'Tutor', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  director_semillero: { label: 'Director', color: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
-  student: { label: 'Estudiante', color: 'bg-green-500/10 text-green-400 border-green-500/20' },
-  guest: { label: 'Invitado', color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
-};
-
-/** Roles assignable from the admin panel — admin is excluded */
-const ASSIGNABLE_ROLES: { value: RoleName; label: string }[] = [
-  { value: 'tutor', label: 'Tutor' },
-  { value: 'director_semillero', label: 'Director Semillero' },
-  { value: 'student', label: 'Estudiante' },
-  { value: 'guest', label: 'Invitado' },
-];
-
-/** Roles shown in the filter dropdown (includes admin for visibility) */
-const ALL_VISIBLE_ROLES: { value: string; label: string }[] = [
-  { value: 'admin', label: 'Administrador' },
-  ...ASSIGNABLE_ROLES,
-];
+import { es, enUS } from 'date-fns/locale';
+import { useTranslation } from '@/lib/i18n/context';
 
 export default function UserManagementPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { t, locale } = useTranslation();
   const qc = useQueryClient();
   const sedeId = useAuthStore((s) => s?.currentSede?.id) ?? '';
 
@@ -153,34 +132,54 @@ export default function UserManagementPage() {
 
   const invalidateUsers = () => qc.invalidateQueries({ queryKey: ['admin', 'users'] });
 
+  const ROLE_BADGE: Record<string, { label: string; color: string }> = {
+    admin: { label: t('admin.users.roles.admin'), color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+    tutor: { label: t('admin.users.roles.tutor'), color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+    director_semillero: { label: t('admin.users.roles.director_semillero'), color: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
+    student: { label: t('admin.users.roles.student'), color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+    guest: { label: t('admin.users.roles.guest'), color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
+  };
+
+  const ASSIGNABLE_ROLES: { value: RoleName; label: string }[] = [
+    { value: 'tutor', label: t('admin.users.roles.tutor') },
+    { value: 'director_semillero', label: t('admin.users.roles.director_semillero') },
+    { value: 'student', label: t('admin.users.roles.student') },
+    { value: 'guest', label: t('admin.users.roles.guest') },
+  ];
+
+  const ALL_VISIBLE_ROLES: { value: string; label: string }[] = [
+    { value: 'admin', label: t('admin.users.roles.admin') },
+    ...ASSIGNABLE_ROLES,
+  ];
+
   const createMut = useMutation({
     mutationFn: (p: AdminUserCreate) => createSedeUser(p),
-    onSuccess: () => { invalidateUsers(); resetAddForm(); toast({ title: 'Usuario creado' }); },
-    onError: () => toast({ title: 'Error', description: 'No se pudo crear el usuario.', variant: 'destructive' }),
+    onSuccess: () => { invalidateUsers(); resetAddForm(); toast({ title: t('admin.users.addUser') }); },
+    onError: () => toast({ title: t('common.error'), description: t('common.error'), variant: 'destructive' }),
   });
 
   const assignMut = useMutation({
     mutationFn: (p: { email: string; role: RoleName }) => assignExistingUser(sedeId, p),
-    onSuccess: () => { invalidateUsers(); resetAddForm(); toast({ title: 'Usuario asignado' }); },
-    onError: () => toast({ title: 'Error', description: 'No se pudo asignar el usuario.', variant: 'destructive' }),
+    onSuccess: () => { invalidateUsers(); resetAddForm(); toast({ title: t('admin.users.dialogs.add.assignButton') }); },
+    onError: () => toast({ title: t('common.error'), variant: 'destructive' }),
   });
 
   const editRoleMut = useMutation({
     mutationFn: ({ id, role }: { id: string; role: RoleName }) => updateUserRole(sedeId, id, role),
-    onSuccess: () => { invalidateUsers(); setEditTarget(null); toast({ title: 'Rol actualizado' }); },
-    onError: () => toast({ title: 'Error', variant: 'destructive' }),
+    onSuccess: () => { invalidateUsers(); setEditTarget(null); toast({ title: t('admin.users.actions.editRole') }); },
+    onError: () => toast({ title: t('common.error'), variant: 'destructive' }),
   });
 
   const deactivateMut = useMutation({
     mutationFn: (id: string) => deactivateUser(sedeId, id),
-    onSuccess: () => { invalidateUsers(); setDeactivateTarget(null); toast({ title: 'Usuario desactivado' }); },
-    onError: () => toast({ title: 'Error', variant: 'destructive' }),
+    onSuccess: () => { invalidateUsers(); setDeactivateTarget(null); toast({ title: t('admin.users.actions.deactivate') }); },
+    onError: () => toast({ title: t('common.error'), variant: 'destructive' }),
   });
 
   const importMut = useMutation({
     mutationFn: (file: File) => bulkImportUsers(sedeId, file),
-    onSuccess: (result) => { setImportResult(result); invalidateUsers(); toast({ title: 'Importación completada' }); },
-    onError: () => toast({ title: 'Error en la importación', variant: 'destructive' }),
+    onSuccess: (result) => { setImportResult(result); invalidateUsers(); toast({ title: t('admin.users.importCsv') }); },
+    onError: () => toast({ title: t('common.error'), variant: 'destructive' }),
   });
 
   const resetAddForm = () => {
@@ -195,15 +194,21 @@ export default function UserManagementPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader title="Gestión de Usuarios" description={`${total} usuario${total !== 1 ? 's' : ''} registrado${total !== 1 ? 's' : ''}`}>
+      <PageHeader 
+        title={t('admin.users.title')} 
+        description={total === 1 
+          ? t('admin.users.description_one') 
+          : t('admin.users.description_other', { count: total })
+        }
+      >
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowImport(true)}>
             <Upload className="w-4 h-4 mr-2" />
-            Importar CSV
+            {t('admin.users.importCsv')}
           </Button>
           <Button onClick={() => setShowAdd(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Agregar Usuario
+            {t('admin.users.addUser')}
           </Button>
         </div>
       </PageHeader>
@@ -213,7 +218,7 @@ export default function UserManagementPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nombre o email..."
+            placeholder={t('admin.users.searchPlaceholder')}
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(0); }}
             className="pl-9"
@@ -221,10 +226,10 @@ export default function UserManagementPage() {
         </div>
         <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v); setPage(0); }}>
           <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filtrar por rol" />
+            <SelectValue placeholder={t('admin.users.filterRole')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los roles</SelectItem>
+            <SelectItem value="all">{t('admin.users.allRoles')}</SelectItem>
             {ALL_VISIBLE_ROLES.map((r) => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -236,12 +241,12 @@ export default function UserManagementPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Ingresó</TableHead>
-                <TableHead>Última Actividad</TableHead>
+                <TableHead>{t('admin.users.table.name')}</TableHead>
+                <TableHead>{t('admin.users.table.email')}</TableHead>
+                <TableHead>{t('admin.users.table.role')}</TableHead>
+                <TableHead>{t('admin.users.table.status')}</TableHead>
+                <TableHead>{t('admin.users.table.joined')}</TableHead>
+                <TableHead>{t('admin.users.table.lastActivity')}</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -257,7 +262,7 @@ export default function UserManagementPage() {
               ) : users.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    No se encontraron usuarios.
+                    {t('admin.users.table.empty')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -272,18 +277,22 @@ export default function UserManagementPage() {
                       </TableCell>
                       <TableCell>
                         {u.is_active ? (
-                          <Badge variant="outline" className="text-[10px] bg-green-500/10 text-green-400 border-green-500/20">Activo</Badge>
+                          <Badge variant="outline" className="text-[10px] bg-green-500/10 text-green-400 border-green-500/20">
+                            {t('admin.users.status.active')}
+                          </Badge>
                         ) : (
-                          <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20">Inactivo</Badge>
+                          <Badge variant="outline" className="text-[10px] bg-red-500/10 text-red-400 border-red-500/20">
+                            {t('admin.users.status.inactive')}
+                          </Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
                         {u.joined_at
-                          ? formatDistanceToNow(new Date(u.joined_at), { addSuffix: true, locale: es })
+                          ? formatDistanceToNow(new Date(u.joined_at), { addSuffix: true, locale: locale === 'es' ? es : enUS })
                           : '—'}
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        No disponible
+                        {t('admin.users.table.notAvailable')}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -295,16 +304,16 @@ export default function UserManagementPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditTarget(u); setEditRole(u.role); }}>
                               <ShieldCheck className="w-3.5 h-3.5 mr-2" />
-                              Editar Rol
+                              {t('admin.users.actions.editRole')}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/admin/users/${u.user_global_id}`); }}>
                               <Eye className="w-3.5 h-3.5 mr-2" />
-                              Ver Perfil
+                              {t('admin.users.actions.viewProfile')}
                             </DropdownMenuItem>
                             {u.is_active && (
                               <DropdownMenuItem className="text-destructive" onClick={(e) => { e.stopPropagation(); setDeactivateTarget(u); }}>
                                 <UserX className="w-3.5 h-3.5 mr-2" />
-                                Desactivar
+                                {t('admin.users.actions.deactivate')}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -322,10 +331,16 @@ export default function UserManagementPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Página {page + 1} de {totalPages} ({total} usuarios)</span>
+          <span>
+            {t('admin.users.pagination.pageOf', { page: page + 1, total: totalPages, count: total })}
+          </span>
           <div className="flex gap-2">
-            <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>Anterior</Button>
-            <Button size="sm" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>Siguiente</Button>
+            <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(page - 1)}>
+              {t('admin.users.pagination.prev')}
+            </Button>
+            <Button size="sm" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>
+              {t('admin.users.pagination.next')}
+            </Button>
           </div>
         </div>
       )}
@@ -334,29 +349,29 @@ export default function UserManagementPage() {
       <Dialog open={showAdd} onOpenChange={(v) => !v && resetAddForm()}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Agregar Usuario</DialogTitle>
+            <DialogTitle>{t('admin.users.dialogs.add.title')}</DialogTitle>
           </DialogHeader>
           <Tabs value={addTab} onValueChange={(v) => setAddTab(v as 'existing' | 'new')}>
             <TabsList className="grid grid-cols-2 w-full">
-              <TabsTrigger value="new">Nuevo Usuario</TabsTrigger>
-              <TabsTrigger value="existing">Usuario Existente</TabsTrigger>
+              <TabsTrigger value="new">{t('admin.users.dialogs.add.newTab')}</TabsTrigger>
+              <TabsTrigger value="existing">{t('admin.users.dialogs.add.existTab')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="new" className="space-y-3 mt-3">
               <div className="space-y-2">
-                <Label>Email *</Label>
+                <Label>{t('admin.users.dialogs.add.email')}</Label>
                 <Input type="email" placeholder="correo@unad.edu.co" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Nombre completo *</Label>
+                <Label>{t('admin.users.dialogs.add.fullName')}</Label>
                 <Input placeholder="Nombre Apellido" value={newName} onChange={(e) => setNewName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Contraseña *</Label>
-                <Input type="password" placeholder="Mínimo 8 caracteres" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                <Label>{t('admin.users.dialogs.add.password')}</Label>
+                <Input type="password" placeholder={t('admin.users.dialogs.add.passwordPlaceholder')} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Rol</Label>
+                <Label>{t('admin.users.dialogs.add.role')}</Label>
                 <Select value={newRole} onValueChange={(v) => setNewRole(v as RoleName)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -370,18 +385,18 @@ export default function UserManagementPage() {
                 disabled={!newEmail || !newName || !newPassword || createMut.isPending}
               >
                 {createMut.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Crear Usuario
+                {t('admin.users.dialogs.add.createButton')}
               </Button>
             </TabsContent>
 
             <TabsContent value="existing" className="space-y-3 mt-3">
-              <p className="text-xs text-muted-foreground">Asignar un usuario existente de otra sede/zona a esta sede.</p>
+              <p className="text-xs text-muted-foreground">{t('admin.users.dialogs.add.assignHint')}</p>
               <div className="space-y-2">
-                <Label>Email del usuario *</Label>
+                <Label>{t('admin.users.dialogs.add.email')}</Label>
                 <Input type="email" placeholder="correo@unad.edu.co" value={existEmail} onChange={(e) => setExistEmail(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Rol en esta sede</Label>
+                <Label>{t('admin.users.dialogs.add.role')}</Label>
                 <Select value={existRole} onValueChange={(v) => setExistRole(v as RoleName)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -395,7 +410,7 @@ export default function UserManagementPage() {
                 disabled={!existEmail || assignMut.isPending}
               >
                 {assignMut.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Asignar a Sede
+                {t('admin.users.dialogs.add.assignButton')}
               </Button>
             </TabsContent>
           </Tabs>
@@ -406,11 +421,11 @@ export default function UserManagementPage() {
       <Dialog open={showImport} onOpenChange={(v) => { if (!v) { setShowImport(false); setImportResult(null); } }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Importar Usuarios desde CSV</DialogTitle>
+            <DialogTitle>{t('admin.users.dialogs.import.title')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">
-              El CSV debe tener columnas: <code className="text-xs bg-muted px-1 py-0.5 rounded">email, full_name, password, role</code>
+              {t('admin.users.dialogs.import.hint')}
             </p>
             <div className="flex items-center gap-3">
               <Input type="file" accept=".csv" onChange={handleImportFile} disabled={importMut.isPending} />
@@ -422,11 +437,11 @@ export default function UserManagementPage() {
                 <div className="flex gap-4 text-sm">
                   <span className="flex items-center gap-1 text-green-400">
                     <CheckCircle2 className="w-4 h-4" />
-                    {importResult.created} creados
+                    {importResult.created} {t('admin.users.dialogs.import.created')}
                   </span>
                   <span className="flex items-center gap-1 text-red-400">
                     <XCircle className="w-4 h-4" />
-                    {importResult.errors} errores
+                    {importResult.errors} {t('admin.users.dialogs.import.errors')}
                   </span>
                 </div>
                 {importResult.details.length > 0 && (
@@ -434,7 +449,7 @@ export default function UserManagementPage() {
                     {importResult.details.map((d, i) => (
                       <p key={i} className="text-[11px] text-destructive flex items-start gap-1">
                         <AlertCircle className="w-3 h-3 shrink-0 mt-0.5" />
-                        Fila {d.row} ({d.email}): {d.error}
+                        {t('admin.users.dialogs.import.row')} {d.row} ({d.email}): {d.error}
                       </p>
                     ))}
                   </div>
@@ -449,7 +464,7 @@ export default function UserManagementPage() {
       <Dialog open={!!editTarget} onOpenChange={(v) => !v && setEditTarget(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Editar Rol — {editTarget?.full_name}</DialogTitle>
+            <DialogTitle>{t('admin.users.dialogs.edit.title')} — {editTarget?.full_name}</DialogTitle>
           </DialogHeader>
           <div className="py-3">
             <Select value={editRole} onValueChange={(v) => setEditRole(v as RoleName)}>
@@ -460,13 +475,13 @@ export default function UserManagementPage() {
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEditTarget(null)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setEditTarget(null)}>{t('admin.users.dialogs.edit.cancel')}</Button>
             <Button
               onClick={() => editTarget && editRoleMut.mutate({ id: editTarget.id, role: editRole })}
               disabled={editRoleMut.isPending}
             >
               {editRoleMut.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-              Guardar
+              {t('admin.users.dialogs.edit.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -476,18 +491,18 @@ export default function UserManagementPage() {
       <AlertDialog open={!!deactivateTarget} onOpenChange={(v) => !v && setDeactivateTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Desactivar usuario</AlertDialogTitle>
+            <AlertDialogTitle>{t('admin.users.dialogs.deactivate.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Desactivar a <strong>{deactivateTarget?.full_name}</strong>? No podrá acceder a la plataforma.
+              {t('admin.users.dialogs.deactivate.description', { name: deactivateTarget?.full_name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('admin.users.dialogs.edit.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => deactivateTarget && deactivateMut.mutate(deactivateTarget.id)}
             >
-              Desactivar
+              {t('admin.users.actions.deactivate')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

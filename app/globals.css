@@ -4,28 +4,28 @@
 
 @layer base {
   :root {
-    /* UNAD Color Palette - Light Mode */
-    --background: 210 30% 96%;
-    --foreground: 220 15% 13%;
+    /* UNAD Color Palette - Institutional Silk Gray Refinement */
+    --background: 210 15% 95%; /* More solid, institutional light gray-blue base */
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 13%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 13%;
+    --popover-foreground: 222 47% 11%;
     /* UNAD Primary: #004669 */
     --primary: 200 100% 20.6%;
     --primary-foreground: 0 0% 100%;
     /* UNAD Teal: #248F8B */
     --secondary: 178 59% 35%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 20% 95%;
-    --muted-foreground: 220 10% 40%;
+    --muted: 210 20% 92%; /* Slightly darker than background for depth */
+    --muted-foreground: 215 16% 47%;
     /* UNAD Orange: #F47920 */
     --accent: 25 91% 54%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
+    --border: 214 15% 88%; /* More defined borders for better separation */
+    --input: 214 15% 88%;
     --ring: 200 100% 20.6%;
     --radius: 0.625rem;
     /* UNAD-based chart colors */

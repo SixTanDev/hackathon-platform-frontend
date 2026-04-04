@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,17 +16,27 @@ import { toArray } from '@/lib/api/response-utils';
 import { getDashboardPathForRole } from '@/lib/auth-helpers';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
 import type { ContextTokenResponse, TokenResponse, User, ZoneMembershipInfo } from '@/types/api';
-import { ArrowLeft, Clock3, Eye, EyeOff, Loader2, Lock, LogIn, Mail, Network } from 'lucide-react';
+import { ArrowLeft, Clock3, Eye, EyeOff, Loader2, Lock, LogIn, Mail, Moon, Network, Sun } from 'lucide-react';
 
-function syncCookies(accessToken: string, contextToken?: string) {
+function syncCookies(accessToken: string, contextToken?: string, role?: string) {
   document.cookie = `hackathon-auth-token=${accessToken}; path=/; SameSite=Lax; max-age=86400`;
+  
   if (contextToken) {
     document.cookie = `hackathon-context-token=${contextToken}; path=/; SameSite=Lax; max-age=86400`;
+  } else {
+    document.cookie = 'hackathon-context-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
+  }
+
+  if (role) {
+    document.cookie = `hackathon-role=${role}; path=/; SameSite=Lax; max-age=86400`;
+  } else {
+    document.cookie = 'hackathon-role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC';
   }
 }
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setTheme, resolvedTheme } = useTheme();
   const login = useAuthStore((s) => s?.login);
   const setMemberships = useAuthStore((s) => s?.setMemberships);
   const selectContext = useAuthStore((s) => s?.selectContext);
@@ -34,6 +45,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e?.preventDefault?.();
@@ -63,7 +79,7 @@ export default function LoginPage() {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
-      const memberships = toArray<ZoneMembershipInfo>(membershipsData, ['items', 'zones', 'results']);
+      const memberships = toArray<ZoneMembershipInfo>(membershipsData);
       setMemberships?.(memberships);
 
       toast.success(`¡Bienvenido, ${userData?.full_name ?? 'usuario'}!`);
@@ -96,7 +112,7 @@ export default function LoginPage() {
           });
 
           const targetRole = ctxData?.role ?? sede?.role ?? 'student';
-          syncCookies(accessToken, ctxToken);
+          syncCookies(accessToken, ctxToken, targetRole);
           router.replace(getDashboardPathForRole(targetRole));
           return;
         } catch {
@@ -116,9 +132,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#050f16] text-[#dce7f0] animate-fade-in">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground animate-fade-in transition-colors duration-500">
       <AnimatedDotBackground />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,#112434_0%,#07131b_52%,#050f16_100%)] opacity-95" />
+      
+      {/* Dynamic Radial Gradient Overlay */}
+      <div 
+        className={`pointer-events-none absolute inset-0 opacity-95 transition-all duration-700 ${
+          resolvedTheme === 'dark' 
+            ? 'bg-[radial-gradient(circle_at_top,#112434_0%,#07131b_52%,#050f16_100%)]' 
+            : 'bg-[radial-gradient(circle_at_top,rgba(186,201,204,0.4)_0%,rgba(210,220,224,0.2)_50%,transparent_100%)]'
+        }`} 
+      />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-6 py-5 lg:px-10">
         <header className="flex items-center justify-between gap-4">
@@ -130,52 +154,67 @@ export default function LoginPage() {
               height={44}
               className="hidden h-auto w-8 object-contain opacity-95 md:block"
             />
-            <span className="text-[2rem] font-extrabold leading-none tracking-[-0.07em] text-slate-50">SAMP</span>
+            <span className="text-[2rem] font-extrabold leading-none tracking-[-0.07em] text-foreground">SAMP</span>
             <span className="hidden h-4 w-px bg-[#ff9f43]/22 md:block" />
-            <span className="hidden text-[11px] font-medium tracking-[0.16em] text-[#aebdc5] md:block">
+            <span className="hidden text-[11px] font-medium tracking-[0.16em] text-muted-foreground md:block">
               Sistema Académico de Maratones de Programación
             </span>
           </Link>
 
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-full border border-[#1a7fb3]/35 bg-[#1a7fb3]/10 px-4 py-2 text-xs font-medium tracking-[0.16em] text-[#aebdc5] transition-all hover:border-[#f59a23]/45 hover:bg-[#f59a23] hover:text-[#1f1404]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Volver al inicio
-          </Link>
+          <div className="flex items-center gap-3">
+            {mounted && (
+              <button
+                onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+                aria-label="Toggle theme"
+              >
+                {resolvedTheme === 'dark' ? (
+                  <Sun className="h-5 w-5 text-[#c3f5ff]" />
+                ) : (
+                  <Moon className="h-5 w-5 text-primary" />
+                )}
+              </button>
+            )}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-full border border-primary/35 bg-primary/10 px-4 py-2 text-xs font-medium tracking-[0.16em] text-muted-foreground transition-all hover:border-accent hover:bg-accent hover:text-accent-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver al inicio
+            </Link>
+          </div>
         </header>
 
         <main className="flex flex-1 items-center py-8 lg:py-9">
           <div className="grid w-full items-center gap-6 lg:grid-cols-12 xl:gap-8">
             <section className="lg:col-span-7">
-              <span className="inline-flex items-center rounded-md border border-[#3b494c]/50 bg-[#13212a]/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-[#c3f5ff]">
+              <span className="inline-flex items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
                 Acceso institucional
               </span>
-              <h1 className="mt-7 max-w-[40rem] text-[2.05rem] font-extrabold leading-[1.01] tracking-[-0.075em] text-[#c7d2dd] md:text-[2.45rem] xl:text-[2.75rem]">
+              <h1 className="mt-7 max-w-[40rem] text-[2.05rem] font-extrabold leading-[1.01] tracking-[-0.075em] text-foreground md:text-[2.45rem] xl:text-[2.75rem]">
                 Ingresa a la plataforma académica de maratones de programación.
               </h1>
-              <p className="mt-4 max-w-lg text-[13px] leading-6 text-[#bac9cc]">
+              <p className="mt-4 max-w-lg text-[13px] leading-6 text-muted-foreground">
                 Accede con tus credenciales para participar en retos, monitorear el progreso formativo y
                 gestionar eventos académicos desde un mismo entorno.
               </p>
 
               <div className="mt-5 grid max-w-[28rem] grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#3b494c]/30 bg-[#151c26]/72 p-3.5 transition-colors hover:bg-[#18232d]/88">
-                  <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[#81ecff]/10 text-[#81ecff]">
+                <div className="rounded-2xl border border-border/30 bg-card/50 p-3.5 transition-colors hover:bg-card/80">
+                  <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Network className="h-4.5 w-4.5" />
                   </div>
-                  <h3 className="text-[1.2rem] font-bold tracking-tight text-slate-100">Multi-sede</h3>
-                  <p className="mt-2 text-[13px] leading-6 text-[#bac9cc]">
+                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">Multi-sede</h3>
+                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
                     Espacios académicos articulados por zonas y sedes.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-[#3b494c]/30 bg-[#151c26]/72 p-3.5 transition-colors hover:bg-[#18232d]/88">
-                  <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-[#10d5ff]/10 text-[#10d5ff]">
+                <div className="rounded-2xl border border-border/30 bg-card/50 p-3.5 transition-colors hover:bg-card/80">
+                  <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
                     <Clock3 className="h-4.5 w-4.5" />
                   </div>
-                  <h3 className="text-[1.2rem] font-bold tracking-tight text-slate-100">24/7</h3>
-                  <p className="mt-2 text-[13px] leading-6 text-[#bac9cc]">
+                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">24/7</h3>
+                  <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
                     Seguimiento continuo para práctica y eventos.
                   </p>
                 </div>
@@ -191,17 +230,17 @@ export default function LoginPage() {
                   height={80}
                   className="mx-auto h-auto w-14 object-contain opacity-95"
                 />
-                <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-slate-50">SAMP</h1>
-                <p className="mt-2 text-sm text-[#bac9cc]">Sistema Académico de Maratones de Programación</p>
+                <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-foreground">SAMP</h1>
+                <p className="mt-2 text-sm text-muted-foreground">Sistema Académico de Maratones de Programación</p>
               </div>
 
-              <Card className="overflow-hidden rounded-[1.6rem] border border-[#3b494c]/35 bg-[#151c26]/80 text-[#dce7f0] shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl">
-                <div className="absolute inset-x-0 top-0 h-20 bg-[#81ecff]/[0.03] blur-3xl" />
+              <Card className="overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+                <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl" />
                 <CardHeader className="relative z-10 space-y-2 pb-4 pt-7">
-                  <CardTitle className="text-[1.75rem] font-bold tracking-tight text-slate-50">
+                  <CardTitle className="text-[1.75rem] font-bold tracking-tight text-foreground">
                     Iniciar sesión
                   </CardTitle>
-                  <CardDescription className="text-[15px] text-[#bac9cc]">
+                  <CardDescription className="text-[15px] text-muted-foreground">
                     Accede con tus credenciales institucionales
                   </CardDescription>
                 </CardHeader>
@@ -214,11 +253,11 @@ export default function LoginPage() {
                     )}
 
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-[#bac9cc]">
+                      <Label htmlFor="email" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-muted-foreground">
                         Correo institucional
                       </Label>
                       <div className="relative">
-                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8790]" />
+                        <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                         <Input
                           id="email"
                           type="email"
@@ -231,17 +270,17 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="email"
-                          className="h-12 rounded-xl border-[#3b494c]/50 bg-slate-950/40 pl-12 text-base text-[#dce3f0] placeholder:text-[#6c777f] focus-visible:border-[#81ecff]/35 focus-visible:ring-[#81ecff]/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 text-base text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/35 focus-visible:ring-primary/15"
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-[#bac9cc]">
+                      <Label htmlFor="password" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-muted-foreground">
                         Contraseña
                       </Label>
                       <div className="relative">
-                        <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8790]" />
+                        <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                         <Input
                           id="password"
                           type={showPassword ? 'text' : 'password'}
@@ -254,13 +293,13 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="current-password"
-                          className="h-12 rounded-xl border-[#3b494c]/50 bg-slate-950/40 pl-12 pr-12 text-base text-[#dce3f0] placeholder:text-[#6c777f] focus-visible:border-[#81ecff]/35 focus-visible:ring-[#81ecff]/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 pr-12 text-base text-foreground placeholder:text-muted-foreground/50 focus-visible:border-primary/35 focus-visible:ring-primary/15"
                         />
                         <Button
                           type="button"
                           variant="ghost"
                           size="icon"
-                          className="absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-lg text-[#7f939a] hover:bg-white/5 hover:text-[#dce3f0]"
+                          className="absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-lg text-muted-foreground/80 hover:bg-muted/10 hover:text-foreground"
                           onClick={() => setShowPassword(!showPassword)}
                           tabIndex={-1}
                         >
@@ -268,7 +307,7 @@ export default function LoginPage() {
                         </Button>
                       </div>
                       <div className="flex justify-end">
-                        <Link href="#" className="text-xs text-[#c3f5ff] transition-colors hover:text-white">
+                        <Link href="#" className="text-xs text-primary transition-colors hover:text-foreground">
                           ¿Olvidaste tu contraseña?
                         </Link>
                       </div>
@@ -293,10 +332,10 @@ export default function LoginPage() {
                     </Button>
                   </form>
 
-                  <div className="mt-6 border-t border-white/10 pt-5 text-center">
-                    <p className="text-sm text-[#bac9cc]">
+                  <div className="mt-6 border-t border-border/10 pt-5 text-center">
+                    <p className="text-sm text-muted-foreground">
                       ¿Problemas de acceso?
-                      <Link href="#" className="ml-2 font-medium text-[#c3f5ff] hover:underline">
+                      <Link href="#" className="ml-2 font-medium text-primary hover:underline">
                         Contactar a soporte
                       </Link>
                     </p>
@@ -306,19 +345,19 @@ export default function LoginPage() {
             </section>
           </div>
         </main>
-
-        <footer className="flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-6 text-center md:flex-row md:text-left">
-          <p className="text-[11px] font-medium tracking-[0.12em] text-[#bac9cc]">
+ 
+        <footer className="flex flex-col items-center justify-between gap-4 border-t border-border/10 pt-6 text-center md:flex-row md:text-left">
+          <p className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground">
             © 2026 SAMP · Academia de Maratones de Programación
           </p>
           <div className="flex items-center gap-8">
-            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-[#bac9cc] transition-colors hover:text-[#c3f5ff]">
+            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
               Términos
             </Link>
-            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-[#bac9cc] transition-colors hover:text-[#c3f5ff]">
+            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
               Privacidad
             </Link>
-            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-[#bac9cc] transition-colors hover:text-[#c3f5ff]">
+            <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
               Contacto
             </Link>
           </div>

@@ -34,7 +34,7 @@ export function generateMetadata() {
   }
 
   return {
-    title: 'Hackathon Platform',
+    title: 'SAMP | Plataforma',
     description: 'Plataforma de hackathones universitarios',
     metadataBase,
     icons: {
@@ -42,7 +42,7 @@ export function generateMetadata() {
       shortcut: '/favicon.svg',
     },
     openGraph: {
-      title: 'Hackathon Platform',
+      title: 'SAMP | Plataforma',
       description: 'Plataforma de hackathones universitarios',
       images: [{ url: '/og-image.png', width: 1200, height: 630 }],
     },
@@ -56,8 +56,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.variable} ${jetbrainsMono.variable} ${brandFont.variable} font-sans`}>
-        <Providers>{children}</Providers>
+      <body suppressHydrationWarning>
+        <div className={`${inter.variable} ${jetbrainsMono.variable} ${brandFont.variable} font-sans min-h-screen`}>
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );

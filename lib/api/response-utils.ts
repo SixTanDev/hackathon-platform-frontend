@@ -79,6 +79,10 @@ export function toArray<T>(payload: unknown, keys: readonly string[] = DEFAULT_A
     return direct as T[];
   }
 
+  if (Array.isArray(record.data)) {
+    return record.data as T[];
+  }
+
   const nested = asRecord(record.data);
   if (!nested) {
     return [];
