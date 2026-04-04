@@ -10,26 +10,18 @@ import {
   getAuditLog,
   getChallengeReviews,
 } from '@/lib/api/admin-services';
-import type {
-  SedeOverviewAnalytics,
-  HealthCheck,
-  AuditLogEntry,
-  ChallengeReview,
-} from '@/lib/api/admin-services';
-import { PageHeader } from '@/components/shared/page-header';
+import { AdminHero } from '@/components/dashboard/admin-hero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Users,
   Trophy,
-  CheckCircle2,
   Code2,
   Brain,
   Percent,
   Server,
   ScrollText,
-  AlertTriangle,
   Clock,
   Activity,
   ShieldCheck,
@@ -72,6 +64,7 @@ function StatCard({
 
 export default function AdminDashboardPage() {
   const { t, locale } = useTranslation();
+  const user = useAuthStore((s) => s?.user);
   const currentSede = useAuthStore((s) => s?.currentSede);
   const sedeId = currentSede?.id ?? '';
 
@@ -105,9 +98,12 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader
-        title={t('admin.hero.title')}
-        description={t('admin.hero.subtitle', { sede: currentSede?.name ?? t('common.campus') })}
+      <AdminHero 
+        user={user} 
+        currentSede={currentSede || null} 
+        health={health || null} 
+        pendingReviewsCount={pendingCount} 
+        loading={loadingOverview || loadingHealth} 
       />
 
       {/* Stat Cards */}
@@ -219,33 +215,11 @@ export default function AdminDashboardPage() {
                   </div>
                 )}
 
-                {health.services && Object.entries(health.services).length > 0 && (
-                  <div className="space-y-1.5">
-                    <p className="text-xs text-muted-foreground font-medium">{t('admin.infra.externalServices')}:</p>
-                    {Object.entries(health.services).map(([name, info]) => (
-                      <div key={name} className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground capitalize">{name.replace(/_/g, ' ')}</span>
-                        <Badge variant="outline" className={`text-[10px] ${
-                            info.status === 'healthy' || info.status === 'ok' || info.status === 'connected'
-                              ? 'bg-green-500/10 text-green-400 border-green-500/20'
-                              : 'bg-red-500/10 text-red-400 border-red-500/20'
-                          }`}>
-                            {info.status}
-                          </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 {health.server?.uptime != null && (
                   <p className="text-[11px] text-muted-foreground">
                     {t('admin.infra.uptime')}: {Math.floor(health.server.uptime / 3600)}h {Math.floor((health.server.uptime % 3600) / 60)}m
                     {health.server.version && ` · v${health.server.version}`}
                   </p>
-                )}
-
-                {!health.checks && !health.services && (
-                  <p className="text-sm text-muted-foreground">{t('admin.infra.noSystems')}</p>
                 )}
               </div>
             ) : (
