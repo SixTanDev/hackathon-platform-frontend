@@ -110,7 +110,14 @@ Un diccionario en Python con el formato:
     queryKey: queryKeys.challenges.testCases(challengeId),
     queryFn: () => {
       if (challengeId === 'mock-python-1') return [
-        { id: 'tc-1', is_example: true, input_data: 'pcap_file_v1', expected_output: '{"suspicious_ips": ["10.0.0.1"]}' }
+        { 
+          id: 'tc-1', 
+          is_example: true, 
+          input_data: 'pcap_file_v1', 
+          expected_output: '{"suspicious_ips": ["10.0.0.1"]}',
+          order_index: 1,
+          explanation: 'Analiza un archivo PCAP básico con una IP sospechosa.'
+        }
       ];
       return getChallengeTestCases(challengeId);
     },
@@ -119,16 +126,6 @@ Un diccionario en Python con el formato:
 
   const handleRun = useCallback(async () => {
     if (isRunning || !challengeId) return;
-
-    if (currentRole === 'tutor') {
-      toast({
-        title: 'Acceso de Auditoría',
-        description: 'Como Tutor, puedes previsualizar el reto, pero no puedes ejecutar pruebas oficiales.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     setIsRunning(true);
     setRunResults(null);
 
@@ -148,6 +145,17 @@ Un diccionario en Python con el formato:
       setIsRunning(false);
     }
   }, [challengeId, code, isRunning, toast]);
+
+  const isTutor = useMemo(() => {
+    const roleNormalized = String(currentRole || '').toLowerCase().trim();
+    if (roleNormalized === 'tutor') return true;
+    
+    // 🍪 Fallback for cookie consistency
+    if (typeof window !== 'undefined') {
+      return document.cookie.includes('hackathon-role=tutor');
+    }
+    return false;
+  }, [currentRole]);
 
   if (challengeLoading) {
     return (
@@ -184,16 +192,18 @@ Un diccionario en Python con el formato:
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            className="h-8 gap-1.5"
-            onClick={handleRun}
-            disabled={isRunning}
-          >
-            {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-            Ejecutar Pruebas
-          </Button>
+          {!isTutor && (
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="h-8 gap-1.5"
+              onClick={handleRun}
+              disabled={isRunning}
+            >
+              {isRunning ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
+              Ejecutar Pruebas
+            </Button>
+          )}
         </div>
       </div>
 
