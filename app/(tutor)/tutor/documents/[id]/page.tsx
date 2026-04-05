@@ -143,6 +143,7 @@ export default function TutorCollectionDetailPage() {
       toast.success('Documento eliminado');
       qc.invalidateQueries({ queryKey: queryKeys.documents.collectionDocs(id) });
       qc.invalidateQueries({ queryKey: queryKeys.documents.collectionDetail(id) });
+      qc.invalidateQueries({ queryKey: queryKeys.documents.collections });
       setDeleteDialog({ open: false, docId: '', name: '' });
     },
     onError: () => toast.error('Error al eliminar el documento'),
@@ -183,6 +184,7 @@ export default function TutorCollectionDetailPage() {
         toast.success(`${uploadedCount} documento(s) subido(s)`);
         qc.invalidateQueries({ queryKey: queryKeys.documents.collectionDocs(id) });
         qc.invalidateQueries({ queryKey: queryKeys.documents.collectionDetail(id) });
+        qc.invalidateQueries({ queryKey: queryKeys.documents.collections });
       }
 
       setUploading(false);

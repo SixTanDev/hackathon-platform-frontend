@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useQueries } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { listCollections, createCollection, deleteCollection } from '@/lib/api/document-services';
+import { listCollections, createCollection, deleteCollection, listDocuments } from '@/lib/api/document-services';
 import type { DocumentCollection, CollectionOwnerType } from '@/types/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { PageHeader } from '@/components/shared/page-header';
@@ -43,6 +43,14 @@ export default function DocumentCollectionsPage() {
     queryFn: listCollections,
   });
 
+  const collectionDocQueries = useQueries({
+    queries: (collections ?? []).map((col) => ({
+      queryKey: queryKeys.documents.collectionDocs(col.id),
+      queryFn: () => listDocuments(col.id),
+      enabled: Boolean(col.id),
+    })),
+  });
+
   const createMut = useMutation({
     mutationFn: () => createCollection({
       name: newName,
@@ -69,6 +77,11 @@ export default function DocumentCollectionsPage() {
     onError: () => toast.error('Error al eliminar'),
   });
 
+  const getCollectionDocCount = (col: DocumentCollection, index: number) => {
+    const docs = collectionDocQueries[index]?.data;
+    return Array.isArray(docs) ? docs.length : col.document_count;
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
@@ -90,9 +103,10 @@ export default function DocumentCollectionsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {collections.map((col: DocumentCollection) => {
+          {collections.map((col: DocumentCollection, index) => {
             const ownerCfg = OWNER_TYPE_CONFIG[col.owner_type] ?? OWNER_TYPE_CONFIG.sede;
             const OwnerIcon = ownerCfg.icon;
+            const docCount = getCollectionDocCount(col, index);
             return (
               <Link key={col.id} href={`/admin/documents/${col.id}`}>
                 <Card className="h-full hover:border-primary/30 transition-all cursor-pointer group">
@@ -110,7 +124,7 @@ export default function DocumentCollectionsPage() {
                       {col.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{col.description}</p>}
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{col.document_count} documento(s)</span>
+                      <span className="flex items-center gap-1"><FileText className="h-3 w-3" />{docCount} documento(s)</span>
                       <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(col.created_at).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}</span>
                     </div>
                     <button

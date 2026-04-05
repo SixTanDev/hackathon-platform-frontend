@@ -5,10 +5,10 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/shared/logo';
 import { cn } from '@/lib/utils';
 import type { RoleName } from '@/types/api';
 import {
-  Zap,
   LayoutDashboard,
   Trophy,
   Code2,
@@ -46,6 +46,7 @@ const ACTIVE_ITEM_STYLES: Record<string, string> = {
   '/dashboard/teams': 'border-[#248f8b]/18 bg-gradient-to-r from-[#248f8b]/18 via-[#35a19d]/10 to-transparent text-[#1f7a77] shadow-[inset_3px_0_0_0_rgb(31,122,119),0_8px_18px_rgba(31,122,119,0.08)] dark:border-[#35a19d]/20 dark:text-[#86e2cf]',
   '/dashboard/leaderboard': 'border-[#f0b429]/22 bg-gradient-to-r from-[#f0b429]/18 via-[#f7941d]/10 to-transparent text-[#b7791f] shadow-[inset_3px_0_0_0_rgb(183,121,31),0_8px_18px_rgba(240,180,41,0.1)] dark:border-[#f0b429]/24 dark:text-[#ffd36a]',
   '/dashboard/profile': 'border-[#d96c8a]/20 bg-gradient-to-r from-[#d96c8a]/16 via-[#f2a7bb]/10 to-transparent text-[#b84f72] shadow-[inset_3px_0_0_0_rgb(184,79,114),0_8px_18px_rgba(217,108,138,0.08)] dark:text-[#f3b2c3]',
+  '/dashboard/documents': 'border-indigo-500/20 bg-gradient-to-r from-indigo-500/16 via-indigo-500/10 to-transparent text-indigo-700 shadow-[inset_3px_0_0_0_rgb(79,70,229),0_8px_18px_rgba(79,70,229,0.08)] dark:text-indigo-300',
   '/tutor/dashboard': 'border-sky-500/20 bg-gradient-to-r from-sky-500/16 via-sky-500/10 to-transparent text-sky-700 shadow-[inset_3px_0_0_0_rgb(14,116,144),0_8px_18px_rgba(14,116,144,0.08)] dark:text-sky-300',
   '/tutor/hackathons': 'border-cyan-500/20 bg-gradient-to-r from-cyan-500/16 via-cyan-500/10 to-transparent text-cyan-700 shadow-[inset_3px_0_0_0_rgb(8,145,178),0_8px_18px_rgba(8,145,178,0.08)] dark:text-cyan-300',
   '/tutor/challenges': 'border-violet-500/20 bg-gradient-to-r from-violet-500/16 via-violet-500/10 to-transparent text-violet-700 shadow-[inset_3px_0_0_0_rgb(109,40,217),0_8px_18px_rgba(109,40,217,0.08)] dark:text-violet-300',
@@ -152,11 +153,16 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
       {/* Logo */}
       <div className="h-16 flex items-center px-4 border-b border-border/50">
         <Link href="/dashboard" className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Zap className="w-4 h-4 text-primary" />
-          </div>
+          <Logo size={34} animated={false} className="flex-shrink-0" />
           {!collapsed && (
-            <span className="font-semibold text-[0.82rem] tracking-wide truncate">{t('brand.title')}</span>
+            <div className="min-w-0">
+              <span className="block truncate font-semibold text-[0.82rem] tracking-wide text-foreground">
+                {t('brand.title')}
+              </span>
+              <span className="block truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                Plataforma academica
+              </span>
+            </div>
           )}
         </Link>
       </div>

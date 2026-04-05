@@ -12,7 +12,8 @@ import {
   TrendingUp, 
   AlertCircle,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import type { User, Sede } from '@/types/api';
@@ -81,6 +82,12 @@ export function TutorHero({
               <Button size="lg" variant="outline" className="h-14 px-8 text-base font-bold border-2">
                 <Inbox className="w-5 h-5 mr-2" />
                 {t('tutor.hero.action.gradeSubmissions')}
+              </Button>
+            </Link>
+            <Link href="/tutor/ai-generation">
+              <Button size="lg" variant="outline" className="h-14 px-8 text-base font-bold border-2 border-purple-500/30 bg-purple-500/5 text-purple-600 hover:bg-purple-500/10">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Generación con IA
               </Button>
             </Link>
           </div>

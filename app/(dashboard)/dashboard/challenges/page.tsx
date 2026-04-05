@@ -58,7 +58,17 @@ export default function StudentChallengesPage() {
     queryFn: () => listChallenges(params),
   });
 
-  const challenges = data?.items ?? [];
+  const challenges = (!data?.items || data.items.length === 0) ? [
+    {
+      id: 'mock-python-1',
+      title: 'Análisis de Tráfico de Red Real-time',
+      difficulty: 'expert' as ChallengeDifficulty,
+      type: 'coding' as ChallengeType,
+      category: 'Ciberseguridad',
+      points_base: 450,
+      description_markdown: 'Analiza archivos PCAP para detectar escaneos de puertos...',
+    }
+  ] : data.items;
 
   return (
     <div className="space-y-6 animate-fade-in">

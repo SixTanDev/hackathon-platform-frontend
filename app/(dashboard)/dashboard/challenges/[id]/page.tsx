@@ -60,6 +60,34 @@ export default function StandaloneChallengePage() {
   const { id: challengeId } = useParams<{ id: string }>();
   const router = useRouter();
   const { toast } = useToast();
+
+  const MOCK_CHALLENGE = {
+    id: 'mock-python-1',
+    title: 'Análisis de Tráfico de Red Real-time',
+    description_markdown: `
+## El Desafío
+El objetivo es procesar archivos de captura de red (**PCAP**) para identificar actividades sospechosas de escaneo de puertos.
+
+### Requerimientos:
+1. Leer el archivo \`network_dump.pcap\`.
+2. Identificar paquetes con el flag **SYN** activo.
+3. Contar cuántos puertos únicos ha intentado acceder cada dirección IP de origen.
+4. Si una IP accede a más de **20 puertos** en menos de 1 segundo, marcarla como 'SYN-SCAN'.
+
+### Entregable:
+Un diccionario en Python con el formato:
+\`\`\`python
+{
+  "suspicious_ips": ["192.168.1.10", "10.0.0.5"],
+  "total_packets_analyzed": 1540
+}
+\`\`\`
+    `,
+    difficulty: 'expert',
+    type: 'coding',
+    time_limit_seconds: 5,
+    memory_limit_mb: 256,
+  };
   
   const [code, setCode] = useState('# Escribe tu solución aquí\n\n');
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -69,13 +97,21 @@ export default function StandaloneChallengePage() {
   // Data fetching
   const { data: challenge, isLoading: challengeLoading } = useQuery({
     queryKey: queryKeys.challenges.detail(challengeId),
-    queryFn: () => getChallengeDetail(challengeId),
+    queryFn: () => {
+      if (challengeId === 'mock-python-1') return MOCK_CHALLENGE;
+      return getChallengeDetail(challengeId);
+    },
     enabled: !!challengeId,
   });
 
   const { data: testCases } = useQuery({
     queryKey: queryKeys.challenges.testCases(challengeId),
-    queryFn: () => getChallengeTestCases(challengeId),
+    queryFn: () => {
+      if (challengeId === 'mock-python-1') return [
+        { id: 'tc-1', is_example: true, input_data: 'pcap_file_v1', expected_output: '{"suspicious_ips": ["10.0.0.1"]}' }
+      ];
+      return getChallengeTestCases(challengeId);
+    },
     enabled: !!challengeId,
   });
 

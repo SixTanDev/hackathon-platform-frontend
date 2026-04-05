@@ -45,7 +45,7 @@ export default function TutorStudentsPage() {
     <div className="space-y-6 animate-fade-in">
       <PageHeader 
         title="Estudiantes" 
-        description="Listado de estudiantes disponibles en el contexto actual (OpenAPI: /admin/users)" 
+        description="Listado de estudiantes disponibles en el contexto actual para tu sede y zona." 
       />
 
       <div className="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">

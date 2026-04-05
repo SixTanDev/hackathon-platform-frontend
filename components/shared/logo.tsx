@@ -7,13 +7,14 @@ import { cn } from '@/lib/utils';
 interface LogoProps {
   className?: string;
   size?: number;
+  animated?: boolean;
 }
 
 /**
  * Logo component with a premium 3D rotating shield and lightning bolt.
  * Redesigned for SAMP platform with slow, continuous rotation.
  */
-export function Logo({ className, size = 48 }: LogoProps) {
+export function Logo({ className, size = 48, animated = true }: LogoProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const id = useId();
@@ -55,7 +56,7 @@ export function Logo({ className, size = 48 }: LogoProps) {
         }
       `}</style>
       
-      <div className="shield-container spinning-shield w-full h-full">
+      <div className={cn("shield-container w-full h-full", animated && "spinning-shield")}>
         <svg
           viewBox="0 0 24 24"
           fill="none"

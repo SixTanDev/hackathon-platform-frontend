@@ -71,7 +71,7 @@ export default function TutorChallengesPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader title="Biblioteca de Retos" description="Consulta y filtra retos aprobados según la especificación OpenAPI" />
+      <PageHeader title="Biblioteca de Retos" description="Consulta y filtra retos aprobados para su uso en competencias." />
 
       <Card>
         <CardContent className="py-4">

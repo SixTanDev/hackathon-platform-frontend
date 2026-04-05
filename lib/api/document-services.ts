@@ -126,6 +126,28 @@ export async function getDocumentDownloadUrl(documentId: string): Promise<string
   return res.data?.url ?? res.data?.download_url ?? '';
 }
 
+export async function downloadDocumentBlob(documentId: string, collectionId?: string): Promise<Blob> {
+  const endpoints = [
+    `/documents/${documentId}/download`,
+    collectionId ? `/document-collections/${collectionId}/documents/${documentId}/download` : null,
+    `/documents/${documentId}`,
+    collectionId ? `/document-collections/${collectionId}/documents/${documentId}` : null,
+  ].filter(Boolean) as string[];
+
+  let lastError: unknown = null;
+
+  for (const endpoint of endpoints) {
+    try {
+      const res = await apiClient.get(endpoint, { responseType: 'blob' });
+      if (res.data instanceof Blob) return res.data;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError ?? new Error('No se pudo descargar el documento');
+}
+
 // ─── Semantic Search ────────────────────────────────────────────────────────
 
 export async function searchDocuments(

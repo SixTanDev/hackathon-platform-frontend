@@ -71,7 +71,7 @@ export default function TutorHackathonsPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader title="Hackathones" description="Listado oficial de hackathones alineado con el backend" />
+      <PageHeader title="Hackathones" description="Consulta el estado, alcance y fechas de los hackathones disponibles." />
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Tabs value={tab} onValueChange={(v) => { setTab(v as TabValue); setPage(1); }}>

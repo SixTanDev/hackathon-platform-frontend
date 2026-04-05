@@ -17,8 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import Link from 'next/link';
 import {
-  Sparkles, Send, Loader2, FileText, Cpu, Clock, CheckCircle2, XCircle, AlertCircle, LucideIcon
+  Sparkles, Send, Loader2, FileText, Cpu, Clock, CheckCircle2, XCircle, AlertCircle, LucideIcon, ArrowRight
 } from 'lucide-react';
 
 /* ── OpenAPI: POST /challenge-generation/request ── */
@@ -101,11 +102,43 @@ export default function TutorAIGenerationPage() {
   const [context, setContext] = useState('');
   const [collectionId, setCollectionId] = useState<string>('none');
 
-  const { data: requests, isLoading: loadingReqs } = useQuery({
+  const { data: requestsData, isLoading: loadingReqs } = useQuery({
     queryKey: ['challenge-generation', 'requests'],
     queryFn: () => listMyGenerationRequests(),
     refetchInterval: 15000,
   });
+
+  // Mock data for visualization based on user request (Python Hackathon context)
+  const requests: GenerationRequestItem[] = (!requestsData || requestsData.length === 0) ? [
+    {
+      id: 'mock-1',
+      status: 'processing',
+      type: 'coding',
+      difficulty: 'expert',
+      topic: 'Detección de Intrusiones con Scapy y Python',
+      challenge_title: 'Análisis de Tráfico de Red Real-time',
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: 'mock-2',
+      status: 'completed',
+      type: 'coding',
+      difficulty: 'hard',
+      topic: 'Análisis de Logs con Pandas',
+      challenge_id: 'challenge-123',
+      challenge_title: 'Minería de Datos de Servidores Web',
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+      completed_at: new Date(Date.now() - 1800000).toISOString(),
+    },
+    {
+      id: 'mock-3',
+      status: 'queued',
+      type: 'coding',
+      difficulty: 'medium',
+      topic: 'Web Scraping de Noticieros Nacionales',
+      created_at: new Date(Date.now() - 7200000).toISOString(),
+    }
+  ] : requestsData;
 
   const { data: collections } = useQuery({
     queryKey: queryKeys.documents.collections,
@@ -115,7 +148,7 @@ export default function TutorAIGenerationPage() {
   const generateMut = useMutation({
     mutationFn: (payload: GenerationSubmitRequest) => submitGenerationRequest(payload),
     onSuccess: () => {
-      toast.success('Solicitud enviada exitosamente (OpenAPI Flow)');
+      toast.success('Solicitud enviada exitosamente');
       qc.invalidateQueries({ queryKey: ['challenge-generation'] });
       setTab('generated'); setTopic(''); setContext('');
     },
@@ -132,7 +165,7 @@ export default function TutorAIGenerationPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <PageHeader title="Generación con IA" description="Alineado con el flujo asíncrono de OpenAPI: /challenge-generation/request" />
+      <PageHeader title="Generación con IA" description="Crea nuevos retos de programación utilizando inteligencia artificial." />
 
       <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
@@ -163,7 +196,7 @@ export default function TutorAIGenerationPage() {
                 <Input value={topic} onChange={e => setTopic(e.target.value)} placeholder="Ej: Programación orientada a objetos en Java" />
               </div>
               <div className="space-y-2">
-                <Label>Contexto / Instrucciones (OpenAPI: additional_context)</Label>
+                <Label>Contexto / Instrucciones adicionales</Label>
                 <Textarea value={context} onChange={e => setContext(e.target.value)} placeholder="Agrega detalles para la generación..." className="min-h-[100px]" />
               </div>
               <div className="space-y-2">
@@ -176,7 +209,7 @@ export default function TutorAIGenerationPage() {
               </div>
               <Separator className="my-4" />
               <Button onClick={handleSubmit} disabled={generateMut.isPending} className="w-full">
-                {generateMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Enviar Solicitud (202 Accepted)
+                {generateMut.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />} Enviar Solicitud
               </Button>
             </CardContent>
           </Card>
@@ -201,7 +234,20 @@ export default function TutorAIGenerationPage() {
                             <span className="text-[10px] text-muted-foreground">{TYPE_LABELS[r.type]}</span>
                           </div>
                         </div>
-                        <Badge variant="secondary" className={`${cfg.class} h-6`}><Icon className={`h-3 w-3 mr-1 ${r.status === 'processing' ? 'animate-spin' : ''}`} />{cfg.label}</Badge>
+                        <div className="flex items-center gap-3">
+                          <Badge variant="secondary" className={`${cfg.class} h-6`}><Icon className={`h-3 w-3 mr-1 ${r.status === 'processing' ? 'animate-spin' : ''}`} />{cfg.label}</Badge>
+                          {r.status === 'completed' && (
+                            <Link href={`/dashboard/challenges/${r.id.startsWith('mock') ? 'mock-python-1' : r.challenge_id}`}>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="gap-2 text-green-600 hover:bg-green-500/10 hover:text-green-700 transition-all font-semibold"
+                              >
+                                Ver Reto <ArrowRight className="w-4 h-4" />
+                              </Button>
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     );
                   })}

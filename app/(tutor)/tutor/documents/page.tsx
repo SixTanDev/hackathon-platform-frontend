@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Plus, FolderOpen, FileText, Trash2, Loader2, Calendar, ArrowRight } from 'lucide-react';
 import { queryKeys } from '@/lib/query-client';
-import { createCollection, deleteCollection, listCollections } from '@/lib/api/document-services';
+import { createCollection, deleteCollection, listCollections, listDocuments } from '@/lib/api/document-services';
 import type { DocumentCollection } from '@/types/api';
 import { useAuthStore } from '@/stores/auth-store';
 import { PageHeader } from '@/components/shared/page-header';
@@ -36,6 +36,14 @@ export default function TutorDocumentsPage() {
     queryFn: listCollections,
   });
 
+  const collectionDocQueries = useQueries({
+    queries: (collections ?? []).map((col) => ({
+      queryKey: queryKeys.documents.collectionDocs(col.id),
+      queryFn: () => listDocuments(col.id),
+      enabled: Boolean(col.id),
+    })),
+  });
+
   const createMut = useMutation({
     mutationFn: () =>
       createCollection({
@@ -63,6 +71,11 @@ export default function TutorDocumentsPage() {
     },
     onError: () => toast.error('Error al eliminar la coleccion'),
   });
+
+  const getCollectionDocCount = (col: DocumentCollection, index: number) => {
+    const docs = collectionDocQueries[index]?.data;
+    return Array.isArray(docs) ? docs.length : col.document_count;
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -96,16 +109,20 @@ export default function TutorDocumentsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {collections.map((col: DocumentCollection) => (
+          {collections.map((col: DocumentCollection, index) => (
             <Link key={col.id} href={`/tutor/documents/${col.id}`}>
               <Card className="group h-full cursor-pointer transition-all hover:border-primary/30">
                 <CardContent className="space-y-3 p-5">
+                  {(() => {
+                    const docCount = getCollectionDocCount(col, index);
+                    return (
+                      <>
                   <div className="flex items-start justify-between">
                     <div className="rounded-lg bg-primary/10 p-2.5">
                       <FolderOpen className="h-5 w-5 text-primary" />
                     </div>
                     <Badge variant="outline" className="bg-primary/5 text-primary border-primary/15">
-                      {col.document_count} docs
+                      {docCount} docs
                     </Badge>
                   </div>
 
@@ -119,7 +136,7 @@ export default function TutorDocumentsPage() {
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <FileText className="h-3 w-3" />
-                      {col.document_count} documento(s)
+                      {docCount} documento(s)
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
@@ -154,6 +171,9 @@ export default function TutorDocumentsPage() {
                     <Trash2 className="mr-1 inline h-3 w-3" />
                     Eliminar
                   </button>
+                      </>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             </Link>
