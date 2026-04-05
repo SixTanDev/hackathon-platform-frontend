@@ -26,12 +26,12 @@ async function proxyRequest(req: NextRequest) {
   if (accept) headers['Accept'] = accept;
 
   try {
-    // Only read body if method usually requires it
-    let body: string | undefined = undefined;
+    // Preserve binary and multipart payloads as raw bytes; reading as text corrupts files like DOCX.
+    let body: BodyInit | undefined = undefined;
     if (req.method !== 'GET' && req.method !== 'HEAD') {
-      const text = await req.text();
-      if (text && text.length > 0) {
-        body = text;
+      const buffer = await req.arrayBuffer();
+      if (buffer.byteLength > 0) {
+        body = buffer;
         // Only set Content-Type if we actually have a body to send
         headers['Content-Type'] = req.headers.get('content-type') || 'application/json';
       }
