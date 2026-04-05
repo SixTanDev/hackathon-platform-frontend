@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { EmptyState } from '@/components/shared/empty-state';
-import { Search, Code2, FileText, Filter, BookOpen, ArrowRight } from 'lucide-react';
+import { Search, Code2, FileText, Filter, BookOpen, ArrowRight, Clock, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
 const DIFFICULTY_LABELS: Record<ChallengeDifficulty, string> = {
@@ -58,17 +58,22 @@ export default function StudentChallengesPage() {
     queryFn: () => listChallenges(params),
   });
 
-  const challenges = (!data?.items || data.items.length === 0) ? [
-    {
+  const challenges = useMemo(() => {
+    const mockChallenge = {
       id: 'mock-python-1',
       title: 'Análisis de Tráfico de Red Real-time',
       difficulty: 'expert' as ChallengeDifficulty,
       type: 'coding' as ChallengeType,
       category: 'Ciberseguridad',
       points_base: 450,
+      time_limit_seconds: 1200,
       description_markdown: 'Analiza archivos PCAP para detectar escaneos de puertos...',
-    }
-  ] : data.items;
+    };
+
+    const items = data?.items || [];
+    // Ensure mockChallenge is always first for the demo
+    return [mockChallenge, ...items.filter(i => i.id !== mockChallenge.id)];
+  }, [data]);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -136,17 +141,28 @@ export default function StudentChallengesPage() {
                   <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     {c.type === 'coding' ? <Code2 className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
                   </div>
-                  <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>
-                    {DIFFICULTY_LABELS[c.difficulty]}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1.5">
+                    {c.id === 'mock-python-1' && (
+                      <Badge className="bg-fuchsia-500 hover:bg-fuchsia-600 text-white border-0 text-[10px] h-5 px-2 animate-pulse flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" /> NUEVO
+                      </Badge>
+                    )}
+                    <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>
+                      {DIFFICULTY_LABELS[c.difficulty]}
+                    </Badge>
+                  </div>
                 </div>
                 
                 <h3 className="font-semibold text-lg line-clamp-1 group-hover:text-primary transition-colors">
                   {c.title}
                 </h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mt-1 mb-4 h-10">
-                  {c.category || 'Sin categoría'} • {TYPE_LABELS[c.type] || c.type}
-                </p>
+                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 mb-4 h-10">
+                  <span className="flex items-center gap-1 text-primary font-medium">
+                    <Clock className="w-3 h-3" /> {(c as any).time_limit_seconds ? `${Math.floor((c as any).time_limit_seconds / 60)} min` : '5 min'}
+                  </span>
+                  <span>•</span>
+                  <span className="truncate">{c.category || 'Sin categoría'}</span>
+                </div>
 
                 <div className="flex items-center justify-between">
                   <div className="text-xs font-mono text-primary font-bold">
