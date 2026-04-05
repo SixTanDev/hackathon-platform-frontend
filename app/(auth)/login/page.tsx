@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -36,6 +35,8 @@ function syncCookies(accessToken: string, contextToken?: string, role?: string) 
 }
 
 export default function LoginPage() {
+  const RECOVERY_TOAST_ID = 'login-recovery-help';
+  const SUPPORT_TOAST_ID = 'login-support-help';
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
   const login = useAuthStore((s) => s?.login);
@@ -194,21 +195,21 @@ export default function LoginPage() {
         </header>
 
         <main className="flex flex-1 items-center py-8 lg:py-9">
-          <div className="grid w-full items-center gap-6 lg:grid-cols-12 xl:gap-8">
-            <section className="lg:col-span-7">
-              <span className="inline-flex items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
+          <div className="grid w-full items-center gap-8 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-12 lg:items-stretch lg:gap-10 xl:gap-12">
+            <section className="flex flex-col justify-center lg:col-span-7 lg:pr-4 xl:pr-10">
+              <span className="inline-flex self-start items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
                 Portal Institucional
               </span>
-              <h1 className="mt-7 max-w-2xl text-[1.85rem] font-extrabold leading-tight tracking-[-0.04em] text-foreground md:text-[2.25rem] xl:text-[2.5rem]">
+              <h1 className="mt-6 max-w-[15ch] text-[1.85rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-foreground md:text-[2.3rem] xl:text-[2.7rem]">
                 Maratones de Programación <span className="text-primary inline-block transform transition-transform hover:scale-105 cursor-default">UNAD</span>
               </h1>
-              <p className="mt-4 max-w-lg text-[13px] leading-6 text-muted-foreground">
+              <p className="mt-5 max-w-[34rem] text-[13px] leading-7 text-muted-foreground">
                 Inicia sesión con tus credenciales para participar en retos, monitorear el progreso formativo y
                 gestionar eventos académicos desde un mismo entorno.
               </p>
 
-              <div className="mt-5 grid max-w-[28rem] grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border/30 bg-card/50 p-3.5 transition-colors hover:bg-card/80">
+              <div className="mt-3 grid max-w-[30rem] grid-cols-1 gap-3 sm:mt-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85">
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Network className="h-4.5 w-4.5" />
                   </div>
@@ -217,7 +218,7 @@ export default function LoginPage() {
                     Espacios académicos articulados por zonas y sedes.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-border/30 bg-card/50 p-3.5 transition-colors hover:bg-card/80">
+                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85">
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
                     <Clock3 className="h-4.5 w-4.5" />
                   </div>
@@ -229,17 +230,17 @@ export default function LoginPage() {
               </div>
             </section>
 
-            <section className="mx-auto w-full max-w-md lg:col-span-5 lg:max-w-[33rem] lg:justify-self-end">
+            <section className="mx-auto flex w-full max-w-md items-center justify-center lg:col-span-5 lg:max-w-[33rem] lg:justify-self-center xl:-translate-x-4">
               <div className="mb-8 text-center lg:hidden">
                 <Logo size={56} className="mx-auto opacity-95" />
                 <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-foreground">SAMP</h1>
                 <p className="mt-2 text-sm text-muted-foreground">Sistema Académico de Maratones de Programación</p>
               </div>
 
-              <Card className="overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-500 hover:scale-[1.015] hover:shadow-[0_32px_96px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_32px_96px_rgba(0,0,0,0.45)]">
-                <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl" />
+              <Card className="group relative overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-[box-shadow,border-color,background-color] duration-300 hover:border-primary/25 hover:bg-card/85 hover:shadow-[0_36px_110px_rgba(0,0,0,0.24),0_0_0_1px_rgba(14,116,144,0.08)] dark:hover:border-primary/30 dark:hover:shadow-[0_36px_110px_rgba(0,0,0,0.5),0_0_0_1px_rgba(125,211,252,0.08)]">
+                <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
                 <CardHeader className="relative z-10 space-y-2 pb-4 pt-7">
-                  <CardTitle className="text-[1.75rem] font-bold tracking-tight text-foreground">
+                  <CardTitle className="text-[1.65rem] font-bold tracking-tight text-foreground md:text-[1.7rem]">
                     Iniciar sesión
                   </CardTitle>
                   <CardDescription className="text-[15px] text-muted-foreground">
@@ -249,7 +250,11 @@ export default function LoginPage() {
                 <CardContent className="relative z-10">
                   <form onSubmit={handleLogin} className="space-y-4.5">
                     {errorMsg && (
-                      <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
+                      <div
+                        className="rounded-xl border border-red-500/25 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300"
+                        role="alert"
+                        aria-live="polite"
+                      >
                         {errorMsg}
                       </div>
                     )}
@@ -272,7 +277,7 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="email"
-                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 text-base text-foreground placeholder:text-[#a3978a] dark:placeholder:text-[#a3978a] light:placeholder:text-[#7a6f62] focus-visible:border-primary/35 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 text-base text-foreground caret-primary/80 placeholder:text-muted-foreground/80 focus-visible:border-primary/55 focus-visible:ring-primary/20"
                         />
                       </div>
                     </div>
@@ -295,7 +300,7 @@ export default function LoginPage() {
                           disabled={isSubmitting}
                           required
                           autoComplete="current-password"
-                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 pr-12 text-base text-foreground placeholder:text-[#a3978a] dark:placeholder:text-[#a3978a] light:placeholder:text-[#7a6f62] focus-visible:border-primary/35 focus-visible:ring-primary/15"
+                          className="h-12 rounded-xl border-border/50 bg-background/40 pl-12 pr-12 text-base text-foreground caret-primary/80 placeholder:text-muted-foreground/80 focus-visible:border-primary/55 focus-visible:ring-primary/20"
                         />
                         <Button
                           type="button"
@@ -303,15 +308,24 @@ export default function LoginPage() {
                           size="icon"
                           className="absolute right-2 top-1/2 h-10 w-10 -translate-y-1/2 rounded-lg text-muted-foreground/80 hover:bg-muted/10 hover:text-foreground"
                           onClick={() => setShowPassword(!showPassword)}
-                          tabIndex={-1}
+                          aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          aria-pressed={showPassword}
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </Button>
                       </div>
                       <div className="flex justify-end">
-                        <Link href="#" className="text-xs text-primary transition-colors hover:text-foreground">
+                        <button
+                          type="button"
+                          className="appearance-none bg-transparent p-0 text-xs text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
+                          onClick={() =>
+                            toast.info('Para recuperar el acceso, comunicate con el soporte institucional.', {
+                              id: RECOVERY_TOAST_ID,
+                            })
+                          }
+                        >
                           ¿Olvidaste tu contraseña?
-                        </Link>
+                        </button>
                       </div>
                     </div>
 
@@ -338,9 +352,17 @@ export default function LoginPage() {
                   <div className="mt-6 border-t border-border/10 pt-5 text-center">
                     <p className="text-sm text-muted-foreground">
                       ¿Problemas de acceso?
-                      <Link href="#" className="ml-2 font-medium text-primary hover:underline">
+                      <button
+                        type="button"
+                        className="ml-2 appearance-none bg-transparent p-0 font-medium text-primary hover:underline focus-visible:outline-none focus-visible:underline"
+                        onClick={() =>
+                          toast.info('Si el problema persiste, contacta al soporte institucional de tu sede o zona.', {
+                            id: SUPPORT_TOAST_ID,
+                          })
+                        }
+                      >
                         Contactar a soporte
-                      </Link>
+                      </button>
                     </p>
                   </div>
                 </CardContent>
