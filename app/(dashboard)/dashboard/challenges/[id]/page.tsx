@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthStore } from '@/stores/auth-store';
 import {
   getChallengeDetail,
   getChallengeTestCases,
@@ -60,6 +61,7 @@ export default function StandaloneChallengePage() {
   const { id: challengeId } = useParams<{ id: string }>();
   const router = useRouter();
   const { toast } = useToast();
+  const currentRole = useAuthStore((s) => s?.currentRole);
 
   const MOCK_CHALLENGE = {
     id: 'mock-python-1',
@@ -117,6 +119,16 @@ Un diccionario en Python con el formato:
 
   const handleRun = useCallback(async () => {
     if (isRunning || !challengeId) return;
+
+    if (currentRole === 'tutor') {
+      toast({
+        title: 'Acceso de Auditoría',
+        description: 'Como Tutor, puedes previsualizar el reto, pero no puedes ejecutar pruebas oficiales.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsRunning(true);
     setRunResults(null);
 

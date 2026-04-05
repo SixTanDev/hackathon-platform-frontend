@@ -82,7 +82,7 @@ export function middleware(request: NextRequest) {
         : roleCookie === 'admin'
           ? rolePrefix === 'admin'
           : roleCookie === 'tutor'
-            ? rolePrefix === 'tutor'
+            ? rolePrefix === 'tutor' || (rolePrefix === 'dashboard' && (pathname.includes('/challenges') || pathname.includes('/documents')))
             : roleCookie === 'director_semillero'
               ? rolePrefix === 'research'
               : roleCookie === 'student' || roleCookie === 'guest'
