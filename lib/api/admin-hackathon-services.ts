@@ -14,21 +14,21 @@ import type {
 // ─── CRUD ────────────────────────────────────────────────────────────────────
 
 export async function createHackathon(payload: HackathonCreate): Promise<Hackathon> {
-  const { data } = await apiClient.post<Hackathon>('/hackathons', payload);
+  const { data } = await apiClient.post<Hackathon>('/admin/hackathons', payload);
   return data;
 }
 
 export async function updateHackathon(id: string, payload: HackathonUpdate): Promise<Hackathon> {
-  const { data } = await apiClient.patch<Hackathon>(`/hackathons/${id}`, payload);
+  const { data } = await apiClient.patch<Hackathon>(`/admin/hackathons/${id}`, payload);
   return data;
 }
 
 export async function deleteHackathon(id: string): Promise<void> {
-  await apiClient.delete(`/hackathons/${id}`);
+  await apiClient.delete(`/admin/hackathons/${id}`);
 }
 
 export async function getHackathon(id: string): Promise<Hackathon> {
-  const { data } = await apiClient.get<Hackathon>(`/hackathons/${id}`);
+  const { data } = await apiClient.get<Hackathon>(`/admin/hackathons/${id}`);
   return data;
 }
 
@@ -38,7 +38,7 @@ export async function listHackathons(params?: {
   limit?: number;
   search?: string;
 }): Promise<{ items: Hackathon[]; total: number }> {
-  const res = await apiClient.get('/hackathons', { params });
+  const res = await apiClient.get('/admin/hackathons', { params });
   return toListResult<Hackathon>(res.data, {
     arrayKeys: ['items', 'hackathons', 'results'],
     totalKeys: ['total', 'count'],
@@ -51,14 +51,14 @@ export async function transitionHackathon(
   id: string,
   targetStatus: HackathonStatus
 ): Promise<Hackathon> {
-  const { data } = await apiClient.patch<Hackathon>(`/hackathons/${id}/status`, {
+  const { data } = await apiClient.patch<Hackathon>(`/admin/hackathons/${id}/status`, {
     target_status: targetStatus,
   });
   return data;
 }
 
 export async function finalizeHackathon(id: string): Promise<Hackathon> {
-  const { data } = await apiClient.post<Hackathon>(`/hackathons/${id}/finalize`);
+  const { data } = await apiClient.post<Hackathon>(`/admin/hackathons/${id}/finalize`);
   return data;
 }
 
@@ -74,7 +74,7 @@ export interface AddChallengePayload {
 export async function listHackathonChallenges(
   hackathonId: string
 ): Promise<HackathonChallenge[]> {
-  const res = await apiClient.get(`/hackathons/${hackathonId}/challenges`);
+  const res = await apiClient.get(`/admin/hackathons/${hackathonId}/challenges`);
   return toArray<HackathonChallenge>(res.data, ['items', 'challenges', 'results']);
 }
 
@@ -83,7 +83,7 @@ export async function addChallengeToHackathon(
   payload: AddChallengePayload
 ): Promise<HackathonChallenge> {
   const { data } = await apiClient.post<HackathonChallenge>(
-    `/hackathons/${hackathonId}/challenges`,
+    `/admin/hackathons/${hackathonId}/challenges`,
     payload
   );
   return data;
@@ -93,7 +93,7 @@ export async function removeChallengeFromHackathon(
   hackathonId: string,
   challengeId: string
 ): Promise<void> {
-  await apiClient.delete(`/hackathons/${hackathonId}/challenges/${challengeId}`);
+  await apiClient.delete(`/admin/hackathons/${hackathonId}/challenges/${challengeId}`);
 }
 
 // ─── Challenge Library (sede-scoped) ─────────────────────────────────────────
@@ -127,7 +127,7 @@ export interface RegistrationEntry {
 }
 
 export async function listRegistrations(hackathonId: string): Promise<RegistrationEntry[]> {
-  const res = await apiClient.get(`/hackathons/${hackathonId}/registrations`);
+  const res = await apiClient.get(`/admin/hackathons/${hackathonId}/registrations`);
   return toArray<RegistrationEntry>(res.data, ['items', 'registrations', 'results']);
 }
 
@@ -142,7 +142,7 @@ export interface HackathonMentor {
 }
 
 export async function getHackathonMentors(hackathonId: string): Promise<HackathonMentor[]> {
-  const res = await apiClient.get(`/hackathons/${hackathonId}/mentors`);
+  const res = await apiClient.get(`/admin/hackathons/${hackathonId}/mentors`);
   return toArray<HackathonMentor>(res.data, ['items', 'mentors', 'results']);
 }
 
@@ -150,14 +150,14 @@ export async function addHackathonMentor(
   hackathonId: string,
   payload: { user_global_id: string; role_in_hackathon: string }
 ): Promise<void> {
-  await apiClient.post(`/hackathons/${hackathonId}/mentors`, payload);
+  await apiClient.post(`/admin/hackathons/${hackathonId}/mentors`, payload);
 }
 
 export async function removeHackathonMentor(
   hackathonId: string,
   userGlobalId: string
 ): Promise<void> {
-  await apiClient.delete(`/hackathons/${hackathonId}/mentors/${userGlobalId}`);
+  await apiClient.delete(`/admin/hackathons/${hackathonId}/mentors/${userGlobalId}`);
 }
 
 // ─── Sede Access ─────────────────────────────────────────────────────────────
@@ -169,7 +169,7 @@ export interface SedeAccessEntry {
 }
 
 export async function listSedeAccess(hackathonId: string): Promise<SedeAccessEntry[]> {
-  const res = await apiClient.get(`/hackathons/${hackathonId}/sede-access`);
+  const res = await apiClient.get(`/admin/hackathons/${hackathonId}/sede-access`);
   return toArray<SedeAccessEntry>(res.data, ['items', 'sedes', 'results']);
 }
 
@@ -177,14 +177,14 @@ export async function grantSedeAccess(
   hackathonId: string,
   sedeId: string
 ): Promise<void> {
-  await apiClient.post(`/hackathons/${hackathonId}/sede-access`, { sede_id: sedeId });
+  await apiClient.post(`/admin/hackathons/${hackathonId}/sede-access`, { sede_id: sedeId });
 }
 
 export async function revokeSedeAccess(
   hackathonId: string,
   sedeId: string
 ): Promise<void> {
-  await apiClient.delete(`/hackathons/${hackathonId}/sede-access/${sedeId}`);
+  await apiClient.delete(`/admin/hackathons/${hackathonId}/sede-access/${sedeId}`);
 }
 
 // ─── Flash Challenges ────────────────────────────────────────────────────────
@@ -203,7 +203,7 @@ export async function createFlashChallenge(
 ): Promise<HackathonChallenge> {
   // Use the challenge assignment endpoint with is_flash flag
   const { data } = await apiClient.post<HackathonChallenge>(
-    `/hackathons/${hackathonId}/challenges`,
+    `/admin/hackathons/${hackathonId}/challenges`,
     {
       challenge_id: payload.challenge_id,
       order_index: 999, // flash challenges go at end

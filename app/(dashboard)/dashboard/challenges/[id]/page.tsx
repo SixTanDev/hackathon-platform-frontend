@@ -351,6 +351,11 @@ Un diccionario en Python con el formato:
 
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
+  const latestCodeRef = useRef(code);
+
+  useEffect(() => {
+    latestCodeRef.current = code;
+  }, [code]);
 
   const moveCursorToEditableArea = useCallback(() => {
     const editor = editorRef.current;
@@ -403,7 +408,7 @@ Un diccionario en Python con el formato:
     });
 
     editor.onDidPaste(() => {
-      editor.setValue(code);
+      editor.setValue(latestCodeRef.current);
       toast({
         title: 'Pegado deshabilitado',
         description: 'No puedes pegar contenido externo en este reto.',

@@ -271,7 +271,7 @@ export class HackathonWSClient {
  */
 export function getWSBaseUrl(): string {
   const apiUrl = typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_API_URL ?? '')
+    ? (process.env.NEXT_PUBLIC_API_URL ?? 'https://apisamp.gruslin.tech/api/v1')
     : '';
 
   if (!apiUrl) return '';

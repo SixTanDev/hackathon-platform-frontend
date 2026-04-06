@@ -1,39 +1,22 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { Calendar, ChevronLeft, ChevronRight, Plus, Search, Trophy } from 'lucide-react';
 import { queryKeys } from '@/lib/query-client';
-import apiClient from '@/lib/api/client';
-import { createHackathon } from '@/lib/api/admin-hackathon-services';
-import { useAuthStore } from '@/stores/auth-store';
-import { useToast } from '@/hooks/use-toast';
+import { listHackathons } from '@/lib/api/admin-hackathon-services';
+import { getHackathons } from '@/lib/api/services';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Trophy, Search, Calendar, ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import type { Hackathon, HackathonCreate, HackathonMode, HackathonScope } from '@/types/api';
+import type { Hackathon, HackathonStatus } from '@/types/api';
 
-/* ── OpenAPI: GET /hackathons ── */
-interface PageHackathonRead {
-  items: Hackathon[];
-  total: number;
-  page: number;
-  page_size: number;
-  pages: number;
-}
-
-async function listHackathonsOpenAPI(params: { page: number; page_size: number; status?: string; search?: string }) {
-  const res = await apiClient.get<PageHackathonRead>('/hackathons', { params });
-  return res.data;
-}
+type TabValue = 'all' | 'active' | 'draft' | 'finished';
 
 const STATUS_STYLES: Record<string, { label: string; className: string }> = {
   draft: { label: 'Borrador', className: 'bg-muted text-muted-foreground' },
@@ -44,12 +27,77 @@ const STATUS_STYLES: Record<string, { label: string; className: string }> = {
   archived: { label: 'Archivado', className: 'bg-muted/50 text-muted-foreground/60' },
 };
 
-const SCOPE_LABELS: Record<string, string> = { internal: 'Interno', zonal: 'Zonal', open: 'Abierto' };
-const MODE_LABELS: Record<string, string> = { live: 'En Vivo', practice: 'Práctica' };
+const SCOPE_LABELS: Record<string, string> = {
+  internal: 'Interno',
+  zonal: 'Zonal',
+  open: 'Abierto',
+};
 
-type TabValue = 'all' | 'active' | 'draft' | 'finished';
+const MODE_LABELS: Record<string, string> = {
+  live: 'En Vivo',
+  practice: 'Practica',
+};
+
+async function listTutorHackathons(params: {
+  page: number;
+  limit: number;
+  status?: string;
+  search?: string;
+}) {
+  const skip = (params.page - 1) * params.limit;
+  try {
+    const adminResult = await listHackathons({
+      status: params.status,
+      search: params.search,
+      skip,
+      limit: params.limit,
+    });
+
+    if (adminResult.items.length > 0) {
+      return adminResult;
+    }
+  } catch {
+    // If the tutor cannot access the admin source, fall back to the public list.
+  }
+
+  const publicStatuses: HackathonStatus[] = params.status
+    ? [params.status as HackathonStatus]
+    : ['draft', 'registration_open', 'active', 'paused', 'finished', 'archived'];
+
+  const publicLists = await Promise.all(
+    publicStatuses.map((status) =>
+      getHackathons({
+        status,
+        limit: Math.max(params.limit, 50),
+      }).catch(() => [])
+    )
+  );
+
+  const merged = publicLists.flat();
+  const seen = new Set<string>();
+  const filtered = merged.filter((hackathon) => {
+    if (seen.has(hackathon.id)) return false;
+    seen.add(hackathon.id);
+    if (!params.search?.trim()) return true;
+
+    const query = params.search.trim().toLowerCase();
+    return (
+      hackathon.name?.toLowerCase().includes(query) ||
+      hackathon.description?.toLowerCase().includes(query)
+    );
+  });
+
+  const start = skip;
+  const end = start + params.limit;
+
+  return {
+    items: filtered.slice(start, end),
+    total: filtered.length,
+  };
+}
 
 export default function TutorHackathonsPage() {
+  const router = useRouter();
   const [tab, setTab] = useState<TabValue>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -62,26 +110,44 @@ export default function TutorHackathonsPage() {
     return undefined;
   }, [tab]);
 
-  // OpenAPI: GET /hackathons with exact query params
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.hackathons.list({ page, pageSize, status: statusFilter, search }),
-    queryFn: () => listHackathonsOpenAPI({ page, page_size: pageSize, status: statusFilter, search }),
+    queryFn: () => listTutorHackathons({ page, limit: pageSize, status: statusFilter, search }),
   });
 
   const hackathons = data?.items ?? [];
-  const totalPages = data?.pages ?? 1;
+  const total = data?.total ?? 0;
+  const totalPages = Math.max(Math.ceil(total / pageSize), 1);
 
-  function formatDate(d: string | null) {
-    if (!d) return '—';
-    return new Date(d).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+  function formatDate(value: string | null) {
+    if (!value) return '-';
+    return new Date(value).toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <PageHeader title="Hackathones" description="Consulta el estado, alcance y fechas de los hackathones disponibles." />
+    <div className="space-y-6 animate-fade-in p-2">
+      <PageHeader
+        title="Hackathones"
+        description="Consulta el estado, alcance y fechas de los hackathones disponibles."
+      >
+        <Button onClick={() => router.push('/tutor/hackathons/create')} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Nuevo Hackathon
+        </Button>
+      </PageHeader>
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Tabs value={tab} onValueChange={(v) => { setTab(v as TabValue); setPage(1); }}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Tabs
+          value={tab}
+          onValueChange={(value) => {
+            setTab(value as TabValue);
+            setPage(1);
+          }}
+        >
           <TabsList>
             <TabsTrigger value="all">Todos</TabsTrigger>
             <TabsTrigger value="active">Activos</TabsTrigger>
@@ -89,63 +155,127 @@ export default function TutorHackathonsPage() {
             <TabsTrigger value="finished">Finalizados</TabsTrigger>
           </TabsList>
         </Tabs>
+
         <div className="relative w-64">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar..." value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} className="pl-9" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar..."
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            className="pl-9"
+          />
         </div>
       </div>
 
-      <Card className="border-border/50">
+      <Card className="overflow-hidden border-border/50 shadow-sm">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="p-6 space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-14 w-full" />)}
+            <div className="space-y-3 p-6">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <Skeleton key={item} className="h-14 w-full" />
+              ))}
             </div>
           ) : hackathons.length === 0 ? (
-            <div className="py-16 text-center">
-              <Trophy className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-muted-foreground">No se encontraron hackathones</p>
+            <div className="py-24 text-center">
+              <Trophy className="mx-auto mb-4 h-12 w-12 text-muted-foreground/20" />
+              <p className="text-sm text-muted-foreground">No se encontraron hackathones disponibles</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border text-muted-foreground">
-                      <th className="px-4 py-3 text-left font-medium">Título</th>
-                      <th className="px-4 py-3 text-left font-medium">Alcance</th>
-                      <th className="px-4 py-3 text-left font-medium">Modo</th>
-                      <th className="px-4 py-3 text-left font-medium">Estado</th>
-                      <th className="px-4 py-3 text-left font-medium flex items-center gap-1"><Calendar className="w-3 h-3" /> Fechas</th>
+                    <tr className="border-b border-border bg-muted/30 text-muted-foreground">
+                      <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-wider">
+                        Titulo
+                      </th>
+                      <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-wider">
+                        Alcance
+                      </th>
+                      <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-wider">
+                        Modo
+                      </th>
+                      <th className="px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="flex items-center gap-1.5 px-5 py-4 text-left text-[10px] font-semibold uppercase tracking-wider">
+                        <Calendar className="h-3.5 w-3.5" /> Fechas
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {hackathons.map((h) => {
-                      const st = STATUS_STYLES[h.status] ?? { label: h.status, className: 'bg-muted text-muted-foreground' };
+                    {hackathons.map((hackathon) => {
+                      const status = STATUS_STYLES[hackathon.status] ?? {
+                        label: hackathon.status,
+                        className: 'bg-muted text-muted-foreground',
+                      };
+
                       return (
-                        <tr key={h.id} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                          <td className="px-4 py-3 font-medium">{h.name}</td>
-                          <td className="px-4 py-3"><Badge variant="outline" className="text-[10px]">{SCOPE_LABELS[h.scope] ?? h.scope}</Badge></td>
-                          <td className="px-4 py-3 text-xs">{MODE_LABELS[h.mode] ?? h.mode}</td>
-                          <td className="px-4 py-3"><Badge className={`${st.className} border-0 text-[10px]`}>{st.label}</Badge></td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(h.starts_at)} – {formatDate(h.ends_at)}</td>
+                        <tr
+                          key={hackathon.id}
+                          className="group border-b border-border/50 transition-all hover:bg-muted/10"
+                        >
+                          <td className="px-5 py-4 font-bold text-zinc-800 transition-colors group-hover:text-primary dark:text-zinc-200">
+                            {hackathon.name}
+                          </td>
+                          <td className="px-5 py-4">
+                            <Badge
+                              variant="outline"
+                              className="border-border/50 text-[10px] font-mono uppercase tracking-tighter"
+                            >
+                              {SCOPE_LABELS[hackathon.scope] ?? hackathon.scope}
+                            </Badge>
+                          </td>
+                          <td className="px-5 py-4 text-[11px] font-medium text-muted-foreground">
+                            {MODE_LABELS[hackathon.mode] ?? hackathon.mode}
+                          </td>
+                          <td className="px-5 py-4">
+                            <Badge
+                              className={`${status.className} border-0 px-2 text-[10px] font-bold uppercase tracking-tight`}
+                            >
+                              {status.label}
+                            </Badge>
+                          </td>
+                          <td className="px-5 py-4 font-mono text-[11px] text-muted-foreground">
+                            {formatDate(hackathon.starts_at)} - {formatDate(hackathon.ends_at)}
+                          </td>
                         </tr>
                       );
                     })}
                   </tbody>
                 </table>
               </div>
-              
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="p-4 border-t border-border flex items-center justify-between">
-                  <div className="text-xs text-muted-foreground">Página {page} de {totalPages}</div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
-                    <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}><ChevronRight className="h-4 w-4" /></Button>
+
+              {totalPages > 1 ? (
+                <div className="flex items-center justify-between border-t border-border bg-muted/10 p-4">
+                  <div className="text-[10px] font-mono uppercase text-muted-foreground">
+                    Pagina {page} de {totalPages}
+                  </div>
+                  <div className="flex gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      disabled={page === 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                      disabled={page === totalPages}
+                      className="h-8 w-8 p-0"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-              )}
+              ) : null}
             </>
           )}
         </CardContent>

@@ -20,7 +20,7 @@ import styles from './dashboard-styles.module.css';
 
 interface AdminHeroProps {
   user: User | null;
-  currentSede: Sede | null;
+  currentSedeName: string | null;
   health: HealthCheck | null;
   pendingReviewsCount: number;
   loading?: boolean;
@@ -28,7 +28,7 @@ interface AdminHeroProps {
 
 export function AdminHero({ 
   user, 
-  currentSede, 
+  currentSedeName, 
   health, 
   pendingReviewsCount, 
   loading 
@@ -84,7 +84,7 @@ export function AdminHero({
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-3 py-1 font-bold tracking-wider uppercase text-[10px]">
-                {t('admin.hero.statusLabel', { sede: currentSede?.name || t('common.campus') })}
+                {t('admin.hero.statusLabel', { sede: currentSedeName || t('common.campus') })}
               </Badge>
               <div className={`flex items-center gap-2 px-3 py-1 rounded-full border ${statusConfig.bg} ${statusConfig.border} ${statusConfig.color} animate-in fade-in zoom-in duration-500`}>
                 <StatusIcon className="w-3.5 h-3.5" />
@@ -97,7 +97,7 @@ export function AdminHero({
                 {t('admin.hero.greeting')}, {user?.full_name?.split(' ')[0] || 'Admin'}
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl leading-relaxed font-medium">
-                {statusConfig.description}. {t('dashboard.subtitle', { sede: currentSede?.name || t('common.campus') })}
+                {statusConfig.description}. {t('dashboard.subtitle', { sede: currentSedeName || t('common.campus') })}
               </p>
             </div>
           </div>

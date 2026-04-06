@@ -100,7 +100,7 @@ export default function AdminDashboardPage() {
     <div className="space-y-6 animate-fade-in">
       <AdminHero 
         user={user} 
-        currentSede={currentSede ? { name: currentSede.name } : null} 
+        currentSedeName={currentSede?.name ?? null} 
         health={health || null} 
         pendingReviewsCount={pendingCount} 
         loading={loadingOverview || loadingHealth} 
