@@ -145,16 +145,23 @@ apiClient.interceptors.response.use(
     }
 
     // Normalize error
-    const responseData = error?.response?.data as ApiError | undefined;
+    const responseData = error?.response?.data;
+    const detail = (typeof responseData?.detail === 'string'
+      ? responseData.detail
+      : error?.message) ?? 'An unexpected error occurred';
+
     const apiError: ApiError = {
-      detail: (typeof responseData?.detail === 'string'
-        ? responseData.detail
-        : error?.message) ?? 'An unexpected error occurred',
+      message: detail,
+      detail,
       error_code: responseData?.error_code,
       field_errors: Array.isArray(responseData?.detail)
         ? (responseData?.detail as any)
         : undefined,
       status: error?.response?.status,
+      config: {
+        method: error?.config?.method,
+        url: error?.config?.url,
+      },
       response: {
         status: error?.response?.status,
         data: responseData,

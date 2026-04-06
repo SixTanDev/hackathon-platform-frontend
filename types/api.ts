@@ -877,10 +877,15 @@ export interface HTTPValidationError {
 }
 
 export interface ApiError {
+  message: string;
   detail: string;
   error_code?: string;
   field_errors?: ValidationError[];
   status?: number;
+  config?: {
+    method?: string;
+    url?: string;
+  };
   response?: {
     status?: number;
     data?: unknown;

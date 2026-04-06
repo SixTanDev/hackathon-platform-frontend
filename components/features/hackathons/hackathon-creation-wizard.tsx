@@ -199,7 +199,9 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
 
   // --- Submit ---
   async function handleSubmit(openRegistration: boolean) {
+    if (submitting) return;
     setSubmitting(true);
+
     try {
       const payload: HackathonCreate = {
         name: name.trim(),
@@ -223,10 +225,12 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
           },
         },
       };
+
+      // 1. Service Creation
       const hackathon = await createHackathon(payload);
       const setupWarnings: string[] = [];
 
-      // Add challenges
+      // 2. Add challenges
       for (const sc of selectedChallenges) {
         try {
           await addChallengeToHackathon(hackathon.id, {
@@ -239,7 +243,7 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
         }
       }
 
-      // Add mentors
+      // 3. Add mentors
       for (const m of selectedMentors) {
         try {
           await addHackathonMentor(hackathon.id, {
@@ -251,27 +255,48 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
         }
       }
 
-      // Transition if requested
+      // 4. Transition if requested
       if (openRegistration) {
         try {
           await transitionHackathon(hackathon.id, 'registration_open');
         } catch {
-          setupWarnings.push('El hackathon se creo, pero no se pudo abrir la etapa de inscripciones.');
+          setupWarnings.push('El hackathon se creó, pero no se pudo abrir la etapa de inscripciones.');
         }
       }
 
-      toast({
-        title: setupWarnings.length > 0 ? 'Hackathon creado con observaciones' : 'Hackathon creado',
-        description:
-          setupWarnings.length > 0
-            ? `"${hackathon.name}" se creo, pero hay ajustes pendientes: ${setupWarnings.join(' ')}`
-            : `"${hackathon.name}" fue creado exitosamente.`,
-        variant: setupWarnings.length > 0 ? 'destructive' : 'default',
-      });
+      // 5. Success Feedback
+      if (setupWarnings.length > 0) {
+        toast({
+          title: 'Hackathon creado con observaciones',
+          description: `"${hackathon.name}" se creó, pero hay ajustes pendientes: ${setupWarnings.join(' ')}`,
+          variant: 'destructive', // Using destructive for visibility of warnings
+        });
+      } else {
+        toast({
+          title: openRegistration ? '¡Hackathon Lanzado!' : '¡Borrador Guardado!',
+          description: `"${hackathon.name}" ha sido ${openRegistration ? 'publicado exitosamente' : 'guardado en tus borradores'}.`,
+        });
+      }
+
+      // 6. Finalize
       queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.all });
       router.push(redirectPath);
     } catch (err: any) {
-      toast({ title: 'Error', description: err?.message ?? 'No se pudo crear el hackathon.', variant: 'destructive' });
+      console.error('Error creating hackathon:', {
+        status: err?.status,
+        message: err?.message,
+        detail: err?.detail,
+        config: err?.config,
+        full: err
+      });
+
+      const errorMessage = err?.message || err?.detail || 'Ocurrió un error inesperado al intentar crear el hackathon. Por favor intenta de nuevo.';
+
+      toast({
+        title: `Error (${err?.status || 'API'})`,
+        description: errorMessage,
+        variant: 'destructive',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -736,32 +761,32 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
             </div>
           )}
         </CardContent>
-      </Card>
 
-      {/* Navigation Toolbar */}
-      <div className="flex items-center justify-between pt-6 border-t border-border/30 bg-background/50 backdrop-blur-md sticky bottom-0 z-50 px-4 py-8 mt-2">
-        <Button variant="outline" size="lg" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-2xl px-10 h-14 border-border/50 text-xs font-bold uppercase transition-all active:scale-95">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Regresar
-        </Button>
-        <div className="flex gap-4">
-          {step < 6 ? (
-            <Button size="lg" onClick={() => setStep((s) => Math.min(6, s + 1))} disabled={!canNext()} className="rounded-2xl px-12 h-14 bg-primary hover:shadow-xl shadow-primary/20 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
-              Siguiente <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          ) : (
-            <>
-              <Button variant="outline" size="lg" onClick={() => handleSubmit(false)} disabled={submitting} className="rounded-2xl px-8 h-14 border-border/50 text-[10px] font-bold uppercase text-muted-foreground hover:bg-muted transition-all active:scale-95">
-                {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Solo Borrador
+        {/* Navigation Toolbar */}
+        <div className="flex items-center justify-between p-6 border-t border-border/50 bg-muted/5 rounded-b-[inherit]">
+          <Button variant="outline" size="lg" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-2xl px-10 h-14 border-border/50 text-xs font-bold uppercase transition-all active:scale-95">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Regresar
+          </Button>
+          <div className="flex gap-4">
+            {step < 6 ? (
+              <Button size="lg" onClick={() => setStep((s) => Math.min(6, s + 1))} disabled={!canNext()} className="rounded-2xl px-12 h-14 bg-primary hover:shadow-xl shadow-primary/20 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
+                Siguiente <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="rounded-2xl px-14 h-14 bg-primary hover:shadow-2xl shadow-primary/30 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
-                {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Lanzar Evento
-              </Button>
-            </>
-          )}
+            ) : (
+              <>
+                <Button variant="outline" size="lg" onClick={() => handleSubmit(false)} disabled={submitting} className="rounded-2xl px-8 h-14 border-border/50 text-[10px] font-bold uppercase text-muted-foreground hover:bg-muted transition-all active:scale-95">
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  Solo Borrador
+                </Button>
+                <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="rounded-2xl px-14 h-14 bg-primary hover:shadow-2xl shadow-primary/30 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  Lanzar Evento
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
