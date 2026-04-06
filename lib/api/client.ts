@@ -1,5 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import type { ApiError } from '@/types/api';
+import type { ApiError, ValidationError } from '@/types/api';
 import { isTokenExpiringSoon } from '@/lib/auth-helpers';
 
 // Use the server-side proxy to avoid CORS issues in preview/production
@@ -146,17 +146,27 @@ apiClient.interceptors.response.use(
 
     // Normalize error
     const responseData = error?.response?.data;
-    const detail = (typeof responseData?.detail === 'string'
-      ? responseData.detail
-      : error?.message) ?? 'An unexpected error occurred';
+    let detail = 'An unexpected error occurred';
+    let fieldErrors: ValidationError[] | undefined = undefined;
+
+    if (responseData?.detail) {
+      if (typeof responseData.detail === 'string') {
+        detail = responseData.detail;
+      } else if (Array.isArray(responseData.detail)) {
+        fieldErrors = responseData.detail;
+        detail = (responseData.detail as any[])
+          .map((d: any) => `${d.loc.join('.')}: ${d.msg}`)
+          .join('; ');
+      }
+    } else if (error?.message) {
+      detail = error.message;
+    }
 
     const apiError: ApiError = {
       message: detail,
       detail,
       error_code: responseData?.error_code,
-      field_errors: Array.isArray(responseData?.detail)
-        ? (responseData?.detail as any)
-        : undefined,
+      field_errors: fieldErrors,
       status: error?.response?.status,
       config: {
         method: error?.config?.method,

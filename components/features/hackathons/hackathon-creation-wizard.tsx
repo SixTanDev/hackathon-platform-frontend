@@ -95,7 +95,7 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
   // Step 1 state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [scope, setScope] = useState<HackathonScope>('internal');
+  const [scope, setScope] = useState<HackathonScope>('local');
   const [mode, setMode] = useState<HackathonMode>('live');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
@@ -203,15 +203,19 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
     setSubmitting(true);
 
     try {
+      // API expects ISO-8601 strings (YYYY-MM-DDTHH:mm:ssZ).
+      // datetime-local input provides YYYY-MM-DDTHH:mm.
+      const formatIso = (val: string) => val ? `${val}:00Z` : null;
+
       const payload: HackathonCreate = {
         name: name.trim(),
         description: description || null,
         scope,
         mode,
-        starts_at: startsAt || null,
-        ends_at: endsAt || null,
-        registration_starts_at: regStartsAt || null,
-        registration_ends_at: regEndsAt || null,
+        starts_at: formatIso(startsAt),
+        ends_at: formatIso(endsAt),
+        registration_starts_at: formatIso(regStartsAt),
+        registration_ends_at: formatIso(regEndsAt),
         rules_text: rulesText || null,
         is_team_based: isTeamBased,
         allow_individual: allowIndividual,
@@ -225,6 +229,8 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
           },
         },
       };
+
+      console.log('Enviando payload:', payload);
 
       // 1. Service Creation
       const hackathon = await createHackathon(payload);
@@ -282,12 +288,14 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
       queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.all });
       router.push(redirectPath);
     } catch (err: any) {
-      console.error('Error creating hackathon:', {
-        status: err?.status,
-        message: err?.message,
-        detail: err?.detail,
+      // Detailed logging for the Next.js error overlay
+      const status = err?.status || 'API Error';
+      const detail = err?.message || err?.detail || 'No detail available';
+      
+      console.error(`Status ${status}: ${detail}`, {
         config: err?.config,
-        full: err
+        field_errors: err?.field_errors,
+        full_error: err
       });
 
       const errorMessage = err?.message || err?.detail || 'Ocurrió un error inesperado al intentar crear el hackathon. Por favor intenta de nuevo.';
@@ -355,9 +363,9 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
                   <Select value={scope} onValueChange={(v) => setScope(v as HackathonScope)}>
                     <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="internal">Interno (solo mi sede)</SelectItem>
-                      <SelectItem value="zonal">Zonal (mi zona)</SelectItem>
-                      <SelectItem value="open">Abierto (nacional)</SelectItem>
+                      <SelectItem value="local">Local (mi sede)</SelectItem>
+                      <SelectItem value="regional">Regional (mi zona)</SelectItem>
+                      <SelectItem value="global">Nacional (toda la UNAD)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
