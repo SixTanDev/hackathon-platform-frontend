@@ -7,7 +7,11 @@ export default function CreateHackathonPage() {
     <div className="p-6">
       <HackathonCreationWizard 
         redirectPath="/admin/hackathons" 
-        title="Crear Global Hackathon" 
+        title="Crear Global Hackathon"
+        allowedScopes={['internal', 'zonal', 'open']}
+        canLaunchImmediately={true}
+        canAssignMentors={true}
+        showDocumentCollections={true}
       />
     </div>
   );

@@ -45,55 +45,17 @@ async function listTutorHackathons(params: {
   search?: string;
 }) {
   const skip = (params.page - 1) * params.limit;
-  try {
-    const adminResult = await listHackathons({
-      status: params.status,
-      search: params.search,
-      skip,
-      limit: params.limit,
-    });
-
-    if (adminResult.items.length > 0) {
-      return adminResult;
-    }
-  } catch {
-    // If the tutor cannot access the admin source, fall back to the public list.
-  }
-
-  const publicStatuses: HackathonStatus[] = params.status
-    ? [params.status as HackathonStatus]
-    : ['draft', 'registration_open', 'active', 'paused', 'finished', 'archived'];
-
-  const publicLists = await Promise.all(
-    publicStatuses.map((status) =>
-      getHackathons({
-        status,
-        limit: Math.max(params.limit, 50),
-      }).catch(() => [])
-    )
-  );
-
-  const merged = publicLists.flat();
-  const seen = new Set<string>();
-  const filtered = merged.filter((hackathon) => {
-    if (seen.has(hackathon.id)) return false;
-    seen.add(hackathon.id);
-    if (!params.search?.trim()) return true;
-
-    const query = params.search.trim().toLowerCase();
-    return (
-      hackathon.name?.toLowerCase().includes(query) ||
-      hackathon.description?.toLowerCase().includes(query)
-    );
+  
+  // Directly use listHackathons as it's the unified endpoint.
+  // The backend will filter based on the user's role and search terms.
+  const result = await listHackathons({
+    status: params.status,
+    search: params.search,
+    skip,
+    limit: params.limit,
   });
 
-  const start = skip;
-  const end = start + params.limit;
-
-  return {
-    items: filtered.slice(start, end),
-    total: filtered.length,
-  };
+  return result;
 }
 
 export default function TutorHackathonsPage() {

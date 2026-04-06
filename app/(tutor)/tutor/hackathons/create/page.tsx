@@ -8,6 +8,8 @@ export default function CreateTutorHackathonPage() {
       <HackathonCreationWizard 
         redirectPath="/tutor/hackathons" 
         title="Crear Nuevo Hackathon de Sede" 
+        allowedScopes={['internal', 'zonal']}
+        canLaunchImmediately={false}
       />
     </div>
   );

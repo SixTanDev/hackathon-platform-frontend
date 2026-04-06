@@ -42,6 +42,7 @@ import {
   UserPlus,
 } from 'lucide-react';
 import type { HackathonCreate, HackathonScope, HackathonMode, ChallengePublic } from '@/types/api';
+import { useAuthStore } from '@/stores/auth-store';
 
 interface SelectedChallenge {
   challenge: ChallengePublic;
@@ -83,9 +84,20 @@ const TYPE_LABELS: Record<string, string> = {
 interface HackathonCreationWizardProps {
   redirectPath: string;
   title?: string;
+  allowedScopes?: HackathonScope[];
+  canLaunchImmediately?: boolean;
+  canAssignMentors?: boolean;
+  showDocumentCollections?: boolean;
 }
 
-export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon" }: HackathonCreationWizardProps) {
+export function HackathonCreationWizard({ 
+  redirectPath, 
+  title = "Crear Hackathon",
+  allowedScopes = ['internal', 'zonal', 'open'],
+  canLaunchImmediately = true,
+  canAssignMentors = true,
+  showDocumentCollections = true,
+}: HackathonCreationWizardProps) {
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -95,7 +107,7 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
   // Step 1 state
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [scope, setScope] = useState<HackathonScope>('local');
+  const [scope, setScope] = useState<HackathonScope>(allowedScopes[0] || 'internal');
   const [mode, setMode] = useState<HackathonMode>('live');
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
@@ -137,9 +149,10 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
     const t = setTimeout(() => setMentorDebounced(mentorSearch), 300);
     return () => clearTimeout(t);
   }, [mentorSearch]);
+  const currentSedeId = useAuthStore((s) => s.currentSede?.id);
   const { data: mentorResults } = useQuery({
-    queryKey: queryKeys.userSearch(mentorDebounced),
-    queryFn: () => searchSedeMembers(mentorDebounced),
+    queryKey: [...queryKeys.userSearch(mentorDebounced), currentSedeId],
+    queryFn: () => searchSedeMembers(mentorDebounced, currentSedeId || undefined),
     enabled: mentorDebounced.length >= 2 && step === 5,
   });
 
@@ -326,6 +339,9 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
       {/* Progress */}
       <div className="flex items-center gap-1 overflow-x-auto pb-2 scrollbar-none">
         {STEPS.map((s) => {
+          if (s.id === 4 && !showDocumentCollections) return null;
+          if (s.id === 5 && !canAssignMentors) return null;
+
           const Icon = s.icon;
           const active = s.id === step;
           const done = s.id < step;
@@ -363,9 +379,9 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
                   <Select value={scope} onValueChange={(v) => setScope(v as HackathonScope)}>
                     <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="local">Local (mi sede)</SelectItem>
-                      <SelectItem value="regional">Regional (mi zona)</SelectItem>
-                      <SelectItem value="global">Nacional (toda la UNAD)</SelectItem>
+                      {allowedScopes.includes('internal') && <SelectItem value="internal">Interno (solo mi sede)</SelectItem>}
+                      {allowedScopes.includes('zonal') && <SelectItem value="zonal">Zonal (mi zona)</SelectItem>}
+                      {allowedScopes.includes('open') && <SelectItem value="open">Abierto (nacional)</SelectItem>}
                     </SelectContent>
                   </Select>
                 </div>
@@ -786,10 +802,12 @@ export function HackathonCreationWizard({ redirectPath, title = "Crear Hackathon
                   {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                   Solo Borrador
                 </Button>
-                <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="rounded-2xl px-14 h-14 bg-primary hover:shadow-2xl shadow-primary/30 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
-                  {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                  Lanzar Evento
-                </Button>
+                {canLaunchImmediately && (
+                  <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="rounded-2xl px-14 h-14 bg-primary hover:shadow-2xl shadow-primary/30 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
+                    {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                    Lanzar Evento
+                  </Button>
+                )}
               </>
             )}
           </div>

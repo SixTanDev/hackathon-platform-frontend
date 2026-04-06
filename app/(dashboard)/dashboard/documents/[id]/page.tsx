@@ -2,24 +2,23 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  getCollection, 
-  listDocuments, 
-  downloadDocumentBlob 
+import {
+  getCollection,
+  listDocuments,
+  downloadDocumentBlob,
 } from '@/lib/api/document-services';
-import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  FileText, 
-  Download, 
-  ArrowLeft, 
-  FileIcon, 
-  CheckCircle2, 
+import {
+  FileText,
+  Download,
+  ArrowLeft,
+  FileIcon,
+  CheckCircle2,
   AlertCircle,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -45,7 +44,7 @@ export default function StudentCollectionDetailPage() {
     try {
       setDownloadingId(docId);
       const blob = await downloadDocumentBlob(docId, collectionId);
-      
+
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -54,7 +53,7 @@ export default function StudentCollectionDetailPage() {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast.success(`Descargando: ${filename}`);
     } catch (err) {
       console.error('Download error:', err);
@@ -76,9 +75,9 @@ export default function StudentCollectionDetailPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4 mb-2">
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => router.back()}
           className="h-9 w-9 rounded-full hover:bg-primary/5"
         >
@@ -102,7 +101,7 @@ export default function StudentCollectionDetailPage() {
         <CardContent className="p-0">
           {loadingDocs ? (
             <div className="p-6 space-y-4">
-              {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
+              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
             </div>
           ) : !documents?.length ? (
             <div className="py-20 text-center text-muted-foreground">
@@ -114,6 +113,9 @@ export default function StudentCollectionDetailPage() {
               {documents.map((doc) => {
                 const isReady = doc.processing_status === 'ready';
                 const isDownloading = downloadingId === doc.id;
+                const displayTitle = doc.title || doc.original_filename || doc.filename;
+                const displayExtension = doc.file_extension || (doc.file_type ? `.${doc.file_type}` : '');
+                const displaySize = doc.file_size ?? doc.file_size_bytes;
 
                 return (
                   <div key={doc.id} className="flex items-center justify-between p-4 hover:bg-muted/20 transition-colors group">
@@ -122,10 +124,10 @@ export default function StudentCollectionDetailPage() {
                         <FileIcon className="w-5 h-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-sm truncate pr-4">{doc.title}</p>
+                        <p className="font-bold text-sm truncate pr-4">{displayTitle}</p>
                         <div className="flex items-center gap-3 mt-1">
                           <span className="text-[10px] text-muted-foreground uppercase font-black tracking-tighter">
-                            {doc.file_extension?.replace('.', '') || 'DOC'} • {Math.round(doc.file_size / 1024)} KB
+                            {displayExtension.replace('.', '') || 'DOC'} - {Math.round(displaySize / 1024)} KB
                           </span>
                           {isReady ? (
                             <Badge variant="outline" className="h-4 text-[9px] bg-green-500/5 text-green-600 border-green-500/10 font-bold">
@@ -144,12 +146,12 @@ export default function StudentCollectionDetailPage() {
                       size="sm"
                       variant={isReady ? 'default' : 'ghost'}
                       className={`h-9 px-4 font-bold gap-2 transition-all ${
-                        isReady 
-                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20' 
+                        isReady
+                          ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20'
                           : 'opacity-50 grayscale'
                       }`}
                       disabled={!isReady || isDownloading}
-                      onClick={() => handleDownload(doc.id, doc.title + (doc.file_extension || ''))}
+                      onClick={() => handleDownload(doc.id, displayTitle + displayExtension)}
                     >
                       {isDownloading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
@@ -165,12 +167,11 @@ export default function StudentCollectionDetailPage() {
           )}
         </CardContent>
       </Card>
-      
-      {/* Disclaimer / Info */}
+
       <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
         <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
         <p className="text-xs text-amber-700 leading-relaxed font-medium">
-          <strong>Nota de seguridad:</strong> Todos los archivos han sido analizados y son seguros para su descarga. 
+          <strong>Nota de seguridad:</strong> Todos los archivos han sido analizados y son seguros para su descarga.
           Si tienes problemas para visualizar el contenido, contacta a tu tutor de sede.
         </p>
       </div>

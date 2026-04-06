@@ -2,9 +2,9 @@
 
 export type RoleName = 'admin' | 'tutor' | 'director_semillero' | 'student' | 'guest';
 
-export type HackathonStatus = 'draft' | 'registration_open' | 'registration_closed' | 'live' | 'paused' | 'finished';
+export type HackathonStatus = 'draft' | 'registration_open' | 'active' | 'paused' | 'finished' | 'archived';
 export type HackathonMode = 'live' | 'practice';
-export type HackathonScope = 'global' | 'regional' | 'local';
+export type HackathonScope = 'internal' | 'zonal' | 'open';
 export type HackathonRegistrationStatus = 'registered' | 'confirmed' | 'cancelled';
 
 export type ChallengeType = 'coding' | 'case_study' | 'essay' | 'clinical_analysis' | 'legal_argument' | 'design_proposal' | 'custom';
@@ -762,7 +762,10 @@ export interface DocumentItem {
   collection_id: string;
   filename: string;
   original_filename: string;
+  title?: string;
   file_type: DocumentFileType;
+  file_extension?: string;
+  file_size?: number;
   file_size_bytes: number;
   processing_status: DocumentProcessingStatus;
   processing_error?: string | null;

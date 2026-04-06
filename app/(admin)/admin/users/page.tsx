@@ -493,7 +493,7 @@ export default function UserManagementPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('admin.users.dialogs.deactivate.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('admin.users.dialogs.deactivate.description', { name: deactivateTarget?.full_name })}
+              {t('admin.users.dialogs.deactivate.description', { name: deactivateTarget?.full_name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

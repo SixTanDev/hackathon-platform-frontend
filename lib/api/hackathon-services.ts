@@ -161,13 +161,37 @@ export interface SedeUserResult {
   email: string;
 }
 
-export async function searchSedeMembers(query: string): Promise<SedeUserResult[]> {
-  // Use admin users endpoint with search to find sede members
-  const { data } = await apiClient.get(
-    '/admin/users',
-    { params: { search: query, limit: 10 } }
-  );
-  return toArray<SedeUserResult>(data, ['items', 'users', 'results']);
+export async function searchSedeMembers(query: string, sedeId?: string): Promise<SedeUserResult[]> {
+  try {
+    // Attempt global admin search first
+    const { data } = await apiClient.get(
+      '/admin/users',
+      { params: { search: query, limit: 10 } }
+    );
+    return toArray<SedeUserResult>(data, ['items', 'users', 'results']);
+  } catch (err: any) {
+    // Fallback: If admin/users is blocked (403) and we have a sedeId, 
+    // fetch all memberships for that sede and filter locally.
+    if (err?.status === 403 && sedeId) {
+      const { data } = await apiClient.get(`/sedes/${sedeId}/memberships`);
+      const memberships = toArray<any>(data, ['items', 'memberships', 'results']);
+      
+      const search = query.toLowerCase();
+      return memberships
+        .filter(m => 
+          m.full_name?.toLowerCase().includes(search) || 
+          m.email?.toLowerCase().includes(search)
+        )
+        .slice(0, 10)
+        .map(m => ({
+          id: m.id,
+          user_global_id: m.user_global_id,
+          full_name: m.full_name,
+          email: m.email,
+        }));
+    }
+    return [];
+  }
 }
 
 // ─── Mentor: My Assigned Teams ───────────────────────────────────────────
