@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useAuthStore } from '@/stores/auth-store';
 import { useWSNotifications, type ConnectionState } from '@/lib/websocket/hooks';
 import { ConnectionStatus } from '@/components/connection-status';
@@ -57,14 +57,14 @@ export function WSProvider({ children }: { children: React.ReactNode }) {
   // Show connection status only when authenticated
   const showStatus = isAuthenticated && notificationState !== 'CONNECTED';
 
+  const contextValue = useMemo(() => ({
+    notificationState,
+    wsUnreadCount,
+    markWSRead,
+  }), [notificationState, wsUnreadCount, markWSRead]);
+
   return (
-    <WSContext.Provider
-      value={{
-        notificationState,
-        wsUnreadCount,
-        markWSRead,
-      }}
-    >
+    <WSContext.Provider value={contextValue}>
       {children}
       {showStatus && (
         <ConnectionStatus

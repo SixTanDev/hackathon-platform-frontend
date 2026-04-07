@@ -91,8 +91,9 @@ export default function LoginPage() {
       );
 
       if (userData?.is_superadmin && allSedes.length === 0) {
-        syncCookies(accessToken);
-        router.replace('/admin/dashboard');
+        // SuperAdmin sin sedes → acceso global. Establecer cookie de rol y redirigir a panel superadmin.
+        syncCookies(accessToken, undefined, 'superadmin');
+        router.replace('/superadmin');
         return;
       }
 

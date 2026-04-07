@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth-store';
 import { DashboardSidebar } from '@/components/dashboard/sidebar';
@@ -54,7 +54,26 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
 
   const toggleMobile = useCallback(() => setMobileOpen((p) => !p), []);
 
-  if (!mounted || !isAuthenticated || (!contextToken && !allowNoContext)) {
+  // Only show the full-screen loader on initial mount or critical auth failure
+  // We avoid unmounting the entire app if we just have a brief flicker
+  const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
+
+  useEffect(() => {
+    if (mounted && isAuthenticated && (contextToken || allowNoContext)) {
+      setHasInitiallyLoaded(true);
+    }
+  }, [mounted, isAuthenticated, contextToken, allowNoContext]);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Only show full loader if we haven't loaded yet and auth is missing
+  if (!hasInitiallyLoaded && (!isAuthenticated || (!contextToken && !allowNoContext))) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />

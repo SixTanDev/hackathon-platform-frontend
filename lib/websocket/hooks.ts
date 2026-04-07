@@ -84,9 +84,13 @@ function useWSConnection(path: string | null) {
     client.on('disconnected', onDisconnected);
     client.on('reconnecting', onReconnecting);
 
-    // Set initial state
-    setConnectionState(client.state);
-    if (client.state === 'DISCONNECTED') {
+    // Set initial state without triggering unnecessary effect re-run
+    const initialState = client.state;
+    if (connectionState !== initialState) {
+      setConnectionState(initialState);
+    }
+    
+    if (initialState === 'DISCONNECTED') {
       client.connect();
     }
 
@@ -97,7 +101,7 @@ function useWSConnection(path: string | null) {
       clientRef.current = null;
       releaseClient(path);
     };
-  }, [path, token]);
+  }, [path, token]); 
 
   return { client: clientRef, connectionState };
 }
@@ -229,6 +233,7 @@ export function useHackathonLive(hackathonId: string | null) {
     c.on('hackathon_resumed', onStatusChange as (d: unknown) => void);
     c.on('submission_result', onSubmissionResult as (d: unknown) => void);
 
+    // ... existing event registrations ...
     return () => {
       c.off('leaderboard_update', onLeaderboard as (d: unknown) => void);
       c.off('flash_challenge_start', onFlashStart as (d: unknown) => void);
@@ -238,7 +243,7 @@ export function useHackathonLive(hackathonId: string | null) {
       c.off('hackathon_resumed', onStatusChange as (d: unknown) => void);
       c.off('submission_result', onSubmissionResult as (d: unknown) => void);
     };
-  }, [client, connectionState, hackathonId, queryClient, userId]);
+  }, [client, hackathonId, queryClient, userId]); // Removed connectionState
 
   return {
     leaderboard,
@@ -274,7 +279,7 @@ export function useHackathonMonitor(hackathonId: string | null) {
       c.off('monitor_stats', onStats as (d: unknown) => void);
       c.off('monitor_alert', onAlert as (d: unknown) => void);
     };
-  }, [client, connectionState]);
+  }, [client]); // Removed connectionState
 
   return { stats, alerts, isConnected: connectionState === 'CONNECTED', connectionState };
 }
@@ -409,8 +414,8 @@ export function useWSNotifications() {
         );
       }
 
-      // Invalidate the notifications query to stay in sync
-      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+      // Invalidate ONLY the notifications list to keep unreadCount cache intact
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications.list() });
     };
 
     c.on('notification', onNotification as (d: unknown) => void);
@@ -418,7 +423,7 @@ export function useWSNotifications() {
     return () => {
       c.off('notification', onNotification as (d: unknown) => void);
     };
-  }, [client, connectionState, queryClient]);
+  }, [client, queryClient]); // Removed connectionState
 
   const markAsRead = useCallback((ids: string[]) => {
     setRealtimeNotifications((prev) =>

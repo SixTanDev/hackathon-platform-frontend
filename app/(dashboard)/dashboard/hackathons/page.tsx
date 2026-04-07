@@ -238,11 +238,12 @@ export default function HackathonsListPage() {
   const { data: hackathons, isLoading } = useQuery({
     queryKey: queryKeys.hackathons.list({ tab: activeTab }),
     queryFn: async () => {
-      // Fetch for each status in the tab
+      // Fetch for each status in the tab (backend currently ignores this, but we'll fetch anyway)
       const results = await Promise.all(
         currentTab.statuses.map((status) => getHackathons({ status, limit: 50 }))
       );
       let merged = results.flat();
+
       // Deduplicate
       const seen = new Set<string>();
       merged = merged.filter((h) => {
@@ -250,7 +251,11 @@ export default function HackathonsListPage() {
         seen.add(h.id);
         return true;
       });
-      // Filter by mode if tab specifies it
+
+      // --- MANUAL FILTER: Backend ignores ?status, so filter results here ---
+      merged = merged.filter((h) => currentTab.statuses.includes(h.status));
+
+      // Filter by mode if tab specifies it (Practice vs Live)
       if (currentTab.mode) {
         merged = merged.filter((h) => h.mode === currentTab.mode);
       } else if (activeTab !== 'finished') {

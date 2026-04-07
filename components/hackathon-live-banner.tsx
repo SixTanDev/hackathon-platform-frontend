@@ -29,12 +29,19 @@ export function HackathonLiveBanner() {
     queryFn: () => getHackathons({ status: 'active', limit: 10 }),
     enabled: isAuthenticated,
     refetchInterval: 60 * 1000,
+    staleTime: 5 * 60 * 1000, // Keep fresh for 5 mins
   });
+
+  const currentRole = useAuthStore((s) => s?.currentRole);
+  const isParticipantRole = currentRole === 'student' || currentRole === 'guest';
 
   // Check enrollment for active live hackathons
   useEffect(() => {
-    if (!activeHackathons?.length || !userId) {
+    // Admins and Tutors don't usually participate in live hackathons as students
+    // We disable this heavy check for them to save API resources
+    if (!activeHackathons?.length || !userId || !isParticipantRole) {
       setActiveEnrolled(null);
+      setMyRank(null);
       return;
     }
 
@@ -44,13 +51,19 @@ export function HackathonLiveBanner() {
       return;
     }
 
-    // Check first live hackathon for enrollment
-    (async () => {
+    // Use an AbortController or a simple mounted flag to avoid state updates on unmounted component
+    let isMounted = true;
+
+    const checkEnrollments = async () => {
       for (const h of liveHackathons) {
+        if (!isMounted) break;
         try {
+          // We could use React Query here, but since it's a Sequential check to find the FIRST 
+          // one, we keep it as a controlled async loop for now but with better guardrails.
           const regs = await getHackathonRegistrations(h.id);
           const myReg = regs?.find?.((r) => r.user_global_id === userId && r.status !== 'cancelled');
-          if (myReg) {
+          
+          if (myReg && isMounted) {
             setActiveEnrolled(h);
             // Get rank
             try {
@@ -62,13 +75,19 @@ export function HackathonLiveBanner() {
             }
             return;
           }
-        } catch {
-          // Continue checking
+        } catch (err) {
+          console.error(`Error checking enrollment for ${h.id}:`, err);
         }
       }
-      setActiveEnrolled(null);
-    })();
-  }, [activeHackathons, userId]);
+      if (isMounted) setActiveEnrolled(null);
+    };
+
+    checkEnrollments();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeHackathons, userId, isParticipantRole]);
 
   if (!activeEnrolled) return null;
 

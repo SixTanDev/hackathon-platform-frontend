@@ -79,7 +79,9 @@ export default function SelectSedePage() {
   }
 
   function handleGoToSuperAdmin() {
-    router.replace('/admin/dashboard');
+    // Establecer cookie de rol 'superadmin' para que el middleware permita acceso
+    syncCookies(accessToken ?? '', 'superadmin');
+    router.replace('/superadmin');
   }
 
   const safeMemberships = memberships ?? [];

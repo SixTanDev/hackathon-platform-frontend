@@ -27,6 +27,9 @@ export function useUnreadCount() {
     queryKey: queryKeys.notifications.unreadCount,
     queryFn: getUnreadNotificationCount,
     refetchInterval: hasContext ? 30 * 1000 : false,
+    staleTime: 60 * 1000, 
+    refetchOnMount: false, // Don't refetch on component mount if we have data
+    refetchOnWindowFocus: false, // Avoid storm when switching tabs
     enabled: hasContext,
   });
 }
