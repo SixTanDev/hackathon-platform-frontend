@@ -66,6 +66,7 @@ import {
   Lightbulb,
   Trophy,
 } from 'lucide-react';
+import { MarkdownContent } from '@/components/shared/markdown-content';
 import dynamic from 'next/dynamic';
 
 // ─── Monaco Loader ───────────────────────────────────────────
@@ -773,10 +774,7 @@ Un diccionario en Python con el formato:
                 <h2 className="text-base font-semibold mb-4 flex items-center gap-2">
                   <FileText className="w-4 h-4 text-primary" /> Descripción
                 </h2>
-                <div 
-                  className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: challenge.description_markdown }} 
-                />
+                <MarkdownContent content={challenge.description_markdown} />
               </div>
 
               {examples.length > 0 && (

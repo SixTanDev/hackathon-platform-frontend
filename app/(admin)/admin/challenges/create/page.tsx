@@ -11,6 +11,7 @@ import {
 } from '@/lib/api/challenge-admin-services';
 import type { ValidationResult, SimilarChallenge, ChallengeSolution } from '@/lib/api/challenge-admin-services';
 import type { ChallengeType, ChallengeDifficulty, TestCase, TestCaseCreate } from '@/types/api';
+import { MarkdownContent } from '@/components/shared/markdown-content';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -406,7 +407,15 @@ export default function ChallengeCreateEditPage() {
             <Textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Escribe la descripción en Markdown..." className="min-h-[200px] font-mono text-sm" />
           </TabsContent>
           <TabsContent value="preview">
-            <Card><CardContent className="py-4 prose prose-invert max-w-none text-sm whitespace-pre-wrap">{description || 'Sin contenido'}</CardContent></Card>
+            <Card className="bg-muted/10">
+              <CardContent className="py-6 min-h-[200px]">
+                {description ? (
+                  <MarkdownContent content={description} />
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">Escribe algo en la pestaña "Editar" para ver la previsualización</p>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

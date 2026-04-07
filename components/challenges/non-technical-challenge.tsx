@@ -14,6 +14,7 @@ import { FileUploadArea } from './file-upload-area';
 import { GradeFeedback } from './grade-feedback';
 import { HintPanel } from './hint-panel';
 import { DocumentQA } from './document-qa';
+import { MarkdownContent } from '@/components/shared/markdown-content';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -97,42 +98,7 @@ const DOC_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   returned_for_revision: { label: 'Devuelto para Revisión', color: 'bg-red-500/10 text-red-500' },
 };
 
-// ─── Markdown Renderer ───────────────────────────────────
 
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-function MarkdownContent({ content }: { content: string }) {
-  const html = useMemo(() => {
-    let text = content ?? '';
-    text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m, lang, code) => {
-      return `<pre class="bg-muted rounded-lg p-3 overflow-x-auto text-xs my-2"><code class="language-${lang ?? ''}">${escapeHtml(code.trim())}</code></pre>`;
-    });
-    text = text.replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-xs">$1</code>');
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    text = text.replace(/^### (.+)$/gm, '<h3 class="text-base font-semibold mt-4 mb-2">$1</h3>');
-    text = text.replace(/^## (.+)$/gm, '<h2 class="text-lg font-semibold mt-4 mb-2">$1</h2>');
-    text = text.replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-4 mb-2">$1</h1>');
-    text = text.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>');
-    text = text.replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>');
-    text = text.replace(/\n\n/g, '</p><p class="my-2">');
-    text = `<p class="my-2">${text}</p>`;
-    return text;
-  }, [content]);
-
-  return (
-    <div
-      className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
-}
 
 // ─── Document Submission List ────────────────────────────
 

@@ -100,6 +100,8 @@ function getStorageKey(hackathonId: string, challengeId: string) {
 
 import dynamic from 'next/dynamic';
 
+import { MarkdownContent } from '@/components/shared/markdown-content';
+
 const MonacoEditor = dynamic(() => import('@monaco-editor/react').then((m) => m.default), {
   ssr: false,
   loading: () => (
@@ -108,51 +110,6 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react').then((m) => m.
     </div>
   ),
 });
-
-// ─── Markdown Renderer (simple) ─────────────────────────────
-
-function MarkdownContent({ content }: { content: string }) {
-  // Simple markdown to HTML for code blocks and basic formatting
-  const html = useMemo(() => {
-    let text = content ?? '';
-    // Code blocks
-    text = text.replace(/```(\w+)?\n([\s\S]*?)```/g, (_m, lang, code) => {
-      return `<pre class="bg-muted rounded-lg p-3 overflow-x-auto text-xs my-2"><code class="language-${lang ?? ''}">${escapeHtml(code.trim())}</code></pre>`;
-    });
-    // Inline code
-    text = text.replace(/`([^`]+)`/g, '<code class="bg-muted px-1.5 py-0.5 rounded text-xs">$1</code>');
-    // Bold
-    text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    // Italic
-    text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    // Headers
-    text = text.replace(/^### (.+)$/gm, '<h3 class="text-base font-semibold mt-4 mb-2">$1</h3>');
-    text = text.replace(/^## (.+)$/gm, '<h2 class="text-lg font-semibold mt-4 mb-2">$1</h2>');
-    text = text.replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-4 mb-2">$1</h1>');
-    // Lists
-    text = text.replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>');
-    text = text.replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal">$1</li>');
-    // Paragraphs
-    text = text.replace(/\n\n/g, '</p><p class="my-2">');
-    text = `<p class="my-2">${text}</p>`;
-    return text;
-  }, [content]);
-
-  return (
-    <div
-      className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed"
-      dangerouslySetInnerHTML={{ __html: html }}
-    />
-  );
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
 
 // ─── Example Test Case Display ─────────────────────────────
 
