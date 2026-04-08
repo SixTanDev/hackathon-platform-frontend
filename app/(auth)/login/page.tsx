@@ -10,13 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { apiClient } from '@/lib/api/client';
 import { toArray } from '@/lib/api/response-utils';
 import { getDashboardPathForRole } from '@/lib/auth-helpers';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
 import { ContextTokenResponse, TokenResponse, User, ZoneMembershipInfo } from '@/types/api';
 import { Logo } from '@/components/shared/logo';
-import { ArrowLeft, Clock3, Eye, EyeOff, Loader2, Lock, LogIn, Mail, Moon, Network, Sun } from 'lucide-react';
+import { ArrowLeft, Clock3, Eye, EyeOff, Languages, Loader2, Lock, LogIn, Mail, Moon, Network, Sun } from 'lucide-react';
 
 function syncCookies(accessToken: string, contextToken?: string, role?: string) {
   document.cookie = `hackathon-auth-token=${accessToken}; path=/; SameSite=Lax; max-age=86400`;
@@ -39,6 +40,7 @@ export default function LoginPage() {
   const SUPPORT_TOAST_ID = 'login-support-help';
   const router = useRouter();
   const { setTheme, resolvedTheme } = useTheme();
+  const { locale, setLocale, t } = useTranslation();
   const login = useAuthStore((s) => s?.login);
   const setMemberships = useAuthStore((s) => s?.setMemberships);
   const selectContext = useAuthStore((s) => s?.selectContext);
@@ -163,11 +165,21 @@ export default function LoginPage() {
 
           <div className="hidden justify-center text-center md:flex">
             <span className="text-[11px] font-bold uppercase tracking-[0.28em] text-muted-foreground">
-              Sistema Académico de Maratones de Programación
+              {t('brand.fullTitle')}
             </span>
           </div>
 
           <div className="flex items-center justify-end gap-3">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+              onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+              aria-label={t('common.language')}
+            >
+              <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
+            </Button>
+
             {mounted && (
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
@@ -189,7 +201,7 @@ export default function LoginPage() {
             >
               <Link href="/">
                 <ArrowLeft className="h-4 w-4" />
-                Volver al inicio
+                {t('auth.backToHome')}
               </Link>
             </Button>
           </div>
@@ -199,14 +211,13 @@ export default function LoginPage() {
           <div className="grid w-full items-center gap-8 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-12 lg:items-stretch lg:gap-10 xl:gap-12">
             <section className="flex flex-col justify-center lg:col-span-7 lg:pr-4 xl:pr-10">
               <span className="inline-flex self-start items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
-                Portal Institucional
+                {t('auth.portalInstitutional')}
               </span>
               <h1 className="mt-6 max-w-[15ch] text-[1.85rem] font-extrabold leading-[1.02] tracking-[-0.045em] text-foreground md:text-[2.3rem] xl:text-[2.7rem]">
-                Maratones de Programación <span className="text-primary inline-block transform transition-transform hover:scale-105 cursor-default">UNAD</span>
+                {t('login.hero.title').split('UNAD')[0]} <span className="text-primary inline-block transform transition-transform hover:scale-105 cursor-default">UNAD</span>
               </h1>
               <p className="mt-5 max-w-[34rem] text-[13px] leading-7 text-muted-foreground">
-                Inicia sesión con tus credenciales para participar en retos, monitorear el progreso formativo y
-                gestionar eventos académicos desde un mismo entorno.
+                {t('login.hero.subtitle')}
               </p>
 
               <div className="mt-3 grid max-w-[30rem] grid-cols-1 gap-3 sm:mt-4 sm:grid-cols-2">
@@ -214,18 +225,18 @@ export default function LoginPage() {
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Network className="h-4.5 w-4.5" />
                   </div>
-                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">Multi-sede</h3>
+                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">{t('login.features.multisede.title')}</h3>
                   <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                    Espacios académicos articulados por zonas y sedes.
+                    {t('login.features.multisede.desc')}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85">
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
                     <Clock3 className="h-4.5 w-4.5" />
                   </div>
-                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">24/7</h3>
+                  <h3 className="text-[1.2rem] font-bold tracking-tight text-foreground">{t('login.features.247.title')}</h3>
                   <p className="mt-2 text-[13px] leading-6 text-muted-foreground">
-                    Seguimiento continuo para práctica y eventos.
+                    {t('login.features.247.desc')}
                   </p>
                 </div>
               </div>
@@ -242,10 +253,10 @@ export default function LoginPage() {
                 <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
                 <CardHeader className="relative z-10 space-y-2 pb-4 pt-7">
                   <CardTitle className="text-[1.65rem] font-bold tracking-tight text-foreground md:text-[1.7rem]">
-                    Iniciar sesión
+                    {t('auth.loginTitle')}
                   </CardTitle>
                   <CardDescription className="text-[15px] text-muted-foreground">
-                    Accede con tus credenciales institucionales
+                    {t('auth.loginDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="relative z-10">
@@ -262,14 +273,14 @@ export default function LoginPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="email" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-muted-foreground">
-                        Correo institucional
+                        {t('auth.emailLabel')}
                       </Label>
                       <div className="relative">
                         <Mail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                         <Input
                           id="email"
                           type="email"
-                          placeholder="usuario@institucion.edu"
+                          placeholder={t('auth.emailPlaceholder')}
                           value={email}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             setEmail(e.target.value);
@@ -285,14 +296,14 @@ export default function LoginPage() {
 
                     <div className="space-y-2">
                       <Label htmlFor="password" className="ml-1 text-[11px] font-semibold tracking-[0.02em] text-muted-foreground">
-                        Contraseña
+                        {t('auth.passwordLabel')}
                       </Label>
                       <div className="relative">
                         <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/60" />
                         <Input
                           id="password"
                           type={showPassword ? 'text' : 'password'}
-                          placeholder="••••••••"
+                          placeholder={t('auth.passwordPlaceholder')}
                           value={password}
                           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                             setPassword(e.target.value);
@@ -320,12 +331,12 @@ export default function LoginPage() {
                           type="button"
                           className="appearance-none bg-transparent p-0 text-xs text-primary transition-colors hover:text-foreground focus-visible:outline-none focus-visible:underline"
                           onClick={() =>
-                            toast.info('Para recuperar el acceso, comunicate con el soporte institucional.', {
+                            toast.info(t('auth.recoveryHelp'), {
                               id: RECOVERY_TOAST_ID,
                             })
                           }
                         >
-                          ¿Olvidaste tu contraseña?
+                          {t('auth.forgotPassword')}
                         </button>
                       </div>
                     </div>
@@ -339,11 +350,11 @@ export default function LoginPage() {
                       {isSubmitting ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Ingresando...
+                          {t('common.loading')}
                         </>
                       ) : (
                         <>
-                          <span className="text-[13px] tracking-[0.02em]">Iniciar sesión</span>
+                          <span className="text-[13px] tracking-[0.02em]">{t('auth.login')}</span>
                           <LogIn className="ml-2 h-4 w-4" />
                         </>
                       )}
@@ -352,17 +363,17 @@ export default function LoginPage() {
 
                   <div className="mt-6 border-t border-border/10 pt-5 text-center">
                     <p className="text-sm text-muted-foreground">
-                      ¿Problemas de acceso?
+                      {t('auth.accessProblems')}
                       <button
                         type="button"
                         className="ml-2 appearance-none bg-transparent p-0 font-medium text-primary hover:underline focus-visible:outline-none focus-visible:underline"
                         onClick={() =>
-                          toast.info('Si el problema persiste, contacta al soporte institucional de tu sede o zona.', {
+                          toast.info(t('auth.supportHelp'), {
                             id: SUPPORT_TOAST_ID,
                           })
                         }
                       >
-                        Contactar a soporte
+                        {t('auth.contactSupport')}
                       </button>
                     </p>
                   </div>
@@ -374,17 +385,17 @@ export default function LoginPage() {
  
         <footer className="flex flex-col items-center justify-between gap-4 border-t border-border/10 pt-6 text-center md:flex-row md:text-left">
           <p className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground">
-            © 2026 SAMP · Academia de Maratones de Programación
+            {t('footer.copy')}
           </p>
           <div className="flex items-center gap-8">
             <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-              Términos
+              {t('footer.terms')}
             </Link>
             <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-              Privacidad
+              {t('footer.privacy')}
             </Link>
             <Link href="#" className="text-[11px] font-medium tracking-[0.12em] text-muted-foreground transition-colors hover:text-primary">
-              Contacto
+              {t('footer.contact')}
             </Link>
           </div>
         </footer>

@@ -107,7 +107,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="group h-10 gap-2 rounded-full border border-transparent px-2.5 hover:border-[#f7941d]/35 hover:bg-[#f7941d]/12 hover:text-[#8a4b00]"
+                className="group h-10 gap-2 rounded-full border border-transparent px-2.5 hover:bg-accent hover:text-accent-foreground"
                 aria-label="Menú de usuario"
               >
                 <Avatar className="h-8 w-8 ring-1 ring-border/40">

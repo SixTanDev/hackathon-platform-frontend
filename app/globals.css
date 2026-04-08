@@ -20,8 +20,8 @@
     --muted: 210 15% 88%; /* Adjusted for depth on new background */
     --muted-foreground: 215 16% 47%;
     /* UNAD Orange: #F47920 */
-    --accent: 25 91% 54%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 200 20% 90%;
+    --accent-foreground: 200 100% 21%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 214 12% 84%; /* More defined contrast for the new background */
@@ -37,7 +37,7 @@
     /* UNAD extended tokens */
     --unad-primary: 200 100% 20.6%;
     --unad-teal: 178 59% 35%;
-    --unad-orange: 25 91% 54%;
+    --unad-orange: 25 91% 54%; /* Reserved for semantic states ONLY */
     --unad-gold: 46 100% 45%;
     --unad-gold-icon: 43 89% 54%;
   }
@@ -59,8 +59,8 @@
     --muted: 226 18% 16%;
     --muted-foreground: 215 15% 58%;
     /* UNAD Orange stays vivid */
-    --accent: 25 91% 54%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 226 25% 14%;
+    --accent-foreground: 210 20% 95%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 100%;
     --border: 226 18% 20%;
@@ -75,7 +75,7 @@
     /* UNAD extended tokens */
     --unad-primary: 200 75% 40%;
     --unad-teal: 178 50% 42%;
-    --unad-orange: 25 91% 54%;
+    --unad-orange: 25 91% 54%; /* Reserved for semantic states ONLY */
     --unad-gold: 46 100% 50%;
     --unad-gold-icon: 43 89% 54%;
   }

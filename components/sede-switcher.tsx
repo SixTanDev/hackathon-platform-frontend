@@ -139,9 +139,9 @@ function RegularSedeSwitcher() {
 function SuperAdminLabel() {
   return (
     <div className="h-9 flex items-center gap-2 px-3">
-      <Shield className="w-4 h-4 text-unad-orange flex-shrink-0" />
+      <Shield className="w-4 h-4 text-primary flex-shrink-0" />
       <span className="text-sm font-medium">Panel SuperAdmin</span>
-      <span className="text-[10px] px-1.5 py-0.5 rounded font-medium border text-unad-orange border-unad-orange/30 bg-unad-orange/10 flex-shrink-0">
+      <span className="text-[10px] px-1.5 py-0.5 rounded font-medium border text-primary border-primary/30 bg-primary/10 flex-shrink-0">
         SuperAdmin
       </span>
     </div>
