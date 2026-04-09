@@ -242,7 +242,7 @@ export default function LoginPage() {
               </div>
             </section>
 
-            <section className="mx-auto flex w-full max-w-md items-center justify-center lg:col-span-5 lg:max-w-[33rem] lg:justify-self-center xl:-translate-x-4">
+            <section className="mx-auto flex w-full max-w-md flex-col items-center justify-center lg:col-span-5 lg:max-w-[33rem] lg:justify-self-center xl:-translate-x-4">
               <div className="mb-8 text-center lg:hidden">
                 <Logo size={56} className="mx-auto opacity-95" />
                 <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-foreground">SAMP</h1>
@@ -379,6 +379,12 @@ export default function LoginPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              <div className="mt-6 text-center">
+                <p className="text-xs font-medium tracking-wide text-muted-foreground/60 transition-colors duration-300 hover:text-muted-foreground">
+                  {t('common.sponsoredBy')}
+                </p>
+              </div>
             </section>
           </div>
         </main>
