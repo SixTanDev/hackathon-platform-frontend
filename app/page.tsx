@@ -1,16 +1,18 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
-import { Terminal, ArrowRight, Brain, BarChart3, ShieldCheck, Sun, Moon } from 'lucide-react';
+import { Terminal, ArrowRight, Brain, BarChart3, ShieldCheck, Sun, Moon, Globe } from 'lucide-react';
 import { Logo } from '@/components/shared/logo';
 import { AnimatedDotBackground } from '@/components/landing/animated-dot-background';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/lib/i18n/context';
 
 export default function HomePage() {
   const { theme, setTheme } = useTheme();
+  const { locale, setLocale, t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -58,7 +60,7 @@ export default function HomePage() {
               className="rounded-full border-primary/40 bg-primary/10 text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary hover:bg-primary/20"
               asChild
             >
-              <Link href="/dashboard/hackathons">Hackathones</Link>
+              <Link href="/dashboard/hackathons">{t('nav.hackathons')}</Link>
             </Button>
             <Button
               variant="ghost"
@@ -66,7 +68,7 @@ export default function HomePage() {
               className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
               asChild
             >
-              <Link href="/dashboard/leaderboard">Líderes</Link>
+              <Link href="/dashboard/leaderboard">{t('nav.leaderboard')}</Link>
             </Button>
             <Button
               variant="ghost"
@@ -74,11 +76,20 @@ export default function HomePage() {
               className="rounded-full text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
               asChild
             >
-              <Link href="/login">Reglamento</Link>
+              <Link href="/login">{t('landing.nav.rules')}</Link>
             </Button>
           </div>
 
           <div className="flex items-center justify-end justify-self-end gap-3 md:gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+              className="rounded-full border-border/70 bg-background/75 text-foreground shadow-sm hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-300"
+              aria-label={t('common.language')}
+            >
+              <span className="text-[10px] font-black uppercase tracking-wider">{locale === 'es' ? 'EN' : 'ES'}</span>
+            </Button>
             {mounted && (
               <Button
                 variant="outline"
@@ -96,7 +107,7 @@ export default function HomePage() {
               className="px-8 text-[10px] font-black uppercase tracking-[0.2em]"
               asChild
             >
-              <Link href="/login">Acceder</Link>
+              <Link href="/login">{t('auth.login')}</Link>
             </Button>
           </div>
         </nav>
@@ -106,7 +117,7 @@ export default function HomePage() {
             <div />
             <div className="justify-self-center text-center">
               <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600 dark:text-[#7f939a]">
-            Sistema Académico de Maratones de Programación
+            {t('brand.fullTitle')}
           </span>
         </div>
             <div />
@@ -140,31 +151,31 @@ export default function HomePage() {
 
             <div className="space-y-4 flex flex-col items-center">
               <span className="inline-block text-[#1a7fb3] dark:text-[#c3f5ff]/80 tracking-[0.2em] text-[10px] md:text-xs font-bold py-2 px-6 rounded-full bg-[#1a7fb3]/8 dark:bg-[#35a19d]/8 border border-[#1a7fb3]/15 dark:border-[#35a19d]/15 backdrop-blur-sm shadow-sm mb-1">
-                Próximo evento · mayo 2026
+                {t('landing.hero.nextEvent')}
               </span>
 
               <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#004669] via-[#1a7fb3] to-[#248f8b] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2">
-                  Compite y crece en <br className="hidden lg:block" /> maratones universitarias
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#004669] via-[#1a7fb3] to-[#248f8b] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2 whitespace-pre-line">
+                  {t('landing.hero.title')}
                 </h1>
               </div>
 
               <p className="text-slate-700 dark:text-[#bac9cc] text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
-                Coordina equipos, resuelve retos y sigue el progreso de cada competencia en un solo lugar.
+                {t('landing.hero.subtitle')}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 w-full">
               <Button size="lg" variant="premium" className="w-full sm:w-auto min-w-[240px] shadow-premium" asChild>
                 <Link href="/login" className="flex items-center justify-center gap-3 group">
-                  <span className="tracking-tight font-extrabold">Entrar a la plataforma</span>
+                  <span className="tracking-tight font-extrabold">{t('landing.hero.cta.enter')}</span>
                   <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-2" />
                 </Link>
               </Button>
 
               <Button size="lg" variant="outline" className="w-full sm:w-auto min-w-[200px]" asChild>
                 <Link href="/dashboard/hackathons" className="flex items-center justify-center gap-3 group">
-                  <span className="tracking-tight font-bold text-muted-foreground group-hover:text-foreground">Ver hackathones</span>
+                  <span className="tracking-tight font-bold text-muted-foreground group-hover:text-foreground">{t('landing.hero.cta.hackathons')}</span>
                 </Link>
               </Button>
             </div>
@@ -176,26 +187,26 @@ export default function HomePage() {
             <div className="lg:col-span-2 lg:row-span-2 bg-white dark:bg-[#151c26] rounded-[2rem] p-10 flex flex-col justify-between relative overflow-hidden group border border-slate-200 dark:border-[#3b494c]/20 shadow-xl dark:shadow-none transition-colors duration-500">
               <div className="absolute -right-20 -top-20 w-80 h-80 bg-[#1a7fb3]/10 dark:bg-[#1a7fb3]/5 blur-[100px] group-hover:bg-[#1a7fb3]/20 dark:group-hover:bg-[#1a7fb3]/15 transition-colors duration-1000" />
               <div className="relative z-10 max-w-[32rem]">
-                <span className="text-[#35a19d] text-xs font-bold uppercase tracking-[0.2em]">Ecosistema académico UNAD</span>
+                <span className="text-[#35a19d] text-xs font-bold uppercase tracking-[0.2em]">{t('landing.features.context')}</span>
                 <h2 className="mt-5 text-3xl font-extrabold tracking-tight leading-[1.04] text-slate-900 dark:text-[#dce3f0] md:text-4xl lg:text-[2.75rem]">
-                  Competencia, práctica y evaluación en una sola plataforma.
+                  {t('landing.features.mainTitle')}
                 </h2>
                 <p className="mt-5 max-w-lg text-sm leading-7 text-slate-600 dark:text-[#9eb0b7] md:text-[15px]">
-                  SAMP integra hackathones, retos y seguimiento formativo en un mismo entorno digital.
+                  {t('landing.features.mainDesc')}
                 </p>
               </div>
 
               <div className="relative z-10 mt-12 flex flex-col gap-7 border-t border-slate-200/80 pt-7 dark:border-white/8">
                 <div className="grid grid-cols-2 gap-6 md:max-w-[22rem]">
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#7d9098]">Cobertura</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.uptime.label')}</span>
                     <p className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">24/7</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-[#9eb0b7]">Seguimiento continuo para práctica y eventos.</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-[#9eb0b7]">{t('landing.features.uptime.desc')}</p>
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#7d9098]">Escala</span>
+                    <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.scale.label')}</span>
                     <p className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">+42</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-[#9eb0b7]">Sedes y participantes articulados en la plataforma.</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-[#9eb0b7]">{t('landing.features.scale.desc')}</p>
                   </div>
                 </div>
 
@@ -226,9 +237,9 @@ export default function HomePage() {
                     </div>
 
                     <div className="flex flex-col">
-                      <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">Comunidad activa</span>
+                      <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.community.label')}</span>
                       <span className="mt-2 max-w-[14rem] text-sm font-medium leading-6 text-slate-600 dark:text-[#bac9cc]">
-                        Formación y competencia en un mismo entorno.
+                        {t('landing.features.community.desc')}
                       </span>
                     </div>
                   </div>
@@ -240,10 +251,10 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-[#1a7fb3]/10 flex items-center justify-center mb-6">
                 <Brain className="text-[#1a7fb3] w-8 h-8 group-hover:scale-110 transition-transform" />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">IA tutora</span>
-              <h3 className="text-xl font-bold mb-3 mt-3 tracking-tight text-slate-900 dark:text-[#dce3f0]">La IA orienta el aprendizaje</h3>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.ai.label')}</span>
+              <h3 className="text-xl font-bold mb-3 mt-3 tracking-tight text-slate-900 dark:text-[#dce3f0]">{t('landing.features.ai.title')}</h3>
               <p className="text-slate-600 dark:text-[#bac9cc] text-sm leading-relaxed">
-                Ofrece <strong className="font-extrabold text-[#1a7fb3] dark:text-[#c3f5ff] drop-shadow-sm">pistas progresivas</strong> y apoyo conceptual sin reemplazar el razonamiento del estudiante.
+                {t('landing.features.ai.desc')}
               </p>
             </div>
 
@@ -251,10 +262,10 @@ export default function HomePage() {
               <div className="w-16 h-16 rounded-full bg-[#35a19d]/10 flex items-center justify-center mb-6">
                 <BarChart3 className="text-[#35a19d] w-8 h-8 group-hover:scale-110 transition-transform" />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">Cobertura multi-sede</span>
-              <h3 className="text-xl font-bold mb-3 mt-3 tracking-tight text-slate-900 dark:text-[#dce3f0]">Una solución alineada con la estructura UNAD</h3>
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.multisede.label')}</span>
+              <h3 className="text-xl font-bold mb-3 mt-3 tracking-tight text-slate-900 dark:text-[#dce3f0]">{t('landing.features.multisede.title')}</h3>
               <p className="text-slate-600 dark:text-[#bac9cc] text-sm leading-relaxed">
-                Cada sede gestiona usuarios, eventos y materiales con articulación institucional por zonas.
+                {t('landing.features.multisede.desc')}
               </p>
             </div>
 
@@ -262,21 +273,21 @@ export default function HomePage() {
               <div className="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-[#1a7fb3]/10 dark:from-[#1a7fb3]/5 to-transparent pointer-events-none group-hover:from-[#1a7fb3]/20 dark:group-hover:from-[#1a7fb3]/10 transition-colors" />
               <div className="space-y-4 relative z-10 max-w-sm">
                 <span className="text-[#35a19d] dark:text-[#35a19d] text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#35a19d]" /> Operación segura
+                  <ShieldCheck className="w-4 h-4 text-[#35a19d]" /> {t('landing.features.security.label')}
                 </span>
-                <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-[#dce3f0] leading-tight">Supervisión en tiempo real para eventos académicos.</p>
+                <p className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-[#dce3f0] leading-tight">{t('landing.features.security.title')}</p>
                 <p className="text-sm md:text-base leading-7 text-slate-600 dark:text-[#9eb0b7] max-w-lg">
-                  Monitorea actividad, envíos y clasificaciones sobre infraestructura segura para competencias académicas.
+                  {t('landing.features.security.desc')}
                 </p>
               </div>
               <div className="relative z-10 flex shrink-0 flex-col gap-3 rounded-[1.5rem] border border-[#35a19d]/20 bg-[#0f2630]/55 px-5 py-4 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
-                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ddce7]">Estado</span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ddce7]">{t('landing.features.status.label')}</span>
                 <div className="flex items-center gap-3">
                   <span className="h-3.5 w-3.5 rounded-full bg-[#35a19d] shadow-[0_0_18px_rgba(53,161,157,0.45)]" />
-                  <span className="text-sm font-semibold text-white/90">Monitoreo activo</span>
+                  <span className="text-sm font-semibold text-white/90">{t('landing.features.status.active')}</span>
                 </div>
                 <div className="h-px w-full bg-gradient-to-r from-[#35a19d]/30 to-transparent" />
-                <span className="text-xs leading-5 text-[#a8c7cf]">Actividad, envíos y rankings disponibles en vivo.</span>
+                <span className="text-xs leading-5 text-[#a8c7cf]">{t('landing.features.status.desc')}</span>
               </div>
             </div>
           </div>
@@ -298,29 +309,32 @@ export default function HomePage() {
               </div>
             </div>
             <p className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-[#9eb0b7] md:text-[15px]">
-              Plataforma para competencia, práctica y seguimiento formativo en entornos académicos de la UNAD.
+              {t('landing.footer.desc')}
             </p>
             <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium">
               <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
-                Política de privacidad
+                {t('footer.privacy')}
               </Link>
               <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
-                Soporte técnico
+                {t('landing.footer.support')}
               </Link>
               <Link className="text-slate-600 transition-colors hover:text-[#1a7fb3] dark:text-[#bac9cc] dark:hover:text-[#1a7fb3]" href="/login">
-                Reglamento
+                {t('landing.footer.rules')}
               </Link>
               <Link className="text-slate-600 transition-colors hover:text-[#35a19d] dark:text-[#bac9cc] dark:hover:text-[#35a19d]" href="/login">
-                Acceder
+                {t('auth.login')}
               </Link>
             </div>
           </div>
           <div className="flex flex-col items-center gap-4 border-t border-slate-200/80 pt-6 text-center dark:border-white/8">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-[#50606a]">
-              Iniciativa académica para hackathones y evaluación formativa en la UNAD
+              {t('landing.footer.initiative')}
             </p>
             <p className="text-xs font-medium text-slate-500 dark:text-[#61727b]">
-              © 2026 SAMP · Sistema Académico de Maratones de Programación
+              {t('landing.footer.copy')}
+            </p>
+            <p className="text-xs font-medium tracking-wide text-slate-500/90 dark:text-slate-400/60">
+              {t('common.sponsoredBy')}
             </p>
           </div>
         </div>
