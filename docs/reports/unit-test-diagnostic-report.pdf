@@ -1,0 +1,101 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 1798 >>
+stream
+BT
+/F1 12 Tf
+72 760 Td
+22 TL
+(Unit Test Execution Report) Tj
+T*
+() Tj
+T*
+(Project: hackathon-platform-frontend) Tj
+T*
+(Branch: repo-fixes-audit) Tj
+T*
+(Executed: 2026-04-01 20:25:16 -05:00) Tj
+T*
+(Command: npm run test -- --reporter=verbose) Tj
+T*
+() Tj
+T*
+(Result: 3 files passed, 10 tests passed) Tj
+T*
+() Tj
+T*
+(Executed tests:) Tj
+T*
+(- tests/components.test.tsx > Shared Components Suite > StatusBadge > renders with label) Tj
+T*
+(\(89ms\)) Tj
+T*
+(- tests/components.test.tsx > Shared Components Suite > StatusBadge > renders with dot) Tj
+T*
+(indicator when enabled \(33ms\)) Tj
+T*
+(- tests/components.test.tsx > Shared Components Suite > StatusBadge > applies the) Tj
+T*
+(correct variant styles \(5ms\)) Tj
+T*
+(- tests/components.test.tsx > Shared Components Suite > PageHeader > renders title and) Tj
+T*
+(description \(16ms\)) Tj
+T*
+(- tests/components.test.tsx > Shared Components Suite > PageHeader > renders actions as) Tj
+T*
+(children \(614ms\)) Tj
+T*
+(- tests/smoke.test.tsx > Base Components Smoke Tests > Badge component renders with) Tj
+T*
+(content \(149ms\)) Tj
+T*
+(- tests/smoke.test.tsx > Base Components Smoke Tests > Button component handles) Tj
+T*
+(interaction \(570ms\)) Tj
+T*
+(- tests/smoke.test.tsx > Base Components Smoke Tests > Button states \(disabled\) \(50ms\)) Tj
+T*
+(- tests/pages.test.tsx > Admin Pages Smoke Tests > Hackathons Management Page > renders) Tj
+T*
+(the header and empty state when no data exists \(2112ms\)) Tj
+T*
+(- tests/pages.test.tsx > Admin Pages Smoke Tests > Hackathons Management Page > renders) Tj
+T*
+(the hackathons list when data is available \(632ms\)) Tj
+T*
+(Notes:) Tj
+T*
+(- Overall status: PASS) Tj
+T*
+(- Warning emitted by Vitest/Vite: vite-tsconfig-paths plugin is deprecated in favor of) Tj
+T*
+(native tsconfig path resolution.) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2161
+%%EOF

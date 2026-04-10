@@ -1,0 +1,175 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 1 /Kids [3 0 R] >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 4159 >>
+stream
+BT
+/F1 12 Tf
+72 760 Td
+22 TL
+(Unit Test Execution Report) Tj
+T*
+() Tj
+T*
+(Project: hackathon-platform-frontend) Tj
+T*
+(Branch: repo-fixes-audit) Tj
+T*
+(Executed: 2026-04-01 20:55:00 -05:00) Tj
+T*
+(Command: Technical audit remediation plan) Tj
+T*
+() Tj
+T*
+(Result: Ordered repair plan based on TypeScript, architecture, dependency, and testing) Tj
+T*
+(findings) Tj
+T*
+() Tj
+T*
+(Priority 1 - Restore compiler health) Tj
+T*
+(1. Fix app/\(tutor\)/tutor/challenges/page.tsx import of ChallengeRead and replace with) Tj
+T*
+(the real exported type from types/api.ts.) Tj
+T*
+(2. Remove unsafe any-based indexing in the same page for difficulty and type labels so) Tj
+T*
+(tsc stops failing.) Tj
+T*
+(3. Fix app/layout.tsx side-effect CSS typing issue for ./globals.css so npx tsc --noEmit) Tj
+T*
+(passes cleanly.) Tj
+T*
+(Why first: the project currently fails TypeScript compilation, so every further change) Tj
+T*
+(is riskier.) Tj
+T*
+(Estimated difficulty: Medium.) Tj
+T*
+(Priority 2 - Repair broken domain contracts) Tj
+T*
+(1. Align notification type names between types/api.ts and) Tj
+T*
+(components/notifications/notification-panel.tsx.) Tj
+T*
+(2. Verify websocket event names in lib/websocket/types.ts and lib/websocket/hooks.ts) Tj
+T*
+(match UI expectations and backend payloads.) Tj
+T*
+(3. Add focused tests for notification rendering and websocket-driven UI behavior.) Tj
+T*
+(Why second: these are silent product bugs that can ship without obvious crashes.) Tj
+T*
+(Estimated difficulty: Low to Medium.) Tj
+T*
+(Priority 3 - Stop hiding backend failures as empty states) Tj
+T*
+(1. Review container pages that use data as any or fallback to [] when requests fail.) Tj
+T*
+(2. Start with app/\(admin\)/admin/hackathons/page.tsx,) Tj
+T*
+(app/\(tutor\)/tutor/challenges/page.tsx, and) Tj
+T*
+(app/\(dashboard\)/dashboard/leaderboard/page.tsx.) Tj
+T*
+(3. Add explicit error UI branches distinct from empty-state UI.) Tj
+T*
+(Why third: operators and users currently cannot distinguish no data from request) Tj
+T*
+(failure.) Tj
+T*
+(Estimated difficulty: Medium.) Tj
+T*
+(Priority 4 - Reduce hook instability and fragile renders) Tj
+T*
+(1. Address react-hooks/exhaustive-deps warnings from npm run lint.) Tj
+T*
+(2. Prioritize app/\(admin\)/admin/research-groups/page.tsx,) Tj
+T*
+(app/\(superadmin\)/superadmin/sedes/page.tsx, app/\(tutor\)/tutor/grading/page.tsx, and) Tj
+T*
+(lib/websocket/hooks.ts.) Tj
+T*
+(3. Stabilize derived arrays and callbacks with clearer memo boundaries.) Tj
+T*
+(Why fourth: these warnings indicate render churn and stale closure risk in complex) Tj
+T*
+(screens.) Tj
+T*
+(Estimated difficulty: Medium.) Tj
+T*
+(Priority 5 - Expand test coverage where the app is most exposed) Tj
+T*
+(1. Add integration-style tests for auth, hackathons admin, leaderboard, notifications,) Tj
+T*
+(and challenge flows.) Tj
+T*
+(2. Keep using tests/test-utils.tsx and mock only external boundaries.) Tj
+T*
+(3. Prioritize pages with multiple states: loading, error, empty, and data.) Tj
+T*
+(Why fifth: the app has about 55 page routes and only 5 test files, so regressions can) Tj
+T*
+(slip through easily.) Tj
+T*
+(Estimated difficulty: Medium to High.) Tj
+T*
+(Priority 6 - Clean repo structure and dependency surface) Tj
+T*
+(1. Remove or archive clearly unused dependencies after verifying no dynamic imports rely) Tj
+T*
+(on them.) Tj
+T*
+(2. Review package.json entries such as swr, formik, react-hot-toast, mapbox-gl,) Tj
+T*
+(plotly.js, monaco, aws-sdk, azure storage, react-select, and react-datepicker.) Tj
+T*
+(3. Update README.md to match the actual stack and workflow, including Next 15 instead of) Tj
+T*
+(Next 14.) Tj
+T*
+(Why sixth: this lowers maintenance cost and reduces confusion for future contributors.) Tj
+T*
+(Estimated difficulty: Medium.) Tj
+T*
+(Recommended execution order summary) Tj
+T*
+(- Step 1: make TypeScript green.) Tj
+T*
+(- Step 2: fix notification and websocket contracts.) Tj
+T*
+(- Step 3: separate error states from empty states in key pages.) Tj
+T*
+(- Step 4: resolve lint hook warnings in high-complexity screens.) Tj
+T*
+(- Step 5: add high-value frontend integration tests.) Tj
+T*
+(- Step 6: prune dependencies and refresh documentation.) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+4522
+%%EOF
