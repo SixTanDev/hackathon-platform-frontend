@@ -139,7 +139,14 @@ function HeroSection({
 
   const ModeIcon = modeLabels[hackathon.mode]?.icon ?? Radio;
 
-  const isRegOpen = hackathon.status === 'registration_open';
+  const now = useMemo(() => new Date(), []);
+  const regStartsAt = hackathon.registration_starts_at ? new Date(hackathon.registration_starts_at) : null;
+  const regEndsAt = hackathon.registration_ends_at ? new Date(hackathon.registration_ends_at) : null;
+  
+  const isWindowClosed = regEndsAt ? now > regEndsAt : false;
+  const isWindowNotOpenYet = regStartsAt ? now < regStartsAt : false;
+  
+  const isRegOpen = hackathon.status === 'registration_open' && !isWindowClosed && !isWindowNotOpenYet;
   const isActive = hackathon.status === 'active';
 
   return (
@@ -156,6 +163,12 @@ function HeroSection({
               <ModeIcon className="w-3 h-3 mr-1" />
               {modeLabels[hackathon.mode]?.label}
             </Badge>
+            {hackathon.status === 'registration_open' && isWindowClosed && (
+              <Badge variant="destructive" className="text-xs opacity-80">Registro cerrado</Badge>
+            )}
+            {hackathon.status === 'registration_open' && isWindowNotOpenYet && (
+              <Badge variant="secondary" className="text-xs">Registro próximamente</Badge>
+            )}
           </div>
           <h1 className="text-2xl font-bold">{hackathon.name}</h1>
           {hackathon.description ? (
@@ -195,7 +208,10 @@ function HeroSection({
         {isActive && hackathon.ends_at ? (
           <CountdownDisplay label="Tiempo restante:" targetDate={hackathon.ends_at} />
         ) : null}
-        {isRegOpen && hackathon.starts_at ? (
+        {hackathon.status === 'registration_open' && isWindowNotOpenYet && regStartsAt ? (
+          <CountdownDisplay label="Registro abre en:" targetDate={hackathon.registration_starts_at} />
+        ) : null}
+        {hackathon.status === 'registration_open' && !isWindowClosed && !isWindowNotOpenYet && hackathon.starts_at ? (
           <CountdownDisplay label="Comienza en:" targetDate={hackathon.starts_at} />
         ) : null}
 
@@ -205,6 +221,14 @@ function HeroSection({
             <Button onClick={onRegister} disabled={isRegistering}>
               {isRegistering ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Zap className="w-4 h-4 mr-1" />}
               Inscribirse
+            </Button>
+          ) : hackathon.status === 'registration_open' && isWindowClosed && !isEnrolled ? (
+            <Button disabled variant="outline" className="opacity-70">
+              <XCircle className="w-4 h-4 mr-1" /> Registro cerrado
+            </Button>
+          ) : hackathon.status === 'registration_open' && isWindowNotOpenYet && !isEnrolled ? (
+            <Button disabled variant="outline" className="opacity-70">
+              <Clock className="w-4 h-4 mr-1" /> Próximamente
             </Button>
           ) : null}
           {isEnrolled ? (
@@ -787,6 +811,7 @@ export default function HackathonDetailPage() {
   const userId = useAuthStore((s) => s?.user?.id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   // Fetch hackathon
   const { data: hackathon, isLoading: hackathonLoading } = useQuery({
@@ -802,24 +827,37 @@ export default function HackathonDetailPage() {
     enabled: !!hackathonId,
   });
 
-  // Fetch registrations
+  // Auth & Role
+  const { enrolledHackathonIds, addEnrolledHackathon, currentRole } = useAuthStore();
+  const isStudent = currentRole === 'student';
+
+  // Fetch registrations (Disabled for students to avoid 403)
   const { data: registrations } = useQuery({
     queryKey: queryKeys.hackathons.registrations(hackathonId),
     queryFn: () => getHackathonRegistrations(hackathonId),
-    enabled: !!hackathonId,
+    enabled: !!hackathonId && !isStudent,
   });
 
   const myRegistration = registrations?.find(
     (r) => r.user_global_id === userId && r.status !== 'cancelled'
   ) ?? null;
-  const isEnrolled = !!myRegistration;
+
+  // For students, we rely on local persistence since we can't fetch the list
+  const isEnrolled = isStudent 
+    ? enrolledHackathonIds.includes(hackathonId) 
+    : !!myRegistration;
 
   // Register mutation
   const registerMutation = useMutation({
     mutationFn: (teamId?: string | null) => registerForHackathon(hackathonId, teamId),
     onSuccess: () => {
-      toast({ title: '¡Inscripción exitosa!', description: 'Ya estás inscrito en este hackathon.' });
-      queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.registrations(hackathonId) });
+      if (isStudent) {
+        addEnrolledHackathon(hackathonId);
+        setShowSuccessDialog(true);
+      } else {
+        queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.registrations(hackathonId) });
+        toast({ title: '¡Inscripción exitosa!', description: 'Ya estás inscrito en este hackathon.' });
+      }
     },
     onError: (err: any) => {
       toast({ title: 'Error', description: err?.detail ?? 'No se pudo completar la inscripción.', variant: 'destructive' });
@@ -945,6 +983,52 @@ export default function HackathonDetailPage() {
           <RulesTab hackathon={hackathon} />
         </TabsContent>
       </Tabs>
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md border-none p-0 overflow-hidden bg-background/80 backdrop-blur-xl animate-in fade-in zoom-in-95 duration-300">
+          <div className="h-2 bg-green-500" />
+          <div className="p-6 text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-10 h-10 text-green-500" />
+            </div>
+            
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold tracking-tight">¡Inscripción Exitosa!</h2>
+              <p className="text-muted-foreground">
+                Te has inscrito correctamente en <span className="font-semibold text-foreground">{hackathon?.name}</span>. 
+                Estás listo para demostrar tu talento.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              {hackathon?.is_team_based ? (
+                <Button 
+                  onClick={() => setShowSuccessDialog(false)} 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20"
+                >
+                  <Users className="w-4 h-4 mr-2" /> Gestionar mi equipo
+                </Button>
+              ) : (
+                <Button 
+                  onClick={() => setShowSuccessDialog(false)} 
+                  className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20"
+                >
+                  <Code2 className="w-4 h-4 mr-2" /> Ver desafíos
+                </Button>
+              )}
+              <Button variant="ghost" onClick={() => setShowSuccessDialog(false)} className="w-full">
+                Cerrar
+              </Button>
+            </div>
+          </div>
+          <div className="px-6 py-4 bg-muted/30 flex items-center justify-center gap-2">
+            <Trophy className="w-4 h-4 text-unad-gold" />
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground text-center">
+              ¡Mucha suerte en la competencia!
+            </span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

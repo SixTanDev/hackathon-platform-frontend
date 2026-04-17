@@ -51,7 +51,7 @@ export async function registerForHackathon(
 ): Promise<Registration> {
   const { data } = await apiClient.post<Registration>(
     `/hackathons/${hackathonId}/register`,
-    teamId ? { team_id: teamId } : {}
+    { team_id: teamId ?? null }
   );
   return data;
 }

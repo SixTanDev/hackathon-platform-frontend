@@ -14,6 +14,8 @@ export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   memberships: ZoneMembershipInfo[];
+  /** IDs of hackathons the user has enrolled in (useful for students to avoid 403s) */
+  enrolledHackathonIds: string[];
   /** Zone selected by superadmin for cross-zone management (not tied to context token) */
   superadminSelectedZone: { id: string; code: string; name: string } | null;
 
@@ -30,6 +32,7 @@ export interface AuthState {
   refreshSession: (accessToken: string, refreshToken: string) => void;
   setLoading: (loading: boolean) => void;
   setUser: (user: User) => void;
+  addEnrolledHackathon: (hackathonId: string) => void;
   /** Set the zone selected by superadmin for cross-zone ops (does NOT require context token) */
   setSuperadminZone: (zone: { id: string; code: string; name: string } | null) => void;
 }
@@ -45,6 +48,7 @@ const initialState = {
   isAuthenticated: false,
   isLoading: false,
   memberships: [],
+  enrolledHackathonIds: [],
   superadminSelectedZone: null,
 };
 
@@ -82,6 +86,13 @@ export const useAuthStore = create<AuthState>()(
 
       setUser: (user: User) => set({ user }),
 
+      addEnrolledHackathon: (hackathonId: string) =>
+        set((state) => ({
+          enrolledHackathonIds: state.enrolledHackathonIds.includes(hackathonId)
+            ? state.enrolledHackathonIds
+            : [...state.enrolledHackathonIds, hackathonId],
+        })),
+
       setSuperadminZone: (zone) => set({ superadminSelectedZone: zone }),
     }),
     {
@@ -107,6 +118,7 @@ export const useAuthStore = create<AuthState>()(
         currentRole: state.currentRole,
         isAuthenticated: state.isAuthenticated,
         memberships: state.memberships,
+        enrolledHackathonIds: state.enrolledHackathonIds,
         superadminSelectedZone: state.superadminSelectedZone,
       }),
     }

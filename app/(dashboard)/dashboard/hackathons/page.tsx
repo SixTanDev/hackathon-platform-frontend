@@ -227,7 +227,8 @@ function LoadingGrid() {
 // ─── Page ───────────────────────────────────────────────
 
 export default function HackathonsListPage() {
-  const userId = useAuthStore((s) => s?.user?.id);
+  const { enrolledHackathonIds, currentRole, user } = useAuthStore();
+  const userId = user?.id;
   const [activeTab, setActiveTab] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [scopeFilter, setScopeFilter] = useState<string>('all');
@@ -273,6 +274,10 @@ export default function HackathonsListPage() {
   const { data: enrolledSet } = useQuery({
     queryKey: ['enrollments', hackathonIds.join(',')],
     queryFn: async () => {
+      if (currentRole === 'student') {
+        return new Set(enrolledHackathonIds);
+      }
+
       const enrolled = new Set<string>();
       // Only check a reasonable number
       const toCheck = hackathonIds.slice(0, 20);
@@ -280,7 +285,7 @@ export default function HackathonsListPage() {
         toCheck.map(async (hid) => {
           try {
             const regs = await getHackathonRegistrations(hid);
-            const myReg = regs?.find?.((r) => r.user_global_id === userId && r.status !== 'cancelled');
+            const myReg = regs?.find?.((r) => r.user_global_id === useAuthStore.getState().user?.id && r.status !== 'cancelled');
             if (myReg) enrolled.add(hid);
           } catch {
             // Ignore errors for individual checks
