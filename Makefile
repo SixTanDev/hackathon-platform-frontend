@@ -11,6 +11,9 @@ IMAGE_NAME ?= $(SERVICE)
 TAG ?= latest
 LOCAL_IMAGE ?= $(IMAGE_NAME):local
 IMAGE ?= $(REGION)-docker.pkg.dev/$(PROJECT)/$(AR_REPO)/$(IMAGE_NAME):$(TAG)
+PUBLIC_ACCESS_FLAG ?= --no-invoker-iam-check
+INGRESS ?= all
+SOURCE_BASE_IMAGE_FLAG ?= --clear-base-image
 
 .PHONY: help install dev build start local local-prod check-gcloud check-docker ensure-ar-repo deploy deploy-source deploy-image deploy-docker describe logs docker-build docker-run docker-push
 
@@ -38,6 +41,9 @@ help:
 	@echo "  IMAGE_NAME=$(IMAGE_NAME)"
 	@echo "  TAG=$(TAG)"
 	@echo "  IMAGE=$(IMAGE)"
+	@echo "  PUBLIC_ACCESS_FLAG=$(PUBLIC_ACCESS_FLAG)"
+	@echo "  INGRESS=$(INGRESS)"
+	@echo "  SOURCE_BASE_IMAGE_FLAG=$(SOURCE_BASE_IMAGE_FLAG)"
 
 install:
 	npm ci $(NPM_INSTALL_FLAGS)
@@ -92,7 +98,9 @@ deploy-source: check-gcloud
 		--region $(REGION) \
 		--platform managed \
 		--set-build-env-vars $(BUILD_ENV_VARS) \
-		--allow-unauthenticated
+		--ingress $(INGRESS) \
+		$(SOURCE_BASE_IMAGE_FLAG) \
+		$(PUBLIC_ACCESS_FLAG)
 
 deploy-image: check-gcloud
 	gcloud run deploy $(SERVICE) \
@@ -101,7 +109,8 @@ deploy-image: check-gcloud
 		--region $(REGION) \
 		--platform managed \
 		--port 8080 \
-		--allow-unauthenticated
+		--ingress $(INGRESS) \
+		$(PUBLIC_ACCESS_FLAG)
 
 deploy-docker: docker-push deploy-image
 
