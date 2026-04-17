@@ -255,13 +255,15 @@ export default function HackathonsListPage() {
       // --- MANUAL FILTER: Backend ignores ?status, so filter results here ---
       merged = merged.filter((h) => currentTab.statuses.includes(h.status));
 
-      // Filter by mode if tab specifies it (Practice vs Live)
+      // Filter by mode if tab specifies it (e.g. "Modo Práctica" tab)
       if (currentTab.mode) {
         merged = merged.filter((h) => h.mode === currentTab.mode);
-      } else if (activeTab !== 'finished') {
-        // Exclude practice from non-practice tabs
+      } else if (activeTab === 'upcoming') {
+        // Exclude practice from the "Próximos" tab to keep it focused on major events
         merged = merged.filter((h) => h.mode !== 'practice');
       }
+      // Note: 'active' and 'finished' tabs will now show both 'live' and 'practice' modes
+      // if they match the status, which prevents empty screens when only practice is available.
       return merged;
     },
   });
