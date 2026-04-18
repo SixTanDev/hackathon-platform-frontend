@@ -101,7 +101,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
             </Button>
           )}
 
-          <NotificationPanel />
+          {/* <NotificationPanel /> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

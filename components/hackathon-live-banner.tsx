@@ -33,7 +33,9 @@ export function HackathonLiveBanner() {
   });
 
   const currentRole = useAuthStore((s) => s?.currentRole);
+  const enrolledHackathonIds = useAuthStore((s) => s?.enrolledHackathonIds);
   const isParticipantRole = currentRole === 'student' || currentRole === 'guest';
+  const isStudent = currentRole === 'student';
 
   // Check enrollment for active live hackathons
   useEffect(() => {
@@ -58,12 +60,15 @@ export function HackathonLiveBanner() {
       for (const h of liveHackathons) {
         if (!isMounted) break;
         try {
-          // We could use React Query here, but since it's a Sequential check to find the FIRST 
-          // one, we keep it as a controlled async loop for now but with better guardrails.
-          const regs = await getHackathonRegistrations(h.id);
-          const myReg = regs?.find?.((r) => r.user_global_id === userId && r.status !== 'cancelled');
+          // Students use local persistence to avoid 403 on /registrations
+          const isEnrolledCheck = isStudent 
+            ? enrolledHackathonIds?.includes(h.id)
+            : await (async () => {
+                const regs = await getHackathonRegistrations(h.id);
+                return !!regs?.find?.((r) => r.user_global_id === userId && r.status !== 'cancelled');
+              })();
           
-          if (myReg && isMounted) {
+          if (isEnrolledCheck && isMounted) {
             setActiveEnrolled(h);
             // Get rank
             try {

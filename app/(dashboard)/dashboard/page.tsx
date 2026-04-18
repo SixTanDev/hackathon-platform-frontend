@@ -315,6 +315,7 @@ export default function DashboardPage() {
 
         {/* Right: Activity Feed */}
         <div className="lg:col-span-2">
+          {/* 
           <Card className="border-border/50">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -353,6 +354,7 @@ export default function DashboardPage() {
               )}
             </CardContent>
           </Card>
+          */}
 
           {/* Badges Preview */}
           {(profile?.badges?.length ?? 0) > 0 ? (
