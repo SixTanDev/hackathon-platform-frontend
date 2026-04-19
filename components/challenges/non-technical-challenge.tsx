@@ -476,7 +476,7 @@ export function NonTechnicalChallenge({
 
       {/* ─── Document Q&A ─── */}
       <DocumentQA hackathonId={hackathonId} />
-      </div>
     </div>
-  );
+  </div>
+);
 }

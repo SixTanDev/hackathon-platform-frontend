@@ -34,7 +34,7 @@ interface DashboardTopbarProps {
   role?: RoleName;
 }
 
-export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
+export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();

@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { listChallenges, deleteChallenge, exportChallenges, importChallenges } from '@/lib/api/challenge-admin-services';
+import { listChallenges, deleteChallenge, exportChallenges, importChallenges, approveChallenge } from '@/lib/api/challenge-admin-services';
 import type { ChallengeListParams } from '@/lib/api/challenge-admin-services';
 import type { Challenge, ChallengeType, ChallengeDifficulty, ChallengeSource } from '@/types/api';
 import { PageHeader } from '@/components/shared/page-header';
@@ -21,7 +21,7 @@ import Link from 'next/link';
 import {
   Plus, Sparkles, Upload, Download, Trash2, Search, LayoutGrid, List as ListIcon,
   MoreHorizontal, Pencil, Eye, Copy, Code2, FileText, ChevronLeft, ChevronRight,
-  Filter, X
+  Filter, X, CheckCircle2
 } from 'lucide-react';
 
 const DIFFICULTY_LABELS: Record<ChallengeDifficulty, string> = {
@@ -59,6 +59,7 @@ export default function ChallengeLibraryPage() {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categorySearch, setCategorySearch] = useState('');
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -71,9 +72,10 @@ export default function ChallengeLibraryPage() {
     if (typeFilter !== 'all') p.type = typeFilter as ChallengeType;
     if (difficultyFilter !== 'all') p.difficulty = difficultyFilter as ChallengeDifficulty;
     if (sourceFilter !== 'all') p.source = sourceFilter as ChallengeSource;
+    if (statusFilter !== 'all') p.status = statusFilter as any;
     if (categorySearch) p.category = categorySearch;
     return p;
-  }, [search, typeFilter, difficultyFilter, sourceFilter, categorySearch, page]);
+  }, [search, typeFilter, difficultyFilter, sourceFilter, statusFilter, categorySearch, page]);
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.challenges.list(params as Record<string, unknown>),
@@ -92,6 +94,15 @@ export default function ChallengeLibraryPage() {
       setSelected(new Set());
     },
     onError: () => toast.error('Error al eliminar'),
+  });
+
+  const approveMut = useMutation({
+    mutationFn: (id: string) => approveChallenge(id),
+    onSuccess: () => {
+      toast.success('Reto aprobado');
+      qc.invalidateQueries({ queryKey: queryKeys.challenges.all });
+    },
+    onError: () => toast.error('Error al aprobar'),
   });
 
   const toggleSelect = useCallback((id: string) => {
@@ -130,8 +141,8 @@ export default function ChallengeLibraryPage() {
     } catch { toast.error('Error al importar'); }
   };
 
-  const hasFilters = typeFilter !== 'all' || difficultyFilter !== 'all' || sourceFilter !== 'all' || !!categorySearch;
-  const clearFilters = () => { setTypeFilter('all'); setDifficultyFilter('all'); setSourceFilter('all'); setCategorySearch(''); setPage(0); };
+  const hasFilters = typeFilter !== 'all' || difficultyFilter !== 'all' || sourceFilter !== 'all' || statusFilter !== 'all' || !!categorySearch;
+  const clearFilters = () => { setTypeFilter('all'); setDifficultyFilter('all'); setSourceFilter('all'); setStatusFilter('all'); setCategorySearch(''); setPage(0); };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -208,6 +219,13 @@ export default function ChallengeLibraryPage() {
                 <SelectItem value="imported">Importado</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
+              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
             <Input placeholder="Categoría..." value={categorySearch} onChange={e => { setCategorySearch(e.target.value); setPage(0); }} className="w-[160px]" />
             {hasFilters && <Button variant="ghost" size="sm" onClick={clearFilters}><X className="h-3.5 w-3.5 mr-1" />Limpiar</Button>}
           </div>
@@ -239,7 +257,17 @@ export default function ChallengeLibraryPage() {
                 </tr>
               </thead>
               <tbody>
-                {challenges.map(c => <ChallengeRow key={c.id} challenge={c} isSelected={selected.has(c.id)} onToggle={() => toggleSelect(c.id)} onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })} />)}
+                {challenges.map(c => (
+                  <ChallengeRow 
+                    key={c.id} 
+                    challenge={c} 
+                    isSelected={selected.has(c.id)} 
+                    onToggle={() => toggleSelect(c.id)} 
+                    onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })}
+                    onApprove={() => approveMut.mutate(c.id)}
+                    isApproving={approveMut.isPending}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
@@ -294,7 +322,12 @@ export default function ChallengeLibraryPage() {
   );
 }
 
-function ChallengeRow({ challenge: c, isSelected, onToggle, onDelete }: { challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void }) {
+function ChallengeRow({ 
+  challenge: c, isSelected, onToggle, onDelete, onApprove, isApproving 
+}: { 
+  challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void;
+  onApprove: () => void; isApproving: boolean;
+}) {
   const src = SOURCE_CONFIG[c.source] ?? SOURCE_CONFIG.manual;
   const st = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.draft;
   return (
@@ -320,6 +353,12 @@ function ChallengeRow({ challenge: c, isSelected, onToggle, onDelete }: { challe
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild><Link href={`/admin/challenges/create?edit=${c.id}`}><Pencil className="h-4 w-4 mr-2" />Editar</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link href={`/admin/challenges/create?edit=${c.id}`}><Eye className="h-4 w-4 mr-2" />Ver Detalle</Link></DropdownMenuItem>
+            {c.status !== 'approved' && (
+              <DropdownMenuItem onClick={onApprove} disabled={isApproving}>
+                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                Aprobar
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem><Copy className="h-4 w-4 mr-2" />Duplicar</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={onDelete}><Trash2 className="h-4 w-4 mr-2" />Eliminar</DropdownMenuItem>
