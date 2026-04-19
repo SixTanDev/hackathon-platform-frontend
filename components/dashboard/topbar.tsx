@@ -40,6 +40,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
+  const currentSede = useAuthStore((s) => s?.currentSede);
   const logout = useAuthStore((s) => s?.logout);
   const [mounted, setMounted] = useState(false);
   const isMobile = useMediaQuery('(max-width: 1023px)');
@@ -64,13 +65,15 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
     ?.toUpperCase?.()
     ?.slice?.(0, 2) ?? 'U';
 
-  // Mobile assessment mode: hide switcher, language and theme toggles
+  // Mobile assessment mode: hide bulky context controls, but keep quick essentials
   const showNavElements = !(isMobile && isChallengeView);
+  const showCompactActions = isMobile && isChallengeView;
+  const mobileContextLabel = currentSede?.name ?? 'Sede';
 
   return (
     <header className="sticky top-0 z-30 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm" role="banner">
       <div className="flex h-full items-center justify-between px-2 sm:px-4 md:px-6">
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           {onMobileMenuToggle && (
             <Button
               variant="ghost"
@@ -82,21 +85,28 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           )}
-          {showNavElements && <SedeSwitcher />}
+          {showNavElements && !isMobile && <SedeSwitcher />}
+          {showNavElements && isMobile && (
+            <div className="min-w-0 rounded-full border border-border/50 bg-background/80 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              <span className="block max-w-[118px] truncate">{mobileContextLabel}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5">
-          {showNavElements && (
+          {(showNavElements || showCompactActions) && (
             <>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
-                aria-label={t('common.language')}
-              >
-                <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
-              </Button>
+              {!showCompactActions && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+                  aria-label={t('common.language')}
+                >
+                  <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
+                </Button>
+              )}
 
               {mounted && (
                 <Button
@@ -130,7 +140,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
                 <span className="hidden max-w-[140px] truncate text-sm font-medium md:inline">
                   {user?.full_name ?? 'Usuario'}
                 </span>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
+                {!isMobile && <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

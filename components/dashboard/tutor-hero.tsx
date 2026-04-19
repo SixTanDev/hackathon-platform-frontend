@@ -66,7 +66,7 @@ export function TutorHero({
           </div>
 
           <div className="flex flex-wrap gap-4 pt-4">
-            <Link href="/tutor/teams">
+            <Link href="/tutor/teams" prefetch={false}>
               <Button size="lg" className="h-14 px-8 text-base font-bold shadow-xl shadow-primary/20">
                 <Users className="w-5 h-5 mr-2" />
                 {t('tutor.hero.action.viewTeams')}

@@ -99,10 +99,10 @@ function CountdownDisplay({ label, targetDate }: { label: string; targetDate: st
   if (!targetDate || countdown.isExpired) return null;
 
   return (
-    <div className="flex items-center gap-2 text-sm">
-      <Clock className="w-4 h-4 text-accent animate-pulse" />
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono font-bold text-accent">{countdown.formatted}</span>
+    <div className="flex flex-wrap items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm">
+      <Clock className="w-4 h-4 animate-pulse text-amber-600 dark:text-amber-400" />
+      <span className="font-medium text-muted-foreground">{label}</span>
+      <span className="font-mono font-bold tracking-tight text-amber-700 dark:text-amber-300">{countdown.formatted}</span>
     </div>
   );
 }
@@ -216,7 +216,7 @@ function HeroSection({
         ) : null}
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-3 pt-2">
+        <div className="flex flex-col items-stretch gap-3 pt-2 sm:flex-row sm:items-center">
           {isRegOpen && !isEnrolled ? (
             <Button onClick={onRegister} disabled={isRegistering}>
               {isRegistering ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Zap className="w-4 h-4 mr-1" />}

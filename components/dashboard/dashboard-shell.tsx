@@ -97,7 +97,7 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
 
       {/* Mobile sidebar via Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-64 border-r border-border/50">
+        <SheetContent side="left" className="p-0 w-[88vw] max-w-72 border-r border-border/50">
           <SheetHeader className="sr-only">
             <SheetTitle>Menú de navegación</SheetTitle>
           </SheetHeader>
@@ -120,7 +120,7 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
         </div>
         
         <DashboardTopbar onMobileMenuToggle={toggleMobile} role={role} />
-        <main className={`flex-1 ${isChallengeView ? 'p-0 sm:p-4 md:p-6' : 'p-4 md:p-6'} max-w-[1400px] mx-auto w-full`} role="main">
+        <main className={`flex-1 ${isChallengeView ? 'p-0 sm:p-4 md:p-6' : 'p-3 sm:p-4 md:p-6'} max-w-[1400px] mx-auto w-full`} role="main">
           {children}
         </main>
         <FlashChallengeAlert />

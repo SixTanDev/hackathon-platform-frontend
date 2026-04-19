@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/logo';
 import { cn } from '@/lib/utils';
@@ -127,6 +128,25 @@ function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean)
   }
 }
 
+function getMobileNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean): NavItem[] {
+  if (isSuperAdmin && (role === 'admin' || !role)) return SUPERADMIN_NAV.slice(0, 4);
+
+  switch (role) {
+    case 'admin':
+      return ADMIN_NAV.filter((item) => ['/admin/dashboard', '/admin/hackathons', '/admin/challenges', '/admin/users'].includes(item.href));
+    case 'tutor':
+      return TUTOR_NAV.filter((item) => ['/tutor/dashboard', '/tutor/hackathons', '/tutor/challenges', '/tutor/grading', '/tutor/teams'].includes(item.href));
+    case 'director_semillero':
+      return DIRECTOR_NAV;
+    case 'student':
+      return STUDENT_NAV.filter((item) => ['/dashboard', '/dashboard/challenges', '/dashboard/teams', '/dashboard/leaderboard', '/dashboard/profile'].includes(item.href));
+    case 'guest':
+      return GUEST_NAV;
+    default:
+      return STUDENT_NAV.filter((item) => ['/dashboard', '/dashboard/challenges', '/dashboard/teams', '/dashboard/leaderboard', '/dashboard/profile'].includes(item.href));
+  }
+}
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
@@ -139,9 +159,10 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
   const storeRole = useAuthStore((s) => s?.currentRole);
   const user = useAuthStore((s) => s?.user);
   const isSuperAdmin = user?.is_superadmin ?? false;
+  const isMobile = useMediaQuery('(max-width: 1023px)');
 
   const currentRole = role || storeRole;
-  const navItems = getNavForRole(currentRole, isSuperAdmin);
+  const navItems = isMobile ? getMobileNavForRole(currentRole, isSuperAdmin) : getNavForRole(currentRole, isSuperAdmin);
 
   return (
     <aside
@@ -180,7 +201,7 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
             <Link key={item?.href ?? ''} href={item?.href ?? '/dashboard'}>
               <div
                 className={cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200',
                   isActive
                     ? activeStyles
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.2)]',
@@ -204,7 +225,9 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
           className="w-full justify-center"
           onClick={onToggle}
         >
-          {collapsed ? (
+          {isMobile ? (
+            <span className="text-xs">Cerrar</span>
+          ) : collapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (
             <>

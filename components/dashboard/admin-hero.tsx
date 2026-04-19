@@ -77,11 +77,11 @@ export function AdminHero({
 
   return (
     <section className={styles.surfaceFeatured} aria-label="Admin Dashboard Hero">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+      <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center lg:gap-8 relative z-10">
         
         {/* Left Side: Operational Info */}
-        <div className="flex-1 space-y-6">
-          <div className="space-y-4">
+        <div className="flex-1 space-y-5">
+          <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-3 py-1 font-bold tracking-wider uppercase text-[10px]">
                 {t('admin.hero.statusLabel', { sede: currentSedeName || t('common.campus') })}
@@ -93,30 +93,30 @@ export function AdminHero({
             </div>
             
             <div className="space-y-2">
-              <h1 className="text-4xl md:text-5xl font-black tracking-tight text-foreground leading-[1.1]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-foreground leading-[1.1]">
                 {t('admin.hero.greeting')}, {user?.full_name?.split(' ')[0] || 'Admin'}
               </h1>
-              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed font-medium">
+              <p className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed font-medium">
                 {statusConfig.description}. {t('dashboard.subtitle', { sede: currentSedeName || t('common.campus') })}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 pt-4">
+          <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap sm:gap-4 sm:pt-4">
             <Link href="/admin/hackathons/create">
-              <Button size="lg" className="h-14 px-8 text-base font-bold shadow-xl shadow-primary/20">
+              <Button size="lg" className="h-12 w-full sm:h-14 sm:w-auto px-5 sm:px-8 text-sm sm:text-base font-bold shadow-xl shadow-primary/20">
                 <PlusCircle className="w-5 h-5 mr-2" />
                 {t('admin.hero.action.createHackathon')}
               </Button>
             </Link>
             <Link href="/admin/challenges?status=pending">
-              <Button size="lg" variant="secondary" className="h-14 px-8 text-base font-bold">
+              <Button size="lg" variant="secondary" className="h-12 w-full sm:h-14 sm:w-auto px-5 sm:px-8 text-sm sm:text-base font-bold">
                 <ShieldCheck className="w-5 h-5 mr-2" />
                 {t('admin.hero.action.approveChallenges')}
               </Button>
             </Link>
             <Link href="/admin/users">
-              <Button size="lg" variant="outline" className="h-14 px-8 text-base font-bold border-2">
+              <Button size="lg" variant="outline" className="h-12 w-full sm:h-14 sm:w-auto px-5 sm:px-8 text-sm sm:text-base font-bold border-2">
                 <Users className="w-5 h-5 mr-2" />
                 {t('admin.hero.action.manageUsers')}
               </Button>
@@ -126,7 +126,7 @@ export function AdminHero({
 
         {/* Right Side: Attention Widget */}
         <div className="lg:w-80 w-full shrink-0">
-          <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-3xl p-7 shadow-2xl space-y-6">
+          <div className="bg-background/40 backdrop-blur-xl border border-border/50 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5 sm:space-y-6">
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/60">
                 {t('dashboard.recentActivity')}

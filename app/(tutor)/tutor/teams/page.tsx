@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { getMentorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
+import { getTutorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +14,8 @@ import { Users, ArrowRight, BarChart3, MessageSquare } from 'lucide-react';
 
 export default function TutorTeamsPage() {
   const { data: teams, isLoading } = useQuery({
-    queryKey: queryKeys.teams.mentorAssigned,
-    queryFn: getMentorTeams,
+    queryKey: queryKeys.teams.tutorVisible({}),
+    queryFn: () => getTutorTeams(),
   });
 
   return (

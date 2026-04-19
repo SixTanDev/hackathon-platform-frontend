@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { getMentorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
+import { getTutorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
 import { TutorHero } from '@/components/dashboard/tutor-hero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +20,8 @@ export default function TutorDashboardPage() {
   const currentSede = useAuthStore((s) => s?.currentSede);
 
   const { data: mentorTeams, isLoading: teamsLoading } = useQuery({
-    queryKey: queryKeys.teams.mentorAssigned,
-    queryFn: getMentorTeams,
+    queryKey: queryKeys.teams.tutorVisible({ status: 'active', limit: 12 }),
+    queryFn: () => getTutorTeams({ status: 'active', limit: 12 }),
   });
 
   // Calculate metrics for TutorHero
@@ -105,7 +105,7 @@ export default function TutorDashboardPage() {
                     )}
                   </div>
                   <div className="flex items-center gap-1 ml-3">
-                    <Link href="/tutor/teams">
+                    <Link href="/tutor/teams" prefetch={false}>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
                         <ArrowRight className="w-4 h-4" />
                       </Button>

@@ -102,34 +102,44 @@ function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
   const isOpen = hackathon.status === 'registration_open';
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/40 transition-colors">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 mb-1">
-          <h4 className="text-sm font-medium truncate">{hackathon.name}</h4>
-          <HackathonStatusBadge status={hackathon.status} />
+    <div className="rounded-xl border border-border/50 p-3.5 transition-colors hover:bg-muted/40 sm:p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex flex-wrap items-start gap-2">
+            <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground sm:text-base">
+              {hackathon.name}
+            </h4>
+            <HackathonStatusBadge status={hackathon.status} />
+          </div>
+          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+            {hackathon.is_team_based ? (
+              <span className="flex items-center gap-1">
+                <Users className="h-3.5 w-3.5 shrink-0" /> {t('common.teams')}
+              </span>
+            ) : null}
+            {hackathon.ends_at ? (
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5 shrink-0" />
+                <span className="leading-5">
+                  {t('dashboard.endsAt', {
+                    time: formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale }),
+                  })}
+                </span>
+              </span>
+            ) : null}
+          </div>
         </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          {hackathon.is_team_based ? (
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" /> {t('common.teams')}
-            </span>
-          ) : null}
-          {hackathon.ends_at ? (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {t('dashboard.endsAt', {
-                time: formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale }),
-              })}
-            </span>
-          ) : null}
-        </div>
+        <Link href={`/dashboard/hackathons/${hackathon.id}`} className="sm:shrink-0">
+          <Button
+            size="sm"
+            variant={isActive ? 'default' : isOpen ? 'secondary' : 'outline'}
+            className="h-10 w-full px-4 text-sm font-semibold sm:w-auto"
+          >
+            {isActive ? t('common.view') : isOpen ? t('dashboard.enroll') : t('common.details')}
+            <ChevronRight className="ml-1 h-3.5 w-3.5" />
+          </Button>
+        </Link>
       </div>
-      <Link href={`/dashboard/hackathons/${hackathon.id}`}>
-        <Button size="sm" variant={isActive ? 'default' : isOpen ? 'secondary' : 'outline'}>
-          {isActive ? t('common.view') : isOpen ? t('dashboard.enroll') : t('common.details')}
-          <ChevronRight className="w-3 h-3 ml-1" />
-        </Button>
-      </Link>
     </div>
   );
 }

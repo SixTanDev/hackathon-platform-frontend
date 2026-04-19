@@ -102,12 +102,12 @@ export default function TutorChallengesPage() {
         title="Biblioteca de Retos" 
         description="Consulta y filtra retos aprobados para su uso en competencias."
       >
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Link href="/tutor/challenges/create">
-            <Button size="sm"><Plus className="h-4 w-4 mr-2" />Nuevo Reto</Button>
+            <Button size="sm" className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" />Nuevo Reto</Button>
           </Link>
           <Link href="/tutor/ai-generation">
-            <Button size="sm" variant="outline" className="border-purple-500/30 text-purple-600 hover:bg-purple-500/5">
+            <Button size="sm" variant="outline" className="w-full sm:w-auto border-purple-500/30 text-purple-600 hover:bg-purple-500/5">
               <Sparkles className="h-4 w-4 mr-2" />IA
             </Button>
           </Link>
@@ -115,9 +115,9 @@ export default function TutorChallengesPage() {
       </PageHeader>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="library">Biblioteca Global</TabsTrigger>
-          <TabsTrigger value="my-challenges">Mis Creaciones</TabsTrigger>
+        <TabsList className="mb-4 grid h-auto w-full grid-cols-2">
+          <TabsTrigger value="library" className="px-3 py-2 text-xs sm:text-sm">Biblioteca Global</TabsTrigger>
+          <TabsTrigger value="my-challenges" className="px-3 py-2 text-xs sm:text-sm">Mis Creaciones</TabsTrigger>
         </TabsList>
 
         <TabsContent value="library" className="space-y-6">
@@ -129,14 +129,14 @@ export default function TutorChallengesPage() {
                   <Input placeholder="Buscar por título..." value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} className="pl-9" />
                 </div>
                 <Select value={typeFilter} onValueChange={v => { setTypeFilter(v); setPage(1); }}>
-                  <SelectTrigger className="w-[160px]"><Filter className="h-3.5 w-3.5 mr-1.5" /><SelectValue placeholder="Tipo" /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-[160px]"><Filter className="h-3.5 w-3.5 mr-1.5" /><SelectValue placeholder="Tipo" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los tipos</SelectItem>
                     {Object.entries(TYPE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Select value={difficultyFilter} onValueChange={v => { setDifficultyFilter(v); setPage(1); }}>
-                  <SelectTrigger className="w-[150px]"><SelectValue placeholder="Dificultad" /></SelectTrigger>
+                  <SelectTrigger className="w-full sm:w-[150px]"><SelectValue placeholder="Dificultad" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas</SelectItem>
                     {Object.entries(DIFFICULTY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
@@ -185,10 +185,10 @@ export default function TutorChallengesPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-6">
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4 mr-1" /> Anterior</Button>
-                  <span className="text-xs text-muted-foreground">Página {page} de {totalPages}</span>
-                  <Button variant="outline" size="sm" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Siguiente <ChevronRight className="h-4 w-4 ml-1" /></Button>
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4 mr-1" /> Anterior</Button>
+                  <span className="text-center text-xs text-muted-foreground">Página {page} de {totalPages}</span>
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages}>Siguiente <ChevronRight className="h-4 w-4 ml-1" /></Button>
                 </div>
               )}
             </>

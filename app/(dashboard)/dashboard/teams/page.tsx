@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { getMentorTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
+import { getStudentTeams, type MentorTeamSummary } from '@/lib/api/hackathon-services';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { EmptyState } from '@/components/shared/empty-state';
+import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
 import { Users, BarChart3, MessageSquare, Trophy, ArrowRight } from 'lucide-react';
 
@@ -21,9 +22,13 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 export default function StudentTeamsPage() {
+  const userId = useAuthStore((s) => s?.user?.id);
+  const enrolledHackathonIds = useAuthStore((s) => s?.enrolledHackathonIds ?? []);
+
   const { data: teams, isLoading } = useQuery({
-    queryKey: queryKeys.teams.mentorAssigned,
-    queryFn: getMentorTeams,
+    queryKey: queryKeys.teams.studentMine(enrolledHackathonIds),
+    queryFn: () => getStudentTeams(enrolledHackathonIds, userId),
+    enabled: !!userId,
   });
 
   return (

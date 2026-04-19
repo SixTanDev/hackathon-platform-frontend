@@ -337,6 +337,7 @@ Un diccionario en Python con el formato:
   const hackathonId = searchParams.get('hackathon_id') || 'mock-hackathon-1';
   
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
+  const [mobileTab, setMobileTab] = useState<'problem' | 'editor' | 'results'>('problem');
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -599,31 +600,33 @@ Un diccionario en Python con el formato:
   const examples = testCases?.filter((tc) => tc.is_example) ?? [];
 
   return (
-    <div className="h-[calc(100vh-6rem)] overflow-hidden flex flex-col -m-6">
+    <div className="flex h-[calc(100vh-5rem)] flex-col overflow-hidden bg-background sm:-m-6 sm:h-[calc(100vh-6rem)]">
       {/* Header Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b bg-background shrink-0">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-8 w-8">
+      <div className="shrink-0 border-b bg-background px-3 py-3 sm:px-4 sm:py-2">
+          <div className="flex items-start justify-between gap-3 sm:items-center">
+          <div className="flex min-w-0 items-start gap-2.5 sm:gap-4">
+            <Button variant="ghost" size="icon" onClick={() => router.back()} className="mt-0.5 h-8 w-8 shrink-0 rounded-full">
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold truncate max-w-[200px] md:max-w-md">{challenge.title}</h1>
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="max-w-[190px] truncate text-[15px] font-bold leading-tight sm:max-w-md sm:text-sm">{challenge.title}</h1>
                 <Badge className={`text-[10px] ${diff.color} border-0`}>{diff.label}</Badge>
               </div>
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-wider">
-                <Clock className="w-3 h-3 text-primary animate-pulse" />
-                Tiempo restante: <span className={timeLeft < 60 ? 'text-destructive font-bold' : 'text-primary'}>{formatTime(timeLeft)}</span>
+              <div className="inline-flex flex-wrap items-center gap-1.5 rounded-full border border-border/60 bg-muted/60 px-2.5 py-1 text-[11px] font-semibold">
+                <Clock className="w-3 h-3 animate-pulse text-primary" />
+                <span className="text-muted-foreground">Tiempo:</span>
+                <span className={timeLeft < 60 ? 'font-bold text-destructive' : 'font-bold text-foreground'}>{formatTime(timeLeft)}</span>
               </div>
             </div>
           </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 self-start sm:self-center">
           {!isTutor && (
             <>
               {/* Mentor IA Sheet */}
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 gap-1.5 border-primary/20 text-primary hover:bg-primary/10">
+                  <Button variant="outline" size="sm" className="hidden h-8 gap-1.5 border-primary/20 text-primary hover:bg-primary/10 sm:flex">
                     <Sparkles className="w-3.5 h-3.5" />
                     Mentor IA
                   </Button>
@@ -752,7 +755,7 @@ Un diccionario en Python con el formato:
 
               <Button 
                 size="sm" 
-                className="h-8 gap-1.5"
+                className="h-9 gap-1.5 rounded-xl px-3 text-xs font-semibold shadow-sm"
                 onClick={handleRun}
                 disabled={isRunning}
               >
@@ -763,9 +766,10 @@ Un diccionario en Python con el formato:
           )}
         </div>
       </div>
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0 bg-muted/10">
+      <div className="hidden flex-1 min-h-0 bg-muted/10 lg:block">
         <ResizablePanelGroup direction="horizontal">
           {/* Left Panel: Description */}
           <ResizablePanel defaultSize={40} minSize={20}>
@@ -956,6 +960,195 @@ Un diccionario en Python con el formato:
             </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
+      </div>
+
+      <div className="flex flex-1 min-h-0 flex-col bg-muted/10 lg:hidden">
+        <div className="border-b border-border/50 bg-muted/5 p-2.5">
+          <div className="grid grid-cols-3 gap-1.5 rounded-xl bg-muted/50 p-1.5">
+            <button
+              onClick={() => setMobileTab('problem')}
+              className={`rounded-lg px-2 py-2.5 text-[11px] font-semibold transition-all ${
+                mobileTab === 'problem' ? 'bg-background text-primary shadow-sm ring-1 ring-border/20' : 'text-muted-foreground'
+              }`}
+            >
+              Problema
+            </button>
+            <button
+              onClick={() => setMobileTab('editor')}
+              className={`rounded-lg px-2 py-2.5 text-[11px] font-semibold transition-all ${
+                mobileTab === 'editor' ? 'bg-background text-primary shadow-sm ring-1 ring-border/20' : 'text-muted-foreground'
+              }`}
+            >
+              Editor
+            </button>
+            <button
+              onClick={() => setMobileTab('results')}
+              className={`rounded-lg px-2 py-2.5 text-[11px] font-semibold transition-all ${
+                mobileTab === 'results' ? 'bg-background text-primary shadow-sm ring-1 ring-border/20' : 'text-muted-foreground'
+              }`}
+            >
+              Resultados
+            </button>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto bg-background">
+          {mobileTab === 'problem' ? (
+            <div className="space-y-5 p-4">
+              <div>
+                <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
+                  <FileText className="w-4 h-4 text-primary" /> Descripción
+                </h2>
+                <MarkdownContent content={challenge.description_markdown} />
+              </div>
+
+              {examples.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-sm font-semibold">Ejemplos</h3>
+                  {examples.map((tc, i) => (
+                    <div key={tc.id} className="space-y-2 rounded-lg border bg-muted/30 p-3">
+                      <p className="text-[10px] font-mono uppercase text-muted-foreground">Caso #{i + 1}</p>
+                      <div className="grid grid-cols-1 gap-3">
+                        <div>
+                          <p className="mb-1 text-[10px] text-muted-foreground">Entrada:</p>
+                          <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded bg-muted p-2 text-xs font-mono">{tc.input_data}</pre>
+                        </div>
+                        <div>
+                          <p className="mb-1 text-[10px] text-muted-foreground">Salida:</p>
+                          <pre className="overflow-x-auto whitespace-pre-wrap break-words rounded bg-muted p-2 text-xs font-mono">{tc.expected_output}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="pt-2">
+                <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">Especificaciones Técnicas</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="mb-1 text-[10px] font-bold uppercase text-muted-foreground">Tiempo Desarrollo</p>
+                    <div className="flex items-center gap-2 text-sm font-mono font-medium">
+                      <Clock className="w-3.5 h-3.5 text-primary" /> {Math.max(Math.ceil((challenge.time_limit_seconds ?? 300) / 60), 1)} min
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
+                    <p className="mb-1 text-[10px] font-bold uppercase text-muted-foreground">Memoria RAM</p>
+                    <div className="flex items-center gap-2 text-sm font-mono font-medium">
+                      <Cpu className="w-3.5 h-3.5 text-primary" /> {challenge.memory_limit_mb} MB
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : mobileTab === 'editor' ? (
+            <div className="flex h-full flex-col bg-zinc-950">
+              <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-zinc-900 px-3 py-2.5 shrink-0">
+                <div className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">
+                  Python 3.12
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="sm" onClick={handleResetCode} className="h-8 px-2.5 text-[11px] font-medium text-zinc-300 hover:bg-white/5">
+                    <RotateCcw className="mr-1 h-3 w-3" /> Reiniciar
+                  </Button>
+                  <Button size="sm" onClick={handleRun} disabled={isRunning} className="h-8 rounded-lg px-3 text-[11px] font-semibold shadow-sm">
+                    {isRunning ? <Loader2 className="mr-1 h-3 w-3 animate-spin" /> : <Play className="mr-1 h-3 w-3" />}
+                    Ejecutar
+                  </Button>
+                </div>
+              </div>
+              <div className="min-h-0 flex-1">
+                <MonacoEditor
+                  height="100%"
+                  language="python"
+                  theme="vs-dark"
+                  value={code}
+                  onMount={handleEditorMount}
+                  onChange={(v) => {
+                    setCode(normalizeEditorValue(v));
+                  }}
+                  options={{
+                    fontSize: 14,
+                    fontFamily: '"JetBrains Mono", monospace',
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    tabSize: 4,
+                    lineNumbersMinChars: 3,
+                    glyphMargin: true,
+                    fixedOverflowWidgets: true,
+                  }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="h-full flex flex-col bg-zinc-900 border-t border-white/10">
+              <div className="flex items-center justify-between border-b border-white/5 bg-zinc-950/60 px-4 py-2.5 shrink-0">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300">Resultados</span>
+                <span className="text-[10px] text-zinc-500">Pruebas visibles</span>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 text-zinc-100">
+                {isRunning ? (
+                  <div className="h-full flex flex-col items-center justify-center space-y-3 text-zinc-300">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-sm font-medium">Ejecutando pruebas visibles...</p>
+                  </div>
+                ) : runError ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-red-300 space-y-3">
+                    <XCircle className="w-8 h-8 opacity-80" />
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">No se pudo ejecutar el código</p>
+                      <p className="max-w-md text-xs text-red-200/80">{runError}</p>
+                    </div>
+                  </div>
+                ) : !runResults ? (
+                  <div className="h-full flex flex-col items-center justify-center space-y-3 text-zinc-300">
+                    <div className="rounded-full border border-white/10 bg-white/5 p-4">
+                      <Code2 className="h-7 w-7 text-primary/80" />
+                    </div>
+                    <div className="space-y-1 text-center">
+                      <p className="text-sm font-semibold text-zinc-100">Todavía no hay resultados</p>
+                      <p className="text-xs text-zinc-400">Ejecuta tu código para ver el estado de las pruebas.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className={`flex items-center gap-2 rounded-lg p-3 text-sm font-medium ${
+                      runResults.every(r => r.passed) ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'
+                    }`}>
+                      {runResults.every(r => r.passed) ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                      {runResults.filter(r => r.passed).length} de {runResults.length} casos pasaron
+                    </div>
+                    {!runResults.every(r => r.passed) ? (
+                      <div className="animate-in fade-in slide-in-from-bottom-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-[12px] leading-relaxed text-amber-100">
+                        <p className="font-semibold text-amber-300">Retroalimentación del tutor</p>
+                        <p className="mt-1 text-amber-100/90">{getTutorEncouragement(runResults)}</p>
+                      </div>
+                    ) : null}
+                        <div className="space-y-2.5">
+                          {runResults.map((r, i) => (
+                        <div key={i} className="space-y-2 rounded-xl border border-white/10 bg-white/[0.06] p-3 text-xs shadow-sm">
+                              <div className="flex items-center justify-between">
+                            <span className="font-mono font-medium text-zinc-300">Caso #{i + 1}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-zinc-400">{r.execution_time_ms}ms</span>
+                              {r.passed ? (
+                                <Badge className="border-0 bg-green-500/20 text-[10px] text-green-500">PASS</Badge>
+                              ) : (
+                                <Badge className="border-0 bg-red-500/20 text-[10px] text-red-500">FAIL</Badge>
+                              )}
+                            </div>
+                          </div>
+                          {!r.passed && r.stderr ? <p className="text-[11px] leading-relaxed text-red-300/90">{r.stderr}</p> : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
