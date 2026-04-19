@@ -26,6 +26,9 @@ export function ConnectionStatus({ state, onRetry, visible = true }: ConnectionS
     if (state !== 'CONNECTED') setDismissed(false);
   }, [state]);
 
+  // Visual badge globally suppressed — connection logic still runs in the background
+  return null;
+
   if (!visible || dismissed) return null;
 
   // Don't show when fully connected (clean state)

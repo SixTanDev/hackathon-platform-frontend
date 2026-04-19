@@ -97,9 +97,9 @@ export function HackathonLiveBanner() {
   if (!activeEnrolled) return null;
 
   return (
-    <div className="bg-red-500/10 border-b border-red-500/20 px-4 py-2">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3 text-sm">
+    <div className="bg-red-500/10 border-b border-red-500/20 px-3 md:px-4 py-2">
+      <div className="max-w-screen-xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 w-full">
+        <div className="flex items-center flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
@@ -120,8 +120,8 @@ export function HackathonLiveBanner() {
             </>
           ) : null}
         </div>
-        <Link href={`/dashboard/hackathons/${activeEnrolled.id}`}>
-          <Button size="sm" variant="destructive" className="text-xs">
+        <Link href={`/dashboard/hackathons/${activeEnrolled.id}`} className="w-full sm:w-auto">
+          <Button size="sm" variant="destructive" className="text-xs w-full sm:w-auto">
             Entrar <ArrowRight className="w-3 h-3 ml-1" />
           </Button>
         </Link>

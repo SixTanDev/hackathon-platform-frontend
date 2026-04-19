@@ -246,7 +246,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
         {/* Left: Hackathons */}
         <div className="lg:col-span-3 space-y-4">
           <Card className="border-border/50">
@@ -257,7 +257,7 @@ export default function DashboardPage() {
                   {t('nav.hackathons')}
                 </CardTitle>
                 <Link href="/dashboard/hackathons">
-                  <Button variant="ghost" size="sm" className="text-xs">
+                  <Button variant="ghost" size="sm" className="text-[10px] sm:text-xs">
                     {t('common.viewAll')} <ArrowRight className="w-3 h-3 ml-1" />
                   </Button>
                 </Link>

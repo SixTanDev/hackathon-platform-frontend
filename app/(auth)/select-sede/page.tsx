@@ -87,8 +87,8 @@ export default function SelectSedePage() {
   const safeMemberships = memberships ?? [];
 
   return (
-    <div className="animate-fade-in max-w-lg mx-auto">
-      <div className="flex flex-col items-center mb-8">
+    <div className="animate-fade-in w-full max-w-lg mx-auto px-4 md:px-0 py-6 md:py-0">
+      <div className="flex flex-col items-center mb-8 text-center">
         <Logo size={64} className="mb-4" />
         <h1 className="text-2xl font-bold tracking-tight">Selecciona tu sede</h1>
         <p className="text-muted-foreground text-sm mt-1">
@@ -151,8 +151,8 @@ export default function SelectSedePage() {
                     >
                       <div className="flex items-center gap-3">
                         <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                        <div className="text-left">
-                          <p className="font-medium text-sm">{sede?.sede_name ?? 'Sede'}</p>
+                        <div className="text-left w-full overflow-hidden">
+                          <p className="font-medium text-sm truncate">{sede?.sede_name ?? 'Sede'}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             <Shield className="w-3 h-3" />
                             <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium border ${roleColor}`}>

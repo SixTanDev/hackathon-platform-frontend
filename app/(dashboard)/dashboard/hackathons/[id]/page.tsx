@@ -992,13 +992,13 @@ export default function HackathonDetailPage() {
               <CheckCircle2 className="w-10 h-10 text-green-500" />
             </div>
             
-            <div className="space-y-2">
-              <h2 className="text-2xl font-bold tracking-tight">¡Inscripción Exitosa!</h2>
-              <p className="text-muted-foreground">
+            <DialogHeader className="space-y-2">
+              <DialogTitle className="text-2xl font-bold tracking-tight text-center">¡Inscripción Exitosa!</DialogTitle>
+              <DialogDescription className="text-muted-foreground text-center">
                 Te has inscrito correctamente en <span className="font-semibold text-foreground">{hackathon?.name}</span>. 
                 Estás listo para demostrar tu talento.
-              </p>
-            </div>
+              </DialogDescription>
+            </DialogHeader>
 
             <div className="flex flex-col gap-2 pt-2">
               {hackathon?.is_team_based ? (

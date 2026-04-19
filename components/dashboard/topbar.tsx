@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SedeSwitcher } from '@/components/sede-switcher';
-import { NotificationPanel } from '@/components/notifications/notification-panel';
+// import { NotificationPanel } from '@/components/notifications/notification-panel';
 import {
   Sun,
   Moon,
@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Menu,
 } from 'lucide-react';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import type { RoleName } from '@/types/api';
 
 interface DashboardTopbarProps {
@@ -35,11 +36,14 @@ interface DashboardTopbarProps {
 
 export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { locale, setLocale, t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
   const logout = useAuthStore((s) => s?.logout);
   const [mounted, setMounted] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 1023px)');
+  const isChallengeView = pathname?.includes('/challenges/');
 
   useEffect(() => {
     setMounted(true);
@@ -60,45 +64,52 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
     ?.toUpperCase?.()
     ?.slice?.(0, 2) ?? 'U';
 
+  // Mobile assessment mode: hide switcher, language and theme toggles
+  const showNavElements = !(isMobile && isChallengeView);
+
   return (
-    <header className="sticky top-0 z-30 h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm" role="banner">
-      <div className="flex h-full items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-2">
+    <header className="sticky top-0 z-30 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm" role="banner">
+      <div className="flex h-full items-center justify-between px-2 sm:px-4 md:px-6">
+        <div className="flex items-center gap-1 sm:gap-2">
           {onMobileMenuToggle && (
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 lg:hidden"
+              className="h-8 w-8 sm:h-9 sm:w-9 lg:hidden mr-1"
               onClick={onMobileMenuToggle}
               aria-label="Abrir menú de navegación"
             >
-              <Menu className="h-5 w-5" />
+              <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
           )}
-          <SedeSwitcher />
+          {showNavElements && <SedeSwitcher />}
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2.5">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
-            aria-label={t('common.language')}
-          >
-            <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
-          </Button>
+          {showNavElements && (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
+                aria-label={t('common.language')}
+              >
+                <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
+              </Button>
 
-          {mounted && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="h-9 w-9"
-              aria-label={t('theme.toggle')}
-            >
-              {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
+              {mounted && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="h-8 w-8"
+                  aria-label={t('theme.toggle')}
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
+              )}
+            </>
           )}
 
           {/* <NotificationPanel /> */}
@@ -119,7 +130,7 @@ export function DashboardTopbar({ onMobileMenuToggle }: DashboardTopbarProps) {
                 <span className="hidden max-w-[140px] truncate text-sm font-medium md:inline">
                   {user?.full_name ?? 'Usuario'}
                 </span>
-                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-[#8a4b00]" />
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">

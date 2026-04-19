@@ -324,9 +324,9 @@ export default function HackathonsListPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-lg">
+        <TabsList className="grid grid-cols-2 lg:grid-cols-4 gap-1 w-full max-w-[600px] h-auto p-1">
           {TABS.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm">
+            <TabsTrigger key={tab.value} value={tab.value} className="text-[11px] sm:text-xs md:text-sm h-8 sm:h-9">
               {tab.label}
             </TabsTrigger>
           ))}

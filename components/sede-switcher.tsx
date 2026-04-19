@@ -71,18 +71,18 @@ function RegularSedeSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-9 gap-2 px-3 max-w-[260px]">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-secondary flex-shrink-0 animate-pulse-glow" />
-            <Building2 className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-            <span className="text-sm font-medium truncate">
+        <Button variant="ghost" className="h-9 gap-1 sm:gap-2 px-2 sm:px-3 max-w-[140px] sm:max-w-[200px] md:max-w-[260px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-secondary flex-shrink-0 animate-pulse-glow" />
+            <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-[13px] sm:text-sm font-medium truncate">
               {currentZone?.name ? `${currentZone.name} › ` : ''}{currentSede?.name ?? 'Sede'}
             </span>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border flex-shrink-0 ${roleColor}`}>
+            <span className={`hidden sm:inline-flex text-[10px] px-1.5 py-0.5 rounded font-medium border flex-shrink-0 ${roleColor}`}>
               {ROLE_LABELS[currentRole ?? ''] ?? currentRole ?? ''}
             </span>
           </div>
-          <ChevronDown className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+          <ChevronDown className="w-3 h-3 text-muted-foreground flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">

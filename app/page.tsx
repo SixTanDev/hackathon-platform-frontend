@@ -48,9 +48,9 @@ export default function HomePage() {
       />
 
       <header className="absolute top-0 z-50 w-full border-b border-slate-200/70 bg-white/40 backdrop-blur-xl transition-colors duration-500 hover:bg-white/90 dark:border-[#3b494c]/20 dark:bg-[#0d141d]/20 dark:hover:bg-[#0d141d]/80">
-        <nav className="mx-auto grid max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center gap-6 px-6 py-3 md:px-8 lg:px-10">
-          <div className="flex w-28 items-center justify-start self-center">
-            <Logo size={56} className="shrink-0 drop-shadow-sm brightness-110" />
+        <nav className="mx-auto flex max-w-[1440px] items-center justify-between gap-4 px-4 py-3 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-6 md:px-8 lg:px-10">
+          <div className="flex items-center justify-start self-center md:w-28">
+            <Logo size={48} className="shrink-0 drop-shadow-sm brightness-110 md:h-[56px] md:w-[56px]" />
           </div>
 
           <div className="hidden items-center justify-self-center rounded-full border border-slate-200/80 bg-white/70 p-1 shadow-[0_12px_32px_rgba(148,163,184,0.1)] backdrop-blur-md md:flex dark:border-[#3b494c]/30 dark:bg-[#111b25]/70 dark:shadow-[0_18px_44px_rgba(0,0,0,0.22)]">
@@ -80,7 +80,7 @@ export default function HomePage() {
             </Button>
           </div>
 
-          <div className="flex items-center justify-end justify-self-end gap-3 md:gap-4">
+          <div className="flex items-center justify-end justify-self-end gap-2 sm:gap-3 md:gap-4">
             <Button
               variant="outline"
               size="icon"
@@ -104,7 +104,7 @@ export default function HomePage() {
             <Button
               variant="premium"
               size="default"
-              className="px-8 text-[10px] font-black uppercase tracking-[0.2em]"
+              className="px-4 text-[10px] font-black uppercase tracking-[0.2em] md:px-8"
               asChild
             >
               <Link href="/login">{t('auth.login')}</Link>
@@ -126,7 +126,7 @@ export default function HomePage() {
       </header>
 
       <main>
-        <section className="relative min-h-screen animated-mesh flex flex-col items-center justify-center pt-24 pb-6">
+        <section className="relative min-h-screen animated-mesh flex flex-col items-center justify-center pt-28 pb-6 md:pt-24">
           <AnimatedDotBackground />
 
           <svg className="wave-svg text-[#1a7fb3]/20 dark:text-[#1a7fb3]/10" preserveAspectRatio="none" viewBox="0 0 1440 320">
@@ -147,25 +147,25 @@ export default function HomePage() {
             />
           </svg>
 
-          <div className="relative z-10 max-w-5xl w-full px-6 flex flex-col items-center text-center">
+          <div className="relative z-10 max-w-5xl w-full px-4 md:px-6 flex flex-col items-center text-center">
 
             <div className="space-y-4 flex flex-col items-center">
               <span className="inline-block text-[#1a7fb3] dark:text-[#c3f5ff]/80 tracking-[0.2em] text-[10px] md:text-xs font-bold py-2 px-6 rounded-full bg-[#1a7fb3]/8 dark:bg-[#35a19d]/8 border border-[#1a7fb3]/15 dark:border-[#35a19d]/15 backdrop-blur-sm shadow-sm mb-1">
                 {t('landing.hero.nextEvent')}
               </span>
 
-              <div className="max-w-3xl mx-auto">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#004669] via-[#1a7fb3] to-[#248f8b] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2 whitespace-pre-line">
+              <div className="max-w-3xl mx-auto px-2">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-[1.2] bg-clip-text text-transparent bg-gradient-to-br from-[#004669] via-[#1a7fb3] to-[#248f8b] dark:from-white dark:via-[#c3f5ff] dark:to-[#35a19d] drop-shadow-xl lg:px-4 pb-2 whitespace-pre-line break-words">
                   {t('landing.hero.title')}
                 </h1>
               </div>
 
-              <p className="text-slate-700 dark:text-[#bac9cc] text-base md:text-lg max-w-2xl mx-auto leading-relaxed font-medium">
+              <p className="text-slate-700 dark:text-[#bac9cc] text-sm md:text-base lg:text-lg max-w-2xl mx-auto leading-relaxed font-medium px-2">
                 {t('landing.hero.subtitle')}
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16 w-full">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-10 md:mt-16 w-full">
               <Button size="lg" variant="premium" className="w-full sm:w-auto min-w-[240px] shadow-premium" asChild>
                 <Link href="/login" className="flex items-center justify-center gap-3 group">
                   <span className="tracking-tight font-extrabold">{t('landing.hero.cta.enter')}</span>
@@ -182,9 +182,9 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-[#eef2f7] dark:bg-[#0d141d] py-24 px-6 md:px-10 max-w-[1440px] mx-auto z-20 relative border-t border-slate-200 dark:border-[#3b494c]/20 transition-colors duration-500">
+        <section className="bg-[#eef2f7] dark:bg-[#0d141d] py-16 md:py-24 px-4 md:px-10 max-w-[1440px] mx-auto z-20 relative border-t border-slate-200 dark:border-[#3b494c]/20 transition-colors duration-500">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-2 lg:row-span-2 bg-white dark:bg-[#151c26] rounded-[2rem] p-10 flex flex-col justify-between relative overflow-hidden group border border-slate-200 dark:border-[#3b494c]/20 shadow-xl dark:shadow-none transition-colors duration-500">
+            <div className="lg:col-span-2 lg:row-span-2 bg-white dark:bg-[#151c26] rounded-[2rem] p-6 md:p-10 flex flex-col justify-between relative overflow-hidden group border border-slate-200 dark:border-[#3b494c]/20 shadow-xl dark:shadow-none transition-colors duration-500">
               <div className="absolute -right-20 -top-20 w-80 h-80 bg-[#1a7fb3]/10 dark:bg-[#1a7fb3]/5 blur-[100px] group-hover:bg-[#1a7fb3]/20 dark:group-hover:bg-[#1a7fb3]/15 transition-colors duration-1000" />
               <div className="relative z-10 max-w-[32rem]">
                 <span className="text-[#35a19d] text-xs font-bold uppercase tracking-[0.2em]">{t('landing.features.context')}</span>
@@ -196,8 +196,8 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="relative z-10 mt-12 flex flex-col gap-7 border-t border-slate-200/80 pt-7 dark:border-white/8">
-                <div className="grid grid-cols-2 gap-6 md:max-w-[22rem]">
+              <div className="relative z-10 mt-10 md:mt-12 flex flex-col gap-7 border-t border-slate-200/80 pt-7 dark:border-white/8">
+                <div className="grid grid-cols-2 gap-4 md:gap-6 md:max-w-[22rem]">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-500 dark:text-[#7d9098]">{t('landing.features.uptime.label')}</span>
                     <p className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">24/7</p>
@@ -269,9 +269,9 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="lg:col-span-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-[#151c26] dark:to-[#19202a] p-10 rounded-[2rem] flex items-center justify-between border border-slate-200 dark:border-[#3b494c]/20 shadow-xl relative overflow-hidden group transition-all duration-500">
-              <div className="absolute right-0 top-0 h-full w-2/3 bg-gradient-to-l from-[#1a7fb3]/10 dark:from-[#1a7fb3]/5 to-transparent pointer-events-none group-hover:from-[#1a7fb3]/20 dark:group-hover:from-[#1a7fb3]/10 transition-colors" />
-              <div className="space-y-4 relative z-10 max-w-sm">
+            <div className="lg:col-span-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-[#151c26] dark:to-[#19202a] p-6 md:p-10 rounded-[2rem] flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-0 border border-slate-200 dark:border-[#3b494c]/20 shadow-xl relative overflow-hidden group transition-all duration-500">
+              <div className="absolute right-0 top-0 h-full w-full md:w-2/3 bg-gradient-to-l from-[#1a7fb3]/10 dark:from-[#1a7fb3]/5 to-transparent pointer-events-none group-hover:from-[#1a7fb3]/20 dark:group-hover:from-[#1a7fb3]/10 transition-colors" />
+              <div className="space-y-4 relative z-10 w-full md:max-w-sm">
                 <span className="text-[#35a19d] dark:text-[#35a19d] text-xs font-bold uppercase tracking-[0.2em] flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#35a19d]" /> {t('landing.features.security.label')}
                 </span>
@@ -280,7 +280,7 @@ export default function HomePage() {
                   {t('landing.features.security.desc')}
                 </p>
               </div>
-              <div className="relative z-10 flex shrink-0 flex-col gap-3 rounded-[1.5rem] border border-[#35a19d]/20 bg-[#0f2630]/55 px-5 py-4 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
+              <div className="relative z-10 flex w-full md:w-auto shrink-0 flex-col gap-3 rounded-[1.5rem] border border-[#35a19d]/20 bg-[#0f2630]/55 px-5 py-4 shadow-[0_12px_32px_rgba(0,0,0,0.16)]">
                 <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#7ddce7]">{t('landing.features.status.label')}</span>
                 <div className="flex items-center gap-3">
                   <span className="h-3.5 w-3.5 rounded-full bg-[#35a19d] shadow-[0_0_18px_rgba(53,161,157,0.45)]" />
@@ -295,7 +295,7 @@ export default function HomePage() {
       </main>
 
       <footer className="w-full border-t border-slate-200 dark:border-[#3b494c]/20 bg-slate-100 dark:bg-[#080f18] transition-colors duration-500">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-10 px-6 py-16 md:px-10">
+        <div className="mx-auto flex max-w-[1440px] flex-col gap-8 md:gap-10 px-4 py-12 md:px-10 md:py-16">
           <div className="flex flex-col items-center gap-6 text-center">
             <div className="flex flex-col items-center gap-3 text-center">
               <Logo size={64} className="opacity-95 drop-shadow-[0_0_14px_rgba(26,127,179,0.14)]" />

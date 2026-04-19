@@ -388,7 +388,7 @@ function DescriptionPanel({
   const estimatedTime = meta?.estimated_time_minutes;
 
   return (
-    <div className="h-full overflow-y-auto p-4 space-y-5">
+    <div className="h-full overflow-y-auto p-3 sm:p-4 space-y-4 sm:space-y-5">
       {/* Title + meta */}
       <div>
         <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -818,15 +818,14 @@ export default function ChallengeSolvingPage() {
         </Tabs>
       </div>
 
-      {/* Bottom Bar */}
       <div className="flex items-center justify-between px-3 py-2 border-t border-border/50 bg-muted/20 shrink-0">
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+        <div className="hidden sm:flex items-center gap-2 text-[10px] text-muted-foreground">
           <Keyboard className="w-3 h-3" />
           <span>Ctrl+↵ Ejecutar</span>
           <span className="text-border">|</span>
           <span>Ctrl+⇧+↵ Enviar</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex-1 sm:flex-none flex items-center justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -864,30 +863,24 @@ export default function ChallengeSolvingPage() {
   );
 
   return (
-    <div className={`flex flex-col ${
-      isFullscreen ? 'fixed inset-0 z-50 bg-background' : 'h-[calc(100vh-8rem)]'
+    <div className={`flex flex-col bg-background ${
+      isFullscreen ? 'fixed inset-0 z-50' : 'h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-8rem)]'
     }`}>
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b border-border/50 shrink-0">
-        <div className="flex items-center gap-2">
+      {/* Top bar - Compact on mobile */}
+      <div className="flex items-center justify-between px-3 py-1 sm:py-1.5 border-b border-border/50 bg-card/30 shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
           <Link href={`/dashboard/hackathons/${hackathonId}`}>
-            <Button variant="ghost" size="sm" className="h-7 text-xs">
-              <ArrowLeft className="w-3 h-3 mr-1" /> Hackathon
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-7 sm:w-auto sm:px-2 text-xs">
+              <ArrowLeft className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Hackathon</span>
             </Button>
           </Link>
           {challenge ? (
-            <span className="text-sm font-medium truncate max-w-[300px]">{challenge.title}</span>
-          ) : null}
+            <span className="text-sm font-semibold truncate text-foreground/90">{challenge.title}</span>
+          ) : (
+            <Skeleton className="h-4 w-24" />
+          )}
         </div>
-
-        {/* Tab tracking warning */}
-        {showWarning ? (
-          <div className="flex items-center gap-2 text-xs text-amber-500">
-            <AlertTriangle className="w-3 h-3" />
-            <span>Las salidas de pestaña se registran</span>
-            <button onClick={dismissWarning} className="text-muted-foreground hover:text-foreground">✕</button>
-          </div>
-        ) : null}
       </div>
 
       {/* Desktop: Split Pane */}
@@ -903,27 +896,33 @@ export default function ChallengeSolvingPage() {
         </ResizablePanelGroup>
       </div>
 
-      {/* Tablet/Mobile: Tabs */}
+      {/* Tablet/Mobile: Segmented Tabs */}
       <div className="flex-1 min-h-0 lg:hidden flex flex-col">
-        <div className="flex border-b border-border/50 shrink-0">
-          <button
-            onClick={() => setMobileTab('problem')}
-            className={`flex-1 py-2 text-xs font-medium text-center transition-colors ${
-              mobileTab === 'problem' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-            }`}
-          >
-            Problema
-          </button>
-          <button
-            onClick={() => setMobileTab('editor')}
-            className={`flex-1 py-2 text-xs font-medium text-center transition-colors ${
-              mobileTab === 'editor' ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
-            }`}
-          >
-            Editor
-          </button>
+        <div className="p-2 border-b border-border/50 bg-muted/5 shrink-0">
+          <div className="flex p-1 bg-muted/50 rounded-lg">
+            <button
+              onClick={() => setMobileTab('problem')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                mobileTab === 'problem' 
+                  ? 'bg-background text-primary shadow-sm ring-1 ring-border/20' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Problema
+            </button>
+            <button
+              onClick={() => setMobileTab('editor')}
+              className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                mobileTab === 'editor' 
+                  ? 'bg-background text-primary shadow-sm ring-1 ring-border/20' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Editor
+            </button>
+          </div>
         </div>
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 bg-background">
           {mobileTab === 'problem' ? descriptionPanel : editorPanel}
         </div>
       </div>
