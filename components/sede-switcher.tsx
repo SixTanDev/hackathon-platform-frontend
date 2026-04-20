@@ -73,9 +73,12 @@ function RegularSedeSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-9 gap-1 sm:gap-2 px-2 sm:px-3 max-w-[140px] sm:max-w-[200px] md:max-w-[260px]">
+        <Button 
+          variant="outline" 
+          className="h-9 gap-1 sm:gap-2 px-2 sm:px-3 max-w-[140px] sm:max-w-[200px] md:max-w-[260px] bg-background/50 hover:bg-background hover:border-primary/30 transition-all shadow-sm"
+        >
           <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-secondary flex-shrink-0 animate-pulse-glow" />
+            <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-secondary flex-shrink-0 shadow-[0_0_8px_rgba(var(--secondary),0.5)]" />
             <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0" />
             <span className="text-[13px] sm:text-sm font-medium truncate">
               {currentZone?.name ? `${currentZone.name} › ` : ''}{currentSede?.name ?? 'Sede'}
@@ -141,10 +144,10 @@ function RegularSedeSwitcher() {
 function SuperAdminLabel() {
   const { t } = useTranslation();
   return (
-    <div className="h-9 flex items-center gap-2 px-3">
-      <Shield className="w-4 h-4 text-primary flex-shrink-0" />
-      <span className="text-sm font-medium">{t('admin.hero.title')}</span>
-      <span className="text-[10px] px-1.5 py-0.5 rounded font-medium border text-primary border-primary/30 bg-primary/10 flex-shrink-0">
+    <div className="h-9 flex items-center gap-2 px-3 bg-primary/5 rounded-full border border-primary/20 shadow-sm">
+      <Shield className="w-4 h-4 text-[#004669] flex-shrink-0" />
+      <span className="text-[13px] font-bold text-[#004669]">{t('admin.hero.title')}</span>
+      <span className="text-[10px] px-2 py-0.5 rounded font-black border text-[#004669] border-[#004669]/40 bg-[#004669]/10 flex-shrink-0 uppercase tracking-wider">
         {t('roles.admin')}
       </span>
     </div>

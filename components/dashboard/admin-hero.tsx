@@ -94,7 +94,7 @@ export function AdminHero({
             
             <div className="space-y-2">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-foreground leading-[1.1]">
-                {t('admin.hero.greeting')}, {user?.full_name?.split(' ')[0] || 'Admin'}
+                {t('admin.hero.greeting')} {user?.full_name?.toLowerCase().includes('demo') || !user?.full_name ? 'Admin' : user.full_name.split(' ')[0]}
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground max-w-xl leading-relaxed font-medium">
                 {statusConfig.description}. {t('dashboard.subtitle', { sede: currentSedeName || t('common.campus') })}

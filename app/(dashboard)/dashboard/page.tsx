@@ -102,86 +102,59 @@ function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
   const isOpen = hackathon.status === 'registration_open';
 
   return (
-    <div className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-4 rounded-xl border border-border/50 bg-card/5 hover:bg-muted/30 transition-all hover:border-border/80 hover:shadow-sm">
+    <div className="group relative flex flex-col p-4 rounded-2xl border border-border/40 bg-card/20 hover:bg-card/40 transition-all hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
       
-      {/* Left: Title & Meta */}
-      <div className="flex-1 min-w-0 space-y-1.5">
-        <h4 className="text-base sm:text-lg font-black text-foreground tracking-tight truncate group-hover:text-primary transition-colors">
+      {/* Top Row: Status & Badge */}
+      <div className="flex items-center justify-between mb-3">
+        <HackathonStatusBadge status={hackathon.status} />
+        {hackathon.ends_at && (
+          <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+            <Clock className="w-3 h-3 opacity-70" /> 
+            <span>
+              {formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale })}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Middle: Title & Meta */}
+      <div className="space-y-1 mb-4 flex-1">
+        <h4 className="text-base font-black text-foreground tracking-tight group-hover:text-primary transition-colors line-clamp-1">
           {hackathon.name}
         </h4>
         
-        <div className="flex flex-wrap items-center gap-3">
-          <HackathonStatusBadge status={hackathon.status} />
-          
-          <div className="flex items-center gap-3 text-[10px] sm:text-xs text-muted-foreground/70 font-medium">
-            {hackathon.is_team_based && (
-              <span className="flex items-center gap-1 bg-muted/40 px-1.5 py-0.5 rounded text-muted-foreground/90">
-                <Users className="w-3 h-3" /> {t('common.teams')}
-              </span>
-            )}
-            
-            {hackathon.ends_at && (
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3 h-3 opacity-60" /> 
-                <span>
-                  {t('dashboard.endsAt', {
-                    time: formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale }),
-                  })}
-                </span>
-              </span>
-            )}
+        <div className="flex items-center gap-2">
+          {hackathon.is_team_based ? (
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/80 bg-muted/50 px-2 py-0.5 rounded-md">
+              <Users className="w-3 h-3 opacity-70" /> 
+              <span>{t('common.teams')}</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/80 bg-muted/50 px-2 py-0.5 rounded-md">
+              <Code2 className="w-3 h-3 opacity-70" /> 
+              <span>{t('hackathons.card.individual')}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground/80 bg-muted/50 px-2 py-0.5 rounded-md uppercase tracking-wider">
+            {hackathon.scope || 'Campus'}
           </div>
         </div>
       </div>
 
-      {/* Right: Action */}
-      <div className="shrink-0 pt-2 sm:pt-0 sm:pl-4 border-t border-border/30 sm:border-0 mt-2 sm:mt-0">
-        <Link href={`/dashboard/hackathons/${hackathon.id}`} className="block w-full">
+      {/* Bottom: Action */}
+      <div className="pt-3 border-t border-border/20">
+        <Link href={`/dashboard/hackathons/${hackathon.id}`} className="block">
           <Button
             size="sm"
-            variant={isActive ? 'secondary' : 'ghost'}
-            className={`w-full sm:w-auto h-9 px-4 text-xs font-semibold transition-colors ${!isActive && 'hover:bg-primary/5 hover:text-primary'}`}
+            variant={isActive ? 'default' : 'secondary'}
+            className={`w-full h-10 text-xs font-bold transition-all ${isActive ? 'shadow-md shadow-primary/20' : 'hover:bg-primary/5'}`}
           >
-            {isActive ? t('common.view') : isOpen ? t('dashboard.enroll') : t('common.details')}
-            <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+            {isActive ? t('dashboard.hero.continue') : isOpen ? t('dashboard.enroll') : t('common.details')}
+            <ChevronRight className="ml-1 w-3.5 h-3.5" />
           </Button>
         </Link>
       </div>
       
-    </div>
-  );
-}
-
-// ─── Activity Item ───────────────────────────────────────
-
-const NOTIFICATION_ICONS: Record<string, React.ElementType> = {
-  badge_earned: Star,
-  hackathon_start: Trophy,
-  hackathon_end: Trophy,
-  team_invite: Users,
-  submission_result: Code2,
-  hint_available: Zap,
-};
-
-function ActivityItem({ notification }: { notification: ApiNotification }) {
-  const { locale } = useTranslation();
-  const dfLocale = locale === 'es' ? es : enUS;
-  const Icon = NOTIFICATION_ICONS[notification.type] ?? Bell;
-  return (
-    <div className="flex gap-3 py-2">
-      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-4 h-4 text-primary" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium leading-tight">{notification.title}</p>
-        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notification.message}</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">
-          {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: dfLocale })}
-        </p>
-      </div>
-      {!notification.is_read ? (
-        <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2" />
-      ) : null}
     </div>
   );
 }
@@ -204,7 +177,6 @@ export default function DashboardPage() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: activeHackathons, isLoading: hackathonsLoading } = useActiveHackathons();
   const { data: openHackathons } = useOpenHackathons();
-  const { data: notifications, isLoading: notificationsLoading } = useNotifications({ limit: 8 });
 
   const safeActiveHackathons = Array.isArray(activeHackathons) ? activeHackathons : [];
   const safeOpenHackathons = Array.isArray(openHackathons) ? openHackathons : [];
@@ -217,7 +189,7 @@ export default function DashboardPage() {
   ).slice(0, 6);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-12">
       <DashboardHero 
         user={user} 
         profile={profile || null} 
@@ -263,65 +235,68 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
-        {/* Left: Hackathons */}
-        <div className="lg:col-span-3 space-y-4">
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-primary" />
-                  {t('nav.hackathons')}
-                </CardTitle>
-                <Link href="/dashboard/hackathons">
-                  <Button variant="ghost" size="sm" className="text-[10px] sm:text-xs">
-                    {t('common.viewAll')} <ArrowRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {hackathonsLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-16 w-full rounded-lg" />
-                  ))}
-                </div>
-              ) : allHackathons.length > 0 ? (
-                allHackathons.map((h) => <HackathonCard key={h.id} hackathon={h} />)
-              ) : (
+      {/* Main Content Sections */}
+      <div className="space-y-10">
+        {/* Full-Width Hackathons Section */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between px-1">
+            <h3 className="text-xl font-black flex items-center gap-2.5 text-foreground tracking-tight">
+              <Trophy className="w-5 h-5 text-primary" />
+              {t('nav.hackathons')}
+            </h3>
+            <Link href="/dashboard/hackathons">
+              <Button variant="ghost" size="sm" className="text-xs font-bold hover:bg-primary/5 hover:text-primary transition-all">
+                {t('common.viewAll')} <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              </Button>
+            </Link>
+          </div>
+
+          {hackathonsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-44 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : allHackathons.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allHackathons.map((h) => <HackathonCard key={h.id} hackathon={h} />)}
+            </div>
+          ) : (
+            <Card className="border-border/40 bg-card/10 backdrop-blur-sm">
+              <CardContent className="py-16">
                 <EmptyState
                   icon={Calendar}
                   title={t('dashboard.noActiveHackathons')}
                   description={t('dashboard.noActiveHackathonsDescription')}
-                  className="py-8"
                 />
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
+        </section>
 
+        {/* Bottom Grid: Points & Badges */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Points */}
           {(profile?.recent_transactions?.length ?? 0) > 0 ? (
-            <Card className="border-border/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base flex items-center gap-2">
+            <Card className="border-border/40 bg-card/10 backdrop-blur-sm shadow-sm">
+              <CardHeader className="pb-3 border-b border-border/10 mb-2">
+                <CardTitle className="text-base font-bold flex items-center gap-2.5">
                   <TrendingUp className="w-4 h-4 text-secondary" />
                   {t('dashboard.recentPoints')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {profile?.recent_transactions?.slice(0, 5)?.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                    <div key={tx.id} className="flex items-center justify-between py-3 border-b border-border/10 last:border-0">
                       <div className="min-w-0">
-                        <p className="text-sm capitalize">{tx.reason?.replace(/_/g, ' ') ?? ''}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm font-bold text-foreground/90 capitalize">{tx.reason?.replace(/_/g, ' ') ?? ''}</p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mt-1 opacity-70">
                           {formatDistanceToNow(new Date(tx.created_at), { addSuffix: true, locale: locale === 'es' ? es : enUS })}
                         </p>
                       </div>
-                      <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="shrink-0">
-                        {tx.points > 0 ? '+' : ''}{tx.points} {t('common.points')}
+                      <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="shrink-0 font-black shadow-sm h-7 px-3">
+                        {tx.points > 0 ? '+' : ''}{tx.points}
                       </Badge>
                     </div>
                   ))}
@@ -329,78 +304,34 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
           ) : null}
-        </div>
-
-        {/* Right: Activity Feed */}
-        <div className="lg:col-span-2">
-          {/* 
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-accent" />
-                  {t('dashboard.recentActivity')}
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {notificationsLoading ? (
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex gap-3">
-                      <Skeleton className="w-8 h-8 rounded-full" />
-                      <div className="flex-1 space-y-1.5">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-3 w-1/2" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (notifications?.length ?? 0) > 0 ? (
-                <div className="divide-y divide-border/30">
-                  {notifications?.map((n) => (
-                    <ActivityItem key={n.id} notification={n} />
-                  ))}
-                </div>
-              ) : (
-                <EmptyState
-                  icon={Bell}
-                  title={t('dashboard.noNotifications')}
-                  description={t('dashboard.noNotificationsDescription')}
-                  className="py-8"
-                />
-              )}
-            </CardContent>
-          </Card>
-          */}
 
           {/* Badges Preview */}
           {(profile?.badges?.length ?? 0) > 0 ? (
-            <Card className="border-border/50 mt-4">
-              <CardHeader className="pb-3">
+            <Card className="border-border/40 bg-card/10 backdrop-blur-sm shadow-sm">
+              <CardHeader className="pb-3 border-b border-border/10 mb-2">
                 <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Star className="w-4 h-4 text-unad-gold" />
-                  {t('dashboard.badges', { count: profile?.badge_count ?? 0 })}
-                </CardTitle>
-                <Link href="/dashboard/profile">
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    {t('dashboard.viewProfile')} <ArrowRight className="w-3 h-3 ml-1" />
-                  </Button>
-                </Link>
+                  <CardTitle className="text-base font-bold flex items-center gap-2.5">
+                    <Star className="w-4 h-4 text-unad-gold" />
+                    {t('dashboard.badges', { count: profile?.badge_count ?? 0 })}
+                  </CardTitle>
+                  <Link href="/dashboard/profile">
+                    <Button variant="ghost" size="sm" className="text-xs font-bold hover:text-primary">
+                      {t('dashboard.viewProfile')} <ArrowRight className="w-3 h-3 ml-1" />
+                    </Button>
+                  </Link>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {profile?.badges?.slice(0, 6)?.map((b) => (
-                    <Badge key={b.badge_id} variant="secondary" className="text-xs">
-                      <Star className="w-3 h-3 mr-1 text-unad-gold" />
+                <div className="flex flex-wrap gap-2.5 pt-2">
+                  {profile?.badges?.slice(0, 10)?.map((b) => (
+                    <Badge key={b.badge_id} variant="secondary" className="px-3 py-1.5 bg-muted/40 border-border/50 text-xs font-bold transition-all hover:bg-muted/60 hover:scale-105">
+                      <Star className="w-3.5 h-3.5 mr-2 text-unad-gold fill-unad-gold/20" />
                       {b.badge_name}
                     </Badge>
                   ))}
-                  {(profile?.badge_count ?? 0) > 6 ? (
-                    <Badge variant="outline" className="text-xs">
-                      +{(profile?.badge_count ?? 0) - 6} {t('common.more')}
+                  {(profile?.badge_count ?? 0) > 10 ? (
+                    <Badge variant="outline" className="text-[10px] font-black uppercase tracking-wider px-3 py-1.5 border-dashed">
+                      +{(profile?.badge_count ?? 0) - 10} {t('common.more')}
                     </Badge>
                   ) : null}
                 </div>

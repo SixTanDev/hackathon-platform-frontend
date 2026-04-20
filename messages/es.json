@@ -176,7 +176,7 @@
   "theme.toggle": "Cambiar tema",
   "sidebar.collapse": "Colapsar",
   "sidebar.expand": "Expandir",
-  "dashboard.hero.greeting": "¡Bienvenido de vuelta, {name}!",
+  "dashboard.hero.greeting": "Hola, {name}",
   "dashboard.hero.points": "Tienes {count} puntos acumulados",
   "dashboard.hero.noHackathon": "No hay hackathones activos",
   "dashboard.hero.eventActive": "Evento en curso",

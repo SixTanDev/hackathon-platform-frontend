@@ -175,7 +175,7 @@
   "theme.toggle": "Toggle theme",
   "sidebar.collapse": "Collapse",
   "sidebar.expand": "Expand",
-  "dashboard.hero.greeting": "Welcome back, {name}!",
+  "dashboard.hero.greeting": "Hello, {name}",
   "dashboard.hero.points": "You have {count} points",
   "dashboard.hero.noHackathon": "No active hackathons",
   "dashboard.hero.eventActive": "Event in progress",

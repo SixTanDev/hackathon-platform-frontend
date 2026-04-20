@@ -39,7 +39,8 @@ export function DashboardHero({
     .filter(h => h.status === 'active' && h.ends_at)
     .sort((a, b) => new Date(a.ends_at!).getTime() - new Date(b.ends_at!).getTime())[0];
 
-  const firstName = user?.full_name?.split(' ')[0] || 'Coder';
+  const isDemoUser = user?.full_name?.toLowerCase().includes('demo');
+  const firstName = isDemoUser || !user?.full_name ? t('roles.student') : user.full_name.split(' ')[0];
   const rank = profile?.sede_rank ? `#${profile.sede_rank}` : '--';
   const totalPoints = profile?.total_points || 0;
   
