@@ -28,6 +28,7 @@ import {
   Inbox, Clock, CheckCircle2, Eye, ChevronLeft, ChevronRight,
   Loader2, FileText, Users, Layers
 } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n/context';
 
 const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
   pending: { label: 'Pendiente', class: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
@@ -39,6 +40,7 @@ const STATUS_CONFIG: Record<string, { label: string; class: string }> = {
 const PAGE_SIZE = 20;
 
 export default function GradingInboxPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [hackathonFilter, setHackathonFilter] = useState<string>('all');
@@ -151,7 +153,27 @@ export default function GradingInboxPage() {
       {isLoading ? (
         <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}</div>
       ) : items.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground"><Inbox className="h-10 w-10 mx-auto mb-3 opacity-40" />No hay entregas en la bandeja</CardContent></Card>
+        <div className="flex flex-col items-center justify-center py-16 text-center bg-muted/5 rounded-2xl border-2 border-dashed border-border/60 max-w-3xl mx-auto mt-8">
+          <div className="bg-muted/10 p-4 rounded-full mb-4">
+            <Inbox className="w-8 h-8 text-muted-foreground/60" />
+          </div>
+          <h3 className="text-xl font-bold text-foreground/90 mb-2">{t('tutor.grading.emptyState.title')}</h3>
+          <p className="text-sm text-muted-foreground max-w-md mb-8 leading-relaxed">
+            {t('tutor.grading.emptyState.description')}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <Link href="/tutor/dashboard">
+              <Button variant="outline" className="gap-2">
+                <ChevronLeft className="w-4 h-4" /> {t('tutor.grading.emptyState.actionDashboard')}
+              </Button>
+            </Link>
+            <Link href="/tutor/teams">
+              <Button variant="default" className="gap-2">
+                <Users className="w-4 h-4" /> {t('tutor.grading.emptyState.actionTeams')}
+              </Button>
+            </Link>
+          </div>
+        </div>
       ) : (
         <Card>
           <div className="overflow-x-auto">

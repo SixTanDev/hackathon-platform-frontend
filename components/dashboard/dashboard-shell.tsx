@@ -111,7 +111,7 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
 
       <div
         className={`transition-all duration-300 min-h-screen flex flex-col ${
-          isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-16' : 'ml-64'
+          isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-16' : 'ml-56'
         }`}
       >
         <div className={isMobile && isChallengeView ? 'hidden' : 'contents'}>

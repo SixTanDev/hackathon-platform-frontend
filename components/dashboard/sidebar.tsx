@@ -168,7 +168,7 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
     <aside
       className={cn(
         'fixed left-0 top-0 h-screen bg-card border-r border-border/50 z-40 transition-all duration-300 flex flex-col',
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-16' : 'w-56'
       )}
     >
       {/* Logo */}
@@ -179,9 +179,6 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
             <div className="min-w-0">
               <span className="block truncate font-semibold text-[0.82rem] tracking-wide text-foreground">
                 {t('brand.title')}
-              </span>
-              <span className="block truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                Plataforma academica
               </span>
             </div>
           )}

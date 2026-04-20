@@ -58,7 +58,19 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
     window.location.href = '/';
   }
 
-  const initials = (user?.full_name ?? 'U')
+  const currentRole = role || useAuthStore((s) => s?.currentRole);
+  const roleNames: Record<string, string> = {
+    admin: 'Administrador',
+    tutor: 'Tutor',
+    student: 'Estudiante',
+    director_semillero: 'Director',
+    guest: 'Invitado',
+  };
+  const fallbackName = roleNames[currentRole || ''] || 'Usuario';
+  const isDemoUser = user?.full_name?.toLowerCase().includes('demo');
+  const displayFullName = isDemoUser || !user?.full_name ? fallbackName : user.full_name;
+
+  const initials = displayFullName
     ?.split?.(' ')
     ?.map?.((n: string) => n?.[0] ?? '')
     ?.join?.('')
@@ -104,7 +116,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
                   onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
                   aria-label={t('common.language')}
                 >
-                  <span className="text-xs font-extrabold tracking-[0.04em]">{locale === 'es' ? 'EN' : 'ES'}</span>
+                  <span className="text-xs font-extrabold tracking-[0.04em] uppercase">{locale}</span>
                 </Button>
               )}
 
@@ -132,13 +144,13 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
                 aria-label="Menú de usuario"
               >
                 <Avatar className="h-8 w-8 ring-1 ring-border/40">
-                  <AvatarImage src={user?.avatar_url || ''} alt={user?.full_name || ''} />
+                  <AvatarImage src={user?.avatar_url || ''} alt={displayFullName} />
                   <AvatarFallback className="text-xs bg-primary/10 text-primary">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden max-w-[140px] truncate text-sm font-medium md:inline">
-                  {user?.full_name ?? 'Usuario'}
+                  {displayFullName}
                 </span>
                 {!isMobile && <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-colors group-hover:text-primary" />}
               </Button>
@@ -146,7 +158,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">{user?.full_name ?? 'Usuario'}</p>
+                  <p className="text-sm font-medium">{displayFullName}</p>
                   <p className="text-xs text-muted-foreground">{user?.email ?? ''}</p>
                 </div>
               </DropdownMenuLabel>
