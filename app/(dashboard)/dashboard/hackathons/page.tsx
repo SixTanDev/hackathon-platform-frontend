@@ -23,7 +23,8 @@ import { PageHeader } from '@/components/shared/page-header';
 import { EmptyState } from '@/components/shared/empty-state';
 import Link from 'next/link';
 import { formatDistanceToNow, format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
+import { useTranslation } from '@/lib/i18n/context';
 import {
   Search,
   Trophy,
@@ -51,32 +52,32 @@ interface TabConfig {
 }
 
 const TABS: TabConfig[] = [
-  { value: 'active', label: 'Activos', statuses: ['active'] },
-  { value: 'upcoming', label: 'Próximos', statuses: ['registration_open'] },
-  { value: 'practice', label: 'Modo Práctica', statuses: ['active', 'registration_open'], mode: 'practice' },
-  { value: 'finished', label: 'Finalizados', statuses: ['finished'] },
+  { value: 'active', label: 'hackathons.list.tabs.active', statuses: ['active'] },
+  { value: 'upcoming', label: 'hackathons.list.tabs.upcoming', statuses: ['registration_open'] },
+  { value: 'practice', label: 'hackathons.list.tabs.practice', statuses: ['active', 'registration_open'], mode: 'practice' },
+  { value: 'finished', label: 'hackathons.list.tabs.finished', statuses: ['finished'] },
 ];
 
 // ─── Scope Config ────────────────────────────────────────
 
-const SCOPE_LABELS: Record<HackathonScope, { label: string; color: string }> = {
-  internal: { label: 'Interno', color: 'bg-muted text-muted-foreground' },
-  zonal: { label: 'Zonal', color: 'bg-blue-500/10 text-blue-500' },
-  open: { label: 'Abierto', color: 'bg-purple-500/10 text-purple-500' },
+const SCOPE_CONFIG: Record<HackathonScope, { labelKey: string; color: string }> = {
+  internal: { labelKey: 'hackathons.list.internal', color: 'bg-muted text-muted-foreground' },
+  zonal: { labelKey: 'hackathons.list.zonal', color: 'bg-blue-500/10 text-blue-500' },
+  open: { labelKey: 'hackathons.list.open', color: 'bg-purple-500/10 text-purple-500' },
 };
 
-const MODE_LABELS: Record<HackathonMode, { label: string; color: string; icon: React.ElementType }> = {
-  live: { label: 'EN VIVO', color: 'bg-red-500/10 text-red-500', icon: Radio },
-  practice: { label: 'PRÁCTICA', color: 'bg-green-500/10 text-green-500', icon: Gamepad2 },
+const MODE_CONFIG: Record<HackathonMode, { labelKey: string; color: string; icon: React.ElementType }> = {
+  live: { labelKey: 'hackathons.card.live', color: 'bg-red-500/10 text-red-500', icon: Radio },
+  practice: { labelKey: 'hackathons.card.practiceMode', color: 'bg-green-500/10 text-green-500', icon: Gamepad2 },
 };
 
-const STATUS_LABELS: Record<HackathonStatus, { label: string; color: string }> = {
-  draft: { label: 'Borrador', color: 'bg-muted text-muted-foreground' },
-  registration_open: { label: 'Inscripciones Abiertas', color: 'bg-amber-500/10 text-amber-500' },
-  active: { label: 'Activo', color: 'bg-green-500/10 text-green-500' },
-  paused: { label: 'Pausado', color: 'bg-muted text-muted-foreground' },
-  finished: { label: 'Finalizado', color: 'bg-muted text-muted-foreground' },
-  archived: { label: 'Archivado', color: 'bg-muted text-muted-foreground' },
+const STATUS_CONFIG: Record<HackathonStatus, { labelKey: string; color: string }> = {
+  draft: { labelKey: 'status.draft', color: 'bg-muted text-muted-foreground' },
+  registration_open: { labelKey: 'status.registrationOpen', color: 'bg-amber-500/10 text-amber-500' },
+  active: { labelKey: 'status.active', color: 'bg-green-500/10 text-green-500' },
+  paused: { labelKey: 'status.paused', color: 'bg-muted text-muted-foreground' },
+  finished: { labelKey: 'status.finished', color: 'bg-muted text-muted-foreground' },
+  archived: { labelKey: 'status.archived', color: 'bg-muted text-muted-foreground' },
 };
 
 // ─── Hackathon Card ──────────────────────────────────────
@@ -88,25 +89,29 @@ function HackathonListCard({
   hackathon: Hackathon;
   isEnrolled: boolean;
 }) {
-  const scope = SCOPE_LABELS[hackathon.scope] ?? SCOPE_LABELS.internal;
-  const mode = MODE_LABELS[hackathon.mode] ?? MODE_LABELS.live;
-  const status = STATUS_LABELS[hackathon.status] ?? STATUS_LABELS.draft;
+  const { t, locale } = useTranslation();
+  const dfLocale = locale === 'es' ? es : enUS;
+  const scope = SCOPE_CONFIG[hackathon.scope] ?? SCOPE_CONFIG.internal;
+  const mode = MODE_CONFIG[hackathon.mode] ?? MODE_CONFIG.live;
+  const status = STATUS_CONFIG[hackathon.status] ?? STATUS_CONFIG.draft;
   const ModeIcon = mode.icon;
 
   const dateRange = useMemo(() => {
-    if (hackathon.mode === 'practice') return 'Sin límite de tiempo';
+    if (hackathon.mode === 'practice') return t('hackathons.card.noTimeLimit');
     if (hackathon.starts_at && hackathon.ends_at) {
-      return `${format(new Date(hackathon.starts_at), "d MMM", { locale: es })} — ${format(new Date(hackathon.ends_at), "d MMM yyyy", { locale: es })}`;
+      return `${format(new Date(hackathon.starts_at), "d MMM", { locale: dfLocale })} — ${format(new Date(hackathon.ends_at), "d MMM yyyy", { locale: dfLocale })}`;
     }
     if (hackathon.starts_at) {
-      return `Desde ${format(new Date(hackathon.starts_at), "d MMM yyyy", { locale: es })}`;
+      return `${t('dashboard.startsAt', { 
+        time: format(new Date(hackathon.starts_at), "d MMM yyyy", { locale: dfLocale }) 
+      })}`;
     }
-    return 'Fechas por definir';
-  }, [hackathon]);
+    return t('hackathons.card.datesTBD');
+  }, [hackathon, t, dfLocale]);
 
   const teamInfo = hackathon.is_team_based
-    ? `Equipos de ${hackathon.min_team_size ?? 2}-${hackathon.max_team_size}`
-    : 'Individual';
+    ? t('hackathons.card.teamSize', { min: hackathon.min_team_size ?? 2, max: hackathon.max_team_size ?? 5 })
+    : t('hackathons.card.individual');
 
   // Action button
   let actionButton: React.ReactNode = null;
@@ -114,39 +119,39 @@ function HackathonListCard({
   if (s === 'registration_open' && !isEnrolled) {
     actionButton = (
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
-        <Button size="sm">Inscribirse <ArrowRight className="w-3 h-3 ml-1" /></Button>
+        <Button size="sm">{t('dashboard.enroll')} <ArrowRight className="w-3 h-3 ml-1" /></Button>
       </Link>
     );
   } else if (s === 'registration_open' && isEnrolled) {
     actionButton = (
       <Button size="sm" variant="outline" disabled className="text-green-500">
-        <CheckCircle2 className="w-3 h-3 mr-1" /> Inscrito
+        <CheckCircle2 className="w-3 h-3 mr-1" /> {t('hackathons.card.enrolled')}
       </Button>
     );
   } else if (s === 'active' && isEnrolled) {
     actionButton = (
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
-        <Button size="sm">Entrar <ArrowRight className="w-3 h-3 ml-1" /></Button>
+        <Button size="sm">{t('hackathons.card.enter')} <ArrowRight className="w-3 h-3 ml-1" /></Button>
       </Link>
     );
   } else if (s === 'active' && !isEnrolled) {
     actionButton = (
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
         <Button size="sm" variant="ghost" className="text-muted-foreground">
-          <Eye className="w-3 h-3 mr-1" /> Solo espectador
+          <Eye className="w-3 h-3 mr-1" /> {t('hackathons.card.spectatorOnly')}
         </Button>
       </Link>
     );
   } else if (s === 'finished') {
     actionButton = (
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
-        <Button size="sm" variant="outline">Ver Resultados</Button>
+        <Button size="sm" variant="outline">{t('hackathons.card.viewResults')}</Button>
       </Link>
     );
   } else if (hackathon.mode === 'practice') {
     actionButton = (
       <Link href={`/dashboard/hackathons/${hackathon.id}`}>
-        <Button size="sm" variant="secondary">Practicar <ArrowRight className="w-3 h-3 ml-1" /></Button>
+        <Button size="sm" variant="secondary">{t('hackathons.card.practice')} <ArrowRight className="w-3 h-3 ml-1" /></Button>
       </Link>
     );
   }
@@ -156,7 +161,7 @@ function HackathonListCard({
       <CardContent className="pt-5 pb-4 space-y-3">
         {/* Badges Row */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <Badge className={`text-[10px] ${scope.color} border-0`}>{scope.label}</Badge>
+          <Badge className={`text-[10px] ${scope.color} border-0`}>{t(scope.labelKey)}</Badge>
           <Badge className={`text-[10px] ${mode.color} border-0 gap-1`}>
             {hackathon.mode === 'live' ? (
               <span className="relative flex h-1.5 w-1.5">
@@ -165,9 +170,9 @@ function HackathonListCard({
               </span>
             ) : null}
             <ModeIcon className="w-3 h-3" />
-            {mode.label}
+            {t(mode.labelKey)}
           </Badge>
-          <Badge className={`text-[10px] ${status.color} border-0`}>{status.label}</Badge>
+          <Badge className={`text-[10px] ${status.color} border-0`}>{t(status.labelKey)}</Badge>
         </div>
 
         {/* Title */}
@@ -228,6 +233,7 @@ function LoadingGrid() {
 
 export default function HackathonsListPage() {
   const { enrolledHackathonIds, currentRole, user } = useAuthStore();
+  const { t } = useTranslation();
   const userId = user?.id;
   const [activeTab, setActiveTab] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
@@ -318,8 +324,8 @@ export default function HackathonsListPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <PageHeader
-        title="Hackathones"
-        description="Explora y participa en los hackathones disponibles."
+        title={t('hackathons.list.title')}
+        description={t('hackathons.list.description')}
       />
 
       {/* Tabs */}
@@ -327,7 +333,7 @@ export default function HackathonsListPage() {
         <TabsList className="grid grid-cols-2 lg:grid-cols-4 gap-1 w-full max-w-[600px] h-auto p-1">
           {TABS.map((tab) => (
             <TabsTrigger key={tab.value} value={tab.value} className="text-[11px] sm:text-xs md:text-sm h-8 sm:h-9">
-              {tab.label}
+              {t(tab.label)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -338,7 +344,7 @@ export default function HackathonsListPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar hackathones..."
+            placeholder={t('hackathons.list.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -346,13 +352,13 @@ export default function HackathonsListPage() {
         </div>
         <Select value={scopeFilter} onValueChange={setScopeFilter}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Tipo" />
+            <SelectValue placeholder={t('hackathons.list.scopePlaceholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="internal">Interno</SelectItem>
-            <SelectItem value="zonal">Zonal</SelectItem>
-            <SelectItem value="open">Abierto</SelectItem>
+            <SelectItem value="all">{t('hackathons.list.allTypes')}</SelectItem>
+            <SelectItem value="internal">{t('hackathons.list.internal')}</SelectItem>
+            <SelectItem value="zonal">{t('hackathons.list.zonal')}</SelectItem>
+            <SelectItem value="open">{t('hackathons.list.open')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -373,11 +379,11 @@ export default function HackathonsListPage() {
       ) : (
         <EmptyState
           icon={Trophy}
-          title="No se encontraron hackathones"
+          title={t('hackathons.list.noResults')}
           description={
             searchQuery || scopeFilter !== 'all'
-              ? 'Intenta ajustar los filtros de búsqueda.'
-              : 'No hay hackathones disponibles en esta categoría por ahora.'
+              ? t('hackathons.list.adjustFilters')
+              : t('hackathons.list.noAvailable')
           }
         />
       )}

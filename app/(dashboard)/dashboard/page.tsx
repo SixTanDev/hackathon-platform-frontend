@@ -102,44 +102,52 @@ function HackathonCard({ hackathon }: { hackathon: Hackathon }) {
   const isOpen = hackathon.status === 'registration_open';
 
   return (
-    <div className="rounded-xl border border-border/50 p-3.5 transition-colors hover:bg-muted/40 sm:p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-2">
-          <div className="flex flex-wrap items-start gap-2">
-            <h4 className="min-w-0 flex-1 text-sm font-semibold leading-5 text-foreground sm:text-base">
-              {hackathon.name}
-            </h4>
-            <HackathonStatusBadge status={hackathon.status} />
-          </div>
-          <div className="flex flex-col gap-1.5 text-xs text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
-            {hackathon.is_team_based ? (
-              <span className="flex items-center gap-1">
-                <Users className="h-3.5 w-3.5 shrink-0" /> {t('common.teams')}
+    <div className="group relative flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-4 rounded-xl border border-border/50 bg-card/5 hover:bg-muted/30 transition-all hover:border-border/80 hover:shadow-sm">
+      
+      {/* Left: Title & Meta */}
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <h4 className="text-base sm:text-lg font-black text-foreground tracking-tight truncate group-hover:text-primary transition-colors">
+          {hackathon.name}
+        </h4>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <HackathonStatusBadge status={hackathon.status} />
+          
+          <div className="flex items-center gap-3 text-[10px] sm:text-xs text-muted-foreground/70 font-medium">
+            {hackathon.is_team_based && (
+              <span className="flex items-center gap-1 bg-muted/40 px-1.5 py-0.5 rounded text-muted-foreground/90">
+                <Users className="w-3 h-3" /> {t('common.teams')}
               </span>
-            ) : null}
-            {hackathon.ends_at ? (
-              <span className="flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5 shrink-0" />
-                <span className="leading-5">
+            )}
+            
+            {hackathon.ends_at && (
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 opacity-60" /> 
+                <span>
                   {t('dashboard.endsAt', {
                     time: formatDistanceToNow(new Date(hackathon.ends_at), { addSuffix: true, locale: dfLocale }),
                   })}
                 </span>
               </span>
-            ) : null}
+            )}
           </div>
         </div>
-        <Link href={`/dashboard/hackathons/${hackathon.id}`} className="sm:shrink-0">
+      </div>
+
+      {/* Right: Action */}
+      <div className="shrink-0 pt-2 sm:pt-0 sm:pl-4 border-t border-border/30 sm:border-0 mt-2 sm:mt-0">
+        <Link href={`/dashboard/hackathons/${hackathon.id}`} className="block w-full">
           <Button
             size="sm"
-            variant={isActive ? 'default' : isOpen ? 'secondary' : 'outline'}
-            className="h-10 w-full px-4 text-sm font-semibold sm:w-auto"
+            variant={isActive ? 'secondary' : 'ghost'}
+            className={`w-full sm:w-auto h-9 px-4 text-xs font-semibold transition-colors ${!isActive && 'hover:bg-primary/5 hover:text-primary'}`}
           >
             {isActive ? t('common.view') : isOpen ? t('dashboard.enroll') : t('common.details')}
-            <ChevronRight className="ml-1 h-3.5 w-3.5" />
+            <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
           </Button>
         </Link>
       </div>
+      
     </div>
   );
 }
@@ -246,11 +254,11 @@ export default function DashboardPage() {
         />
         <MetricCard
           label={t('dashboard.campusRank')}
-          value={profile?.sede_rank != null ? `#${profile.sede_rank}` : t('common.na')}
+          value={profile?.sede_rank != null ? `#${profile.sede_rank}` : t('dashboard.rankUnranked')}
           icon={Medal}
           color="text-unad-gold"
           bg="bg-unad-gold/10"
-          subtitle={profile?.hackathons_participated ? t('dashboard.hackathonsParticipated', { count: profile.hackathons_participated }) : undefined}
+          subtitle={profile?.hackathons_participated ? t('dashboard.hackathonsParticipated', { count: profile.hackathons_participated }) : t('dashboard.rankJoinToStart')}
           loading={profileLoading}
         />
       </div>
@@ -273,7 +281,7 @@ export default function DashboardPage() {
                 </Link>
               </div>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-4">
               {hackathonsLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map((i) => (

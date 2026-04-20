@@ -223,7 +223,7 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
           onClick={onToggle}
         >
           {isMobile ? (
-            <span className="text-xs">Cerrar</span>
+            <span className="text-xs">{t('common.close')}</span>
           ) : collapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (

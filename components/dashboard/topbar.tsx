@@ -59,14 +59,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
   }
 
   const currentRole = role || useAuthStore((s) => s?.currentRole);
-  const roleNames: Record<string, string> = {
-    admin: 'Administrador',
-    tutor: 'Tutor',
-    student: 'Estudiante',
-    director_semillero: 'Director',
-    guest: 'Invitado',
-  };
-  const fallbackName = roleNames[currentRole || ''] || 'Usuario';
+  const fallbackName = t(`roles.${currentRole || 'user'}`);
   const isDemoUser = user?.full_name?.toLowerCase().includes('demo');
   const displayFullName = isDemoUser || !user?.full_name ? fallbackName : user.full_name;
 
@@ -80,7 +73,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
   // Mobile assessment mode: hide bulky context controls, but keep quick essentials
   const showNavElements = !(isMobile && isChallengeView);
   const showCompactActions = isMobile && isChallengeView;
-  const mobileContextLabel = currentSede?.name ?? 'Sede';
+  const mobileContextLabel = currentSede?.name ?? t('common.campus');
 
   return (
     <header className="sticky top-0 z-30 h-14 sm:h-16 border-b border-border/50 bg-card/80 backdrop-blur-sm" role="banner">
@@ -92,7 +85,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
               size="icon"
               className="h-8 w-8 sm:h-9 sm:w-9 lg:hidden mr-1"
               onClick={onMobileMenuToggle}
-              aria-label="Abrir menú de navegación"
+              aria-label={t('common.openNavigation')}
             >
               <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
@@ -141,7 +134,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
               <Button
                 variant="ghost"
                 className="group h-10 gap-2 rounded-full border border-transparent px-2.5 hover:bg-accent hover:text-accent-foreground"
-                aria-label="Menú de usuario"
+                aria-label={t('common.userMenu')}
               >
                 <Avatar className="h-8 w-8 ring-1 ring-border/40">
                   <AvatarImage src={user?.avatar_url || ''} alt={displayFullName} />

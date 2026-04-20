@@ -10,7 +10,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/shared/empty-state';
 import Link from 'next/link';
 import { formatDistanceToNow, format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { es, enUS } from 'date-fns/locale';
+import { useTranslation } from '@/lib/i18n/context';
 import {
   PieChart, Pie, Cell,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -97,6 +98,7 @@ function ProfileIdentity({
   const currentSede = useAuthStore((s) => s?.currentSede);
   const currentRole = useAuthStore((s) => s?.currentRole);
 
+  const { t } = useTranslation();
   const initials = (user?.full_name ?? '')
     .split(' ')
     .map((w: string) => w[0])
@@ -117,14 +119,14 @@ function ProfileIdentity({
           </div>
           {currentRole && (
             <span className="absolute bottom-1 right-1 bg-secondary text-secondary-foreground text-[10px] font-bold px-3 py-1 rounded-full shadow-lg border-2 border-background uppercase tracking-widest">
-              {currentRole.replace('_', ' ')}
+              {t(`roles.${currentRole}`)}
             </span>
           )}
         </div>
         
         <div className="mt-4 space-y-1">
           <h2 className="text-2xl font-extrabold tracking-tight text-foreground">
-            {user?.full_name ?? 'Usuario'}
+            {user?.full_name ?? t('roles.user')}
           </h2>
           <p className="text-muted-foreground text-sm font-medium">
             {user?.email ?? ''}
@@ -151,13 +153,14 @@ function ProfileIdentity({
 }
 
 function ProfileBentoStats({ profile, loading }: { profile: ProfileResponse | undefined, loading: boolean }) {
+  const { t } = useTranslation();
   return (
     <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
       {[
-        { label: 'Puntos', value: profile?.total_points ?? 0, icon: Zap, color: 'text-primary' },
-        { label: 'Racha', value: `${profile?.current_streak_days ?? 0}`, icon: Flame, color: 'text-secondary' },
-        { label: 'Retos', value: profile?.challenges_solved ?? 0, icon: Code2, color: 'text-accent' },
-        { label: 'Ranking', value: profile?.sede_rank != null ? `#${profile.sede_rank}` : '—', icon: Trophy, color: 'text-unad-gold' },
+        { label: t('dashboard.totalPoints'), value: profile?.total_points ?? 0, icon: Zap, color: 'text-primary' },
+        { label: t('dashboard.currentStreak'), value: t('dashboard.days', { count: profile?.current_streak_days ?? 0 }), icon: Flame, color: 'text-secondary' },
+        { label: t('dashboard.challengesSolved'), value: profile?.challenges_solved ?? 0, icon: Code2, color: 'text-accent' },
+        { label: t('dashboard.campusRank'), value: profile?.sede_rank != null ? `#${profile.sede_rank}` : '—', icon: Trophy, color: 'text-unad-gold' },
       ].map((stat) => {
         const Icon = stat.icon;
         return (
@@ -179,6 +182,9 @@ function ProfileBentoStats({ profile, loading }: { profile: ProfileResponse | un
 // ─── Badges Grid ─────────────────────────────────────────
 
 function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boolean }) {
+  const { t, locale } = useTranslation();
+  const dfLocale = locale === 'es' ? es : enUS;
+
   if (loading) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -194,14 +200,14 @@ function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boo
           <Medal className="w-10 h-10 text-muted-foreground/40" />
         </div>
         <div className="space-y-2">
-          <p className="font-semibold text-foreground text-lg">Sin insignias aún</p>
+          <p className="font-semibold text-foreground text-lg">{t('dashboard.noBadges')}</p>
           <p className="text-sm text-muted-foreground leading-relaxed px-4 max-w-sm">
-            Completa retos y participa en hackathones para ganar insignias y brillar en tu perfil.
+            {t('dashboard.noBadgesDescription')}
           </p>
         </div>
         <Link href="/dashboard/challenges">
           <Button className="rounded-full shadow-lg font-bold px-8" size="lg">
-            Ver Retos
+            {t('dashboard.hero.viewChallenges')}
           </Button>
         </Link>
       </div>
@@ -220,7 +226,7 @@ function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boo
           </div>
           <p className="text-sm font-bold text-center leading-tight mb-1.5">{badge.badge_name}</p>
           <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
-            {format(new Date(badge.awarded_at), "d MMM yyyy", { locale: es })}
+            {format(new Date(badge.awarded_at), "d MMM yyyy", { locale: dfLocale })}
           </p>
         </div>
       ))}
@@ -231,10 +237,11 @@ function BadgesGrid({ badges, loading }: { badges: BadgeResponse[]; loading: boo
 // ─── Charts ──────────────────────────────────────────────
 
 function CategoryDonutChart({ categories }: { categories: ChallengeBreakdown[] }) {
+  const { t } = useTranslation();
   if (!categories?.length) {
     return (
       <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">
-        Recopilando datos...
+        {t('dashboard.analytics.collecting')}
       </div>
     );
   }
@@ -253,6 +260,7 @@ function CategoryDonutChart({ categories }: { categories: ChallengeBreakdown[] }
 }
 
 function PointsBarChart({ transactions }: { transactions: PointTransaction[] }) {
+  const { t } = useTranslation();
   const data = useMemo(() => {
     if (!transactions?.length) return [];
     const grouped: Record<string, number> = {};
@@ -264,7 +272,7 @@ function PointsBarChart({ transactions }: { transactions: PointTransaction[] }) 
   }, [transactions]);
 
   if (!data.length) {
-    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">Recopilando datos...</div>;
+    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">{t('dashboard.analytics.collecting')}</div>;
   }
 
   return (
@@ -274,15 +282,16 @@ function PointsBarChart({ transactions }: { transactions: PointTransaction[] }) 
         <XAxis dataKey="day" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} dy={8} />
         <YAxis tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} dx={-8} />
         <Tooltip cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }} contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 12, boxShadow: '0 8px 24px -4px rgba(0,0,0,0.1)' }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
-        <Bar dataKey="points" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Puntos" />
+        <Bar dataKey="points" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name={t('dashboard.history.table.points')} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
 function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }) {
+  const { t } = useTranslation();
   if (!categories?.length) {
-    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">Recopilando datos...</div>;
+    return <div className="flex items-center justify-center h-[200px] text-sm text-muted-foreground font-medium">{t('dashboard.analytics.collecting')}</div>;
   }
   const data = categories.map((c) => ({
     category: c.category.length > 12 ? c.category.slice(0, 12) + '…' : c.category,
@@ -296,7 +305,7 @@ function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }
         <PolarGrid stroke="hsl(var(--border))" />
         <PolarAngleAxis dataKey="category" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))', fontWeight: 600 }} />
         <PolarRadiusAxis tick={{ fontSize: 9, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} />
-        <Radar name="Retos" dataKey="count" stroke="hsl(var(--secondary))" fill="hsl(var(--secondary))" fillOpacity={0.35} />
+        <Radar name={t('nav.challenges')} dataKey="count" stroke="hsl(var(--secondary))" fill="hsl(var(--secondary))" fillOpacity={0.35} />
         <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '12px', fontSize: 12 }} itemStyle={{ color: 'hsl(var(--foreground))' }} />
       </RadarChart>
     </ResponsiveContainer>
@@ -306,12 +315,15 @@ function CategoryRadarChart({ categories }: { categories: ChallengeBreakdown[] }
 // ─── Transaction History ─────────────────────────────────
 
 function TransactionHistory({ transactions, loading }: { transactions: PointTransaction[]; loading: boolean }) {
+  const { t, locale } = useTranslation();
+  const dfLocale = locale === 'es' ? es : enUS;
+
   if (loading) {
     return <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}</div>;
   }
 
   if (!transactions?.length) {
-    return <EmptyState icon={TrendingUp} title="Sin transacciones" description="Tus movimientos de puntos aparecerán aquí." className="py-8 bg-card/20 border-dashed rounded-3xl border-border/50" />;
+    return <EmptyState icon={TrendingUp} title={t('dashboard.history.empty')} description={t('dashboard.history.emptyDescription')} className="py-8 bg-card/20 border-dashed rounded-3xl border-border/50" />;
   }
 
   return (
@@ -319,9 +331,9 @@ function TransactionHistory({ transactions, loading }: { transactions: PointTran
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border/50 bg-muted/30">
-            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Detalle</th>
-            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Fecha</th>
-            <th className="text-right py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Puntos</th>
+            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.history.table.detail')}</th>
+            <th className="text-left py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.history.table.date')}</th>
+            <th className="text-right py-3 px-5 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{t('dashboard.history.table.points')}</th>
           </tr>
         </thead>
         <tbody>
@@ -332,7 +344,7 @@ function TransactionHistory({ transactions, loading }: { transactions: PointTran
                 {tx.reason?.replace(/_/g, ' ') ?? '—'}
               </td>
               <td className="py-3.5 px-5 text-muted-foreground text-xs font-medium">
-                {format(new Date(tx.created_at), "d MMM yyyy, HH:mm", { locale: es })}
+                {format(new Date(tx.created_at), "d MMM yyyy, HH:mm", { locale: dfLocale })}
               </td>
               <td className="py-3.5 px-5 text-right">
                 <Badge variant={tx.points > 0 ? 'default' : 'destructive'} className="font-bold py-0.5 px-2">
@@ -350,6 +362,7 @@ function TransactionHistory({ transactions, loading }: { transactions: PointTran
 // ─── Profile Page Main Context ───────────────────────────
 
 export default function ProfilePage() {
+  const { t } = useTranslation();
   const { data: profile, isLoading } = useProfile();
 
   return (
@@ -364,7 +377,7 @@ export default function ProfilePage() {
       {/* Badges Section */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-extrabold tracking-tight">Insignias</h3>
+          <h3 className="text-xl font-extrabold tracking-tight">{t('dashboard.badges', { count: profile?.badge_count ?? 0 })}</h3>
           <Link href="/dashboard/challenges" className="text-muted-foreground hover:text-foreground transition-colors p-2 hover:bg-muted rounded-full">
             <ArrowRight className="w-5 h-5 pointer-events-none" />
           </Link>
@@ -375,15 +388,15 @@ export default function ProfilePage() {
       {/* Analytics Section */}
       <section className="space-y-6">
         <div>
-           <h3 className="text-xl font-extrabold tracking-tight">Análisis de Progreso</h3>
-           <p className="text-sm text-muted-foreground mt-1 font-medium">Resumen de tu evolución en la plataforma.</p>
+           <h3 className="text-xl font-extrabold tracking-tight">{t('dashboard.analytics.title')}</h3>
+           <p className="text-sm text-muted-foreground mt-1 font-medium">{t('dashboard.analytics.subtitle')}</p>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                 <Code2 className="w-4 h-4 text-primary" /> Distribución
+                 <Code2 className="w-4 h-4 text-primary" /> {t('dashboard.analytics.distribution')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2">
@@ -394,7 +407,7 @@ export default function ProfilePage() {
           <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                 <TrendingUp className="w-4 h-4 text-secondary" /> Puntos Recientes
+                 <TrendingUp className="w-4 h-4 text-secondary" /> {t('dashboard.analytics.recentPoints')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2">
@@ -405,7 +418,7 @@ export default function ProfilePage() {
           <Card className="min-w-0 overflow-hidden border-border/40 rounded-3xl shadow-sm bg-card hover:shadow-md transition-shadow">
             <CardHeader className="pb-1 pt-6 px-6">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                 <Target className="w-4 h-4 text-accent" /> Habilidades
+                 <Target className="w-4 h-4 text-accent" /> {t('dashboard.analytics.skills')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2">
@@ -418,7 +431,7 @@ export default function ProfilePage() {
       {/* Transaction History Section */}
       <section className="space-y-5">
          <div>
-           <h3 className="text-xl font-extrabold tracking-tight">Historial Transaccional</h3>
+           <h3 className="text-xl font-extrabold tracking-tight">{t('dashboard.history.title')}</h3>
         </div>
         <TransactionHistory
           transactions={profile?.recent_transactions ?? []}

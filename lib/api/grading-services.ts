@@ -97,23 +97,97 @@ export interface GradingSubmissionDetail {
 // ─── API Functions ──────────────────────────────────────────────────────────
 
 export async function getGradingInbox(params?: GradingInboxParams): Promise<GradingInboxResponse> {
-  const res = await apiClient.get('/grading/inbox', { params });
-  const data = res.data;
-  const list = toListResult<GradingInboxItem>(data, {
-    arrayKeys: ['items', 'submissions', 'results'],
-    totalKeys: ['total', 'count'],
-  });
-  const items = list.items;
-  // Normalize counts when backend does not provide them.
-  const fallbackCounts = {
-    pending: items.filter((i) => i.status === 'pending').length,
-    under_review: items.filter((i) => i.status === 'under_review').length,
-    graded: items.filter((i) => i.status === 'graded').length,
+  // --- MOCK DATA PARA AUDITORÍA UX ---
+  const mockItems: GradingInboxItem[] = [
+    {
+      id: 'sub-1', submission_id: 'sub-1',
+      student_name: 'Ana García', student_email: 'ana@example.com', team_name: 'Equipo Alpha',
+      challenge_id: 'c-1', challenge_title: 'Desarrollo de API REST',
+      hackathon_id: 'h-1', hackathon_name: 'Hackathon Primavera 2026',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+      status: 'pending',
+      file_type: 'application/pdf', file_url: null, text_content: null,
+      original_filename: 'entrega_final.pdf', file_size_bytes: 102400,
+      rubric_json: null
+    },
+    {
+      id: 'sub-2', submission_id: 'sub-2',
+      student_name: 'Carlos López', student_email: 'carlos@example.com', team_name: 'Code Ninjas',
+      challenge_id: 'c-2', challenge_title: 'Implementación de OAuth2',
+      hackathon_id: 'h-1', hackathon_name: 'Hackathon Primavera 2026',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+      status: 'under_review',
+      file_type: 'application/zip', file_url: null, text_content: null,
+      original_filename: 'source_code.zip', file_size_bytes: 512000,
+      rubric_json: null
+    },
+    {
+      id: 'sub-3', submission_id: 'sub-3',
+      student_name: 'María Fernández', student_email: 'maria@example.com', team_name: null,
+      challenge_id: 'c-3', challenge_title: 'Diseño de Base de Datos',
+      hackathon_id: 'h-2', hackathon_name: 'Hackathon Invierno 2025',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+      status: 'returned_for_revision',
+      file_type: 'application/pdf', file_url: null, text_content: null,
+      original_filename: 'diagrama_er.pdf', file_size_bytes: 204800,
+      rubric_json: null
+    },
+    {
+      id: 'sub-4', submission_id: 'sub-4',
+      student_name: 'Juan Pérez', student_email: 'juan@example.com', team_name: 'Los Hackers',
+      challenge_id: 'c-1', challenge_title: 'Desarrollo de API REST',
+      hackathon_id: 'h-1', hackathon_name: 'Hackathon Primavera 2026',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
+      status: 'graded',
+      file_type: 'application/json', file_url: null, text_content: null,
+      original_filename: 'postman_collection.json', file_size_bytes: 15360,
+      rubric_json: null
+    },
+    {
+      id: 'sub-5', submission_id: 'sub-5',
+      student_name: 'Lucía Gómez', student_email: 'lucia@example.com', team_name: 'Dev Squad',
+      challenge_id: 'c-4', challenge_title: 'Optimización de Algoritmos',
+      hackathon_id: 'h-1', hackathon_name: 'Hackathon Primavera 2026',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+      status: 'pending',
+      file_type: 'text/plain', file_url: null, text_content: null,
+      original_filename: 'solucion.py', file_size_bytes: 5120,
+      rubric_json: null
+    },
+    {
+      id: 'sub-6', submission_id: 'sub-6',
+      student_name: 'Roberto Sánchez', student_email: 'roberto@example.com', team_name: 'Frontend Masters',
+      challenge_id: 'c-5', challenge_title: 'Maquetado Responsivo',
+      hackathon_id: 'h-1', hackathon_name: 'Hackathon Primavera 2026',
+      submitted_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+      status: 'pending',
+      file_type: 'application/zip', file_url: null, text_content: null,
+      original_filename: 'build.zip', file_size_bytes: 1024000,
+      rubric_json: null
+    }
+  ];
+
+  let filteredItems = [...mockItems];
+  if (params?.status && params.status !== 'all') {
+    filteredItems = filteredItems.filter(i => i.status === params.status);
+  }
+  if (params?.hackathon_id && params.hackathon_id !== 'all') {
+    filteredItems = filteredItems.filter(i => i.hackathon_id === params.hackathon_id);
+  }
+  if (params?.challenge_id && params.challenge_id !== 'all') {
+    filteredItems = filteredItems.filter(i => i.challenge_id === params.challenge_id);
+  }
+
+  const counts = {
+    pending: mockItems.filter(i => i.status === 'pending').length,
+    under_review: mockItems.filter(i => i.status === 'under_review').length,
+    graded: mockItems.filter(i => i.status === 'graded').length,
   };
+
   return {
-    items,
-    total: list.total,
-    counts: (data as any)?.counts ?? fallbackCounts,
+    items: filteredItems,
+    total: filteredItems.length,
+    counts,
   };
 }
 

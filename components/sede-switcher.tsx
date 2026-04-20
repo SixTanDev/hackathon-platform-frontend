@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/auth-store';
+import { useTranslation } from '@/lib/i18n/context';
 import { apiClient } from '@/lib/api/client';
-import { getDashboardPathForRole, ROLE_LABELS, ROLE_COLORS } from '@/lib/auth-helpers';
+import { getDashboardPathForRole, ROLE_COLORS } from '@/lib/auth-helpers';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { Building2, ChevronDown, Check, Loader2, Globe, Shield } from 'lucide-re
 function RegularSedeSwitcher() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
   const memberships = useAuthStore((s) => s?.memberships);
   const accessToken = useAuthStore((s) => s?.accessToken);
   const currentSede = useAuthStore((s) => s?.currentSede);
@@ -56,10 +58,10 @@ function RegularSedeSwitcher() {
       });
 
       queryClient.clear();
-      toast.success(`Cambiado a: ${sede?.sede_name ?? 'Sede'}`);
+      toast.success(t('common.switchSuccess', { name: sede?.sede_name ?? 'Sede' }));
       router.replace(getDashboardPathForRole(role));
     } catch (err: any) {
-      toast.error(err?.detail ?? 'Error al cambiar sede');
+      toast.error(err?.detail ?? t('common.switchError'));
     } finally {
       setIsSwitching(null);
     }
@@ -79,14 +81,14 @@ function RegularSedeSwitcher() {
               {currentZone?.name ? `${currentZone.name} › ` : ''}{currentSede?.name ?? 'Sede'}
             </span>
             <span className={`hidden sm:inline-flex text-[10px] px-1.5 py-0.5 rounded font-medium border flex-shrink-0 ${roleColor}`}>
-              {ROLE_LABELS[currentRole ?? ''] ?? currentRole ?? ''}
+              {t(`roles.${currentRole || 'user'}`)}
             </span>
           </div>
           <ChevronDown className="w-3 h-3 text-muted-foreground flex-shrink-0" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">Mis sedes</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-xs text-muted-foreground">{t('common.mySedes')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {safeMemberships.map((zone: ZoneMembershipInfo) => (
           <DropdownMenuGroup key={zone?.zone_id ?? ''}>
@@ -119,7 +121,7 @@ function RegularSedeSwitcher() {
                     </div>
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium border ${sedeRoleColor}`}>
-                        {ROLE_LABELS[sede?.role ?? ''] ?? sede?.role ?? ''}
+                        {t(`roles.${sede?.role || 'user'}`)}
                       </span>
                       {loading && <Loader2 className="w-3 h-3 animate-spin" />}
                     </div>
@@ -137,12 +139,13 @@ function RegularSedeSwitcher() {
 // ─── SuperAdmin static label (zone selector moved to sedes page) ────────────
 
 function SuperAdminLabel() {
+  const { t } = useTranslation();
   return (
     <div className="h-9 flex items-center gap-2 px-3">
       <Shield className="w-4 h-4 text-primary flex-shrink-0" />
-      <span className="text-sm font-medium">Panel SuperAdmin</span>
+      <span className="text-sm font-medium">{t('admin.hero.title')}</span>
       <span className="text-[10px] px-1.5 py-0.5 rounded font-medium border text-primary border-primary/30 bg-primary/10 flex-shrink-0">
-        SuperAdmin
+        {t('roles.admin')}
       </span>
     </div>
   );
