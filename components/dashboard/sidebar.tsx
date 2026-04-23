@@ -111,8 +111,10 @@ const GUEST_NAV: NavItem[] = [
 ];
 
 function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean): NavItem[] {
-  if (isSuperAdmin && (role === 'admin' || !role)) return SUPERADMIN_NAV;
+  if (isSuperAdmin && (role === 'superadmin' || role === 'admin' || !role)) return SUPERADMIN_NAV;
   switch (role) {
+    case 'superadmin':
+      return SUPERADMIN_NAV;
     case 'admin':
       return ADMIN_NAV;
     case 'tutor':
@@ -129,9 +131,11 @@ function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean)
 }
 
 function getMobileNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean): NavItem[] {
-  if (isSuperAdmin && (role === 'admin' || !role)) return SUPERADMIN_NAV.slice(0, 4);
+  if (isSuperAdmin && (role === 'superadmin' || role === 'admin' || !role)) return SUPERADMIN_NAV.slice(0, 4);
 
   switch (role) {
+    case 'superadmin':
+      return SUPERADMIN_NAV.slice(0, 4);
     case 'admin':
       return ADMIN_NAV.filter((item) => ['/admin/dashboard', '/admin/hackathons', '/admin/challenges', '/admin/users'].includes(item.href));
     case 'tutor':

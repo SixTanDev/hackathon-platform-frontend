@@ -1,6 +1,6 @@
 // ─── Enums & Constants ─────────────────────────────────────────────────────
 
-export type RoleName = 'admin' | 'tutor' | 'director_semillero' | 'student' | 'guest';
+export type RoleName = 'admin' | 'tutor' | 'director_semillero' | 'student' | 'guest' | 'superadmin';
 
 export type HackathonStatus = 'draft' | 'registration_open' | 'active' | 'paused' | 'finished' | 'archived';
 export type HackathonMode = 'live' | 'practice';

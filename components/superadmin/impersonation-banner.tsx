@@ -45,7 +45,7 @@ export function ImpersonationBanner() {
         contextToken: '',
         zone: { id: '', code: '', name: '' },
         sede: { id: '', name: '', slug: '' },
-        role: 'admin',
+        role: 'superadmin',
       });
 
       // Restore superadmin selected zone
