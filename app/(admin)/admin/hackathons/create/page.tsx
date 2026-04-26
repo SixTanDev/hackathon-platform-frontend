@@ -4,7 +4,7 @@ import { HackathonCreationWizard } from '@/components/features/hackathons/hackat
 
 export default function CreateHackathonPage() {
   return (
-    <div className="p-6">
+    <div className="px-3 py-4 sm:p-6">
       <HackathonCreationWizard 
         redirectPath="/admin/hackathons" 
         title="Crear Global Hackathon"

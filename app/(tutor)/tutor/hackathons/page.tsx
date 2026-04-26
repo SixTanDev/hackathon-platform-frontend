@@ -1,12 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { Calendar, ChevronLeft, ChevronRight, Plus, Search, Trophy } from 'lucide-react';
 import { queryKeys } from '@/lib/query-client';
 import { listHackathons } from '@/lib/api/admin-hackathon-services';
-import { getHackathons } from '@/lib/api/services';
 import { PageHeader } from '@/components/shared/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +13,17 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import type { Hackathon, HackathonStatus } from '@/types/api';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import type { Hackathon } from '@/types/api';
 
 type TabValue = 'all' | 'active' | 'draft' | 'finished';
 
@@ -41,18 +50,12 @@ const MODE_LABELS: Record<string, string> = {
 async function listTutorHackathons(params: {
   page: number;
   limit: number;
-  status?: string;
   search?: string;
 }) {
-  const skip = (params.page - 1) * params.limit;
-  
-  // Directly use listHackathons as it's the unified endpoint.
-  // The backend will filter based on the user's role and search terms.
   const result = await listHackathons({
-    status: params.status,
     search: params.search,
-    skip,
-    limit: params.limit,
+    skip: 0,
+    limit: 200,
   });
 
   return result;
@@ -63,23 +66,45 @@ export default function TutorHackathonsPage() {
   const [tab, setTab] = useState<TabValue>('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [showCreateNotice, setShowCreateNotice] = useState(false);
   const pageSize = 10;
-
-  const statusFilter = useMemo(() => {
-    if (tab === 'active') return 'active';
-    if (tab === 'draft') return 'draft';
-    if (tab === 'finished') return 'finished';
-    return undefined;
-  }, [tab]);
+  const deferredSearch = useDeferredValue(search);
 
   const { data, isLoading } = useQuery({
-    queryKey: queryKeys.hackathons.list({ page, pageSize, status: statusFilter, search }),
-    queryFn: () => listTutorHackathons({ page, limit: pageSize, status: statusFilter, search }),
+    queryKey: queryKeys.hackathons.list({ scope: 'tutor', search: deferredSearch }),
+    queryFn: () => listTutorHackathons({ page, limit: pageSize, search: deferredSearch }),
   });
 
-  const hackathons = data?.items ?? [];
-  const total = data?.total ?? 0;
+  const filteredHackathons = useMemo(() => {
+    const allHackathons = data?.items ?? [];
+    let filtered = allHackathons;
+
+    if (tab === 'active') {
+      filtered = filtered.filter(
+        (hackathon) => hackathon.status === 'active' || hackathon.status === 'registration_open'
+      );
+    } else if (tab === 'draft') {
+      filtered = filtered.filter((hackathon) => hackathon.status === 'draft');
+    } else if (tab === 'finished') {
+      filtered = filtered.filter(
+        (hackathon) => hackathon.status === 'finished' || hackathon.status === 'archived'
+      );
+    }
+
+    if (deferredSearch.trim()) {
+      const normalizedSearch = deferredSearch.trim().toLowerCase();
+      filtered = filtered.filter((hackathon) => hackathon.name.toLowerCase().includes(normalizedSearch));
+    }
+
+    return filtered;
+  }, [data?.items, deferredSearch, tab]);
+
+  const total = filteredHackathons.length;
   const totalPages = Math.max(Math.ceil(total / pageSize), 1);
+  const hackathons = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredHackathons.slice(start, start + pageSize);
+  }, [filteredHackathons, page]);
 
   function formatDate(value: string | null) {
     if (!value) return '-';
@@ -96,11 +121,30 @@ export default function TutorHackathonsPage() {
         title="Hackathones"
         description="Consulta el estado, alcance y fechas de los hackathones disponibles."
       >
-        <Button onClick={() => router.push('/tutor/hackathons/create')} className="gap-2">
+        <Button onClick={() => setShowCreateNotice(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Nuevo Hackathon
         </Button>
       </PageHeader>
+
+      <AlertDialog open={showCreateNotice} onOpenChange={setShowCreateNotice}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Antes de empezar</AlertDialogTitle>
+            <AlertDialogDescription>
+              Puedes preparar el hackathon desde este asistente, pero el guardado para tutores
+              todavía depende de permisos backend en construcción. Si continúas, podrás revisar el
+              formulario, aunque al guardar podrías ver una validación de permisos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Volver</AlertDialogCancel>
+            <AlertDialogAction onClick={() => router.push('/tutor/hackathons/create')}>
+              Continuar de todos modos
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Tabs
