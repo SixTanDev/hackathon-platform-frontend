@@ -10,6 +10,7 @@ import {
   getAuditLog,
   getChallengeReviews,
 } from '@/lib/api/admin-services';
+import { listChallenges } from '@/lib/api/challenge-admin-services';
 import { AdminHero } from '@/components/dashboard/admin-hero';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -92,8 +93,20 @@ export default function AdminDashboardPage() {
     enabled: !!sedeId,
   });
 
+  const { data: tutorPending } = useQuery({
+    queryKey: queryKeys.challenges.list({ status: 'pending_approval' }),
+    queryFn: () => listChallenges({ status: 'pending_approval' }),
+    enabled: !!sedeId,
+  });
+
+  const { data: tutorDrafts } = useQuery({
+    queryKey: queryKeys.challenges.list({ status: 'draft' }),
+    queryFn: () => listChallenges({ status: 'draft' }),
+    enabled: !!sedeId,
+  });
+
   const auditEntries = auditData?.items ?? [];
-  const pendingCount = pendingReviews?.length ?? 0;
+  const pendingCount = (pendingReviews?.length ?? 0) + (tutorPending?.total ?? 0) + (tutorDrafts?.total ?? 0);
   const loading = loadingOverview;
 
   return (

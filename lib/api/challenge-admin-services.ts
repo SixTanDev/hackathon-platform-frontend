@@ -199,16 +199,16 @@ export async function searchSimilarByText(title: string, category?: string): Pro
 // No dedicated reject endpoint; update challenge status to 'rejected' via PUT
 
 export async function approveChallenge(challengeId: string): Promise<Challenge> {
-  const res = await apiClient.post('/challenges/approve', { challenge_id: challengeId });
+  const res = await apiClient.post('/challenges/approve', { challenge_id: challengeId, approve: true });
   return res.data;
 }
 
 export async function rejectChallenge(challengeId: string, reason: string): Promise<void> {
-  // No dedicated reject endpoint — update the challenge status
-  await apiClient.put(`/challenges/${challengeId}`, {
-    status: 'rejected',
-    metadata_json: { rejection_reason: reason },
-  } as any);
+  await apiClient.post('/challenges/approve', {
+    challenge_id: challengeId,
+    approve: false,
+    rejection_reason: reason,
+  });
 }
 
 // ─── AI Generation ──────────────────────────────────────────────────────────

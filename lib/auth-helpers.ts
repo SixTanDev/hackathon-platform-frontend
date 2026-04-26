@@ -29,7 +29,7 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-  admin: 'text-white bg-[#004669] border-[#004669]/20 font-semibold',
+  admin: 'text-[#004669] bg-[#004669]/15 border-[#004669]/30 font-bold',
   tutor: 'text-primary bg-primary/10 border-primary/20',
   director_semillero: 'text-unad-gold bg-unad-gold/10 border-unad-gold/20',
   student: 'text-secondary bg-secondary/10 border-secondary/20',

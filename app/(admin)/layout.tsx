@@ -7,5 +7,5 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardShell role="admin" allowNoContext>{children}</DashboardShell>;
+  return <DashboardShell allowNoContext>{children}</DashboardShell>;
 }

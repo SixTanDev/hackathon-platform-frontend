@@ -11,7 +11,7 @@ import { FlashChallengeAlert } from '@/components/flash-challenge-alert';
 import { ScorePopup } from '@/components/gamification/score-popup';
 import { BadgeEarned } from '@/components/gamification/badge-earned';
 import { ImpersonationBanner } from '@/components/superadmin/impersonation-banner';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Loader2 } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import type { RoleName } from '@/types/api';
@@ -55,7 +55,6 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
   const toggleMobile = useCallback(() => setMobileOpen((p) => !p), []);
 
   // Only show the full-screen loader on initial mount or critical auth failure
-  // We avoid unmounting the entire app if we just have a brief flicker
   const [hasInitiallyLoaded, setHasInitiallyLoaded] = useState(false);
 
   useEffect(() => {
@@ -64,6 +63,7 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
     }
   }, [mounted, isAuthenticated, contextToken, allowNoContext]);
 
+  const isChallengeView = pathname?.includes('/challenges/');
   if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -82,7 +82,7 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/10">
       <AuthCookieSync />
 
       {/* Desktop sidebar */}
@@ -96,7 +96,10 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
 
       {/* Mobile sidebar via Sheet */}
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="p-0 w-64">
+        <SheetContent side="left" className="p-0 w-[88vw] max-w-72 border-r border-border/50">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Menú de navegación</SheetTitle>
+          </SheetHeader>
           <DashboardSidebar 
             collapsed={false} 
             onToggle={() => setMobileOpen(false)} 
@@ -106,14 +109,18 @@ export function DashboardShell({ children, allowNoContext = false, role }: Dashb
       </Sheet>
 
       <div
-        className={`transition-all duration-300 ${
-          isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-16' : 'ml-64'
+        className={`transition-all duration-300 min-h-screen flex flex-col ${
+          isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-16' : 'ml-56'
         }`}
       >
-        <ImpersonationBanner />
-        <HackathonLiveBanner />
+        <div className={isMobile && isChallengeView ? 'hidden' : 'contents'}>
+          <ImpersonationBanner />
+          <HackathonLiveBanner />
+        </div>
+        
         <DashboardTopbar onMobileMenuToggle={toggleMobile} role={role} />
-        <main className="p-4 md:p-6 max-w-[1200px] mx-auto" role="main">
+        <main className={`flex-1 ${isChallengeView ? 'p-0 sm:p-4 md:p-6' : 'p-3 sm:p-4 md:p-6'} max-w-[1400px] mx-auto w-full`} role="main">
+
           {children}
         </main>
         <FlashChallengeAlert />
