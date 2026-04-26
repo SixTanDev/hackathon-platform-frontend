@@ -41,7 +41,6 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
   const { locale, setLocale, t } = useTranslation();
   const user = useAuthStore((s) => s?.user);
   const currentSede = useAuthStore((s) => s?.currentSede);
-  const storeRole = useAuthStore((s) => s?.currentRole);
   const logout = useAuthStore((s) => s?.logout);
   const [mounted, setMounted] = useState(false);
   const isMobile = useMediaQuery('(max-width: 1023px)');
@@ -59,7 +58,7 @@ export function DashboardTopbar({ onMobileMenuToggle, role }: DashboardTopbarPro
     window.location.href = '/';
   }
 
-  const currentRole = role ?? storeRole;
+  const currentRole = role || useAuthStore((s) => s?.currentRole);
   const fallbackName = t(`roles.${currentRole || 'user'}`);
   const isDemoUser = user?.full_name?.toLowerCase().includes('demo');
   const displayFullName = isDemoUser || !user?.full_name ? fallbackName : user.full_name;

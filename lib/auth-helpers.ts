@@ -5,8 +5,6 @@ import type { RoleName } from '@/types/api';
  */
 export function getDashboardPathForRole(role: RoleName | null | undefined): string {
   switch (role) {
-    case 'superadmin':
-      return '/superadmin';
     case 'admin':
       return '/admin/dashboard';
     case 'tutor':
@@ -23,7 +21,6 @@ export function getDashboardPathForRole(role: RoleName | null | undefined): stri
 }
 
 export const ROLE_LABELS: Record<string, string> = {
-  superadmin: 'SuperAdmin',
   admin: 'Administrador',
   tutor: 'Tutor',
   director_semillero: 'Director de Semillero',
@@ -32,7 +29,6 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-  superadmin: 'text-[#0f172a] bg-[#38bdf8]/15 border-[#38bdf8]/30 font-bold',
   admin: 'text-[#004669] bg-[#004669]/15 border-[#004669]/30 font-bold',
   tutor: 'text-primary bg-primary/10 border-primary/20',
   director_semillero: 'text-unad-gold bg-unad-gold/10 border-unad-gold/20',
