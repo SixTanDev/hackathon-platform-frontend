@@ -76,6 +76,10 @@ export const queryKeys = {
     messages: (id: string) => ['teams', id, 'messages'] as const,
     progress: (id: string) => ['teams', id, 'progress'] as const,
     mentorAssigned: ['teams', 'mentor-assigned'] as const,
+
+    tutorVisible: (params?: Record<string, unknown>) => ['teams', 'tutor-visible', params] as const,
+    studentMine: (hackathonIds: string[]) => ['teams', 'student-mine', hackathonIds] as const,
+
   },
 
   // User search

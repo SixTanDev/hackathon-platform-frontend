@@ -7,5 +7,5 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardShell role="student">{children}</DashboardShell>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

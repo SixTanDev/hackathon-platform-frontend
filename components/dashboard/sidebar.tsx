@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/logo';
 import { cn } from '@/lib/utils';
@@ -127,6 +128,7 @@ function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean)
   }
 }
 
+
 interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
@@ -139,15 +141,16 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
   const storeRole = useAuthStore((s) => s?.currentRole);
   const user = useAuthStore((s) => s?.user);
   const isSuperAdmin = user?.is_superadmin ?? false;
-
+  const isMobile = useMediaQuery('(max-width: 1023px)');
   const currentRole = role || storeRole;
-  const navItems = getNavForRole(currentRole, isSuperAdmin);
+  const navItems = isMobile ? getMobileNavForRole(currentRole, isSuperAdmin) : getNavForRole(currentRole, isSuperAdmin);
+
 
   return (
     <aside
       className={cn(
         'fixed left-0 top-0 h-screen bg-card border-r border-border/50 z-40 transition-all duration-300 flex flex-col',
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? 'w-16' : 'w-56'
       )}
     >
       {/* Logo */}
@@ -158,9 +161,6 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
             <div className="min-w-0">
               <span className="block truncate font-semibold text-[0.82rem] tracking-wide text-foreground">
                 {t('brand.title')}
-              </span>
-              <span className="block truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                Plataforma academica
               </span>
             </div>
           )}
@@ -179,8 +179,8 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
           return (
             <Link key={item?.href ?? ''} href={item?.href ?? '/dashboard'}>
               <div
-                className={cn(
-                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                className={cn(<
+                  'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200',
                   isActive
                     ? activeStyles
                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:shadow-[inset_3px_0_0_0_hsl(var(--primary)/0.2)]',
@@ -204,7 +204,9 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
           className="w-full justify-center"
           onClick={onToggle}
         >
-          {collapsed ? (
+          {isMobile ? (
+            <span className="text-xs">{t('common.close')}</span>
+          ) : collapsed ? (
             <ChevronRight className="w-4 h-4" />
           ) : (
             <>

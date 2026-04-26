@@ -22,8 +22,9 @@ function LeaderboardTable({ entries, currentUserId }: { entries: LeaderboardEntr
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+
+    <div className="overflow-x-auto rounded-md">
+      <table className="w-full text-xs sm:text-sm min-w-[400px]">
         <thead>
           <tr className="border-b border-border text-muted-foreground">
             <th className="px-4 py-3 text-left w-16">#</th>
@@ -115,11 +116,11 @@ export default function SedeLeaderboardPage() {
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="sede" className="gap-1.5">
+        <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+          <TabsTrigger value="sede" className="gap-1 sm:gap-1.5 text-xs sm:text-sm">
             <MapPin className="w-3.5 h-3.5" /> Mi Sede
           </TabsTrigger>
-          <TabsTrigger value="zone" className="gap-1.5">
+          <TabsTrigger value="zone" className="gap-1 sm:gap-1.5 text-xs sm:text-sm">
             <Globe className="w-3.5 h-3.5" /> Mi Zona
           </TabsTrigger>
         </TabsList>

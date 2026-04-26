@@ -327,46 +327,51 @@ export function NonTechnicalChallenge({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Back button */}
-      <Link href={`/dashboard/hackathons/${hackathonId}`}>
-        <Button variant="ghost" size="sm" className="h-8 text-xs">
-          <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Volver al Hackathon
-        </Button>
-      </Link>
-
-      {/* ─── Header Section ─── */}
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-xl font-bold">{challenge.title}</h1>
-          <Badge className={`text-[10px] border-0 ${typeConfig.color}`}>
-            {typeConfig.icon}
-            <span className="ml-1">{typeConfig.label}</span>
-          </Badge>
-          <Badge className={`text-[10px] border-0 ${diffConfig.color}`}>
-            {diffConfig.label}
-          </Badge>
-          <Badge variant="outline" className="text-[10px]">
-            {challenge.points_base} pts
-          </Badge>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-          {challenge.category ? (
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-3 h-3" /> {challenge.category}
-            </span>
-          ) : null}
-          {estimatedTime ? (
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" /> ~{estimatedTime} min
-            </span>
-          ) : null}
+    <div className="max-w-4xl mx-auto px-0 sm:px-4 py-0 sm:py-6 space-y-4 sm:space-y-6">
+      {/* Top bar - Compact on mobile */}
+      <div className="flex items-center justify-between px-3 py-1 sm:py-1.5 border-b sm:border-0 border-border/50 bg-card/30 sm:bg-transparent shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Link href={`/dashboard/hackathons/${hackathonId}`}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-7 sm:w-auto sm:px-2 text-xs">
+              <ArrowLeft className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
+              <span className="hidden sm:inline">Hackathon</span>
+            </Button>
+          </Link>
+          <span className="text-sm font-semibold truncate text-foreground/90 sm:hidden">{challenge.title}</span>
         </div>
       </div>
 
-      <Separator />
+      <div className="px-4 sm:px-0 space-y-4 sm:space-y-6">
+        {/* ─── Header Section (Desktop only or for detail) ─── */}
+        <div className="hidden sm:block space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold">{challenge.title}</h1>
+            <Badge className={`text-[10px] border-0 ${typeConfig.color}`}>
+              {typeConfig.icon}
+              <span className="ml-1">{typeConfig.label}</span>
+            </Badge>
+            <Badge className={`text-[10px] border-0 ${diffConfig.color}`}>
+              {diffConfig.label}
+            </Badge>
+            <Badge variant="outline" className="text-[10px]">
+              {challenge.points_base} pts
+            </Badge>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            {challenge.category ? (
+              <span className="flex items-center gap-1">
+                <BookOpen className="w-3 h-3" /> {challenge.category}
+              </span>
+            ) : null}
+            {estimatedTime ? (
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" /> ~{estimatedTime} min
+              </span>
+            ) : null}
+          </div>
+          <Separator />
+        </div>
       {/* ─── Challenge Description ─── */}
       <Card>
         <CardContent className="pt-6">
@@ -470,5 +475,7 @@ export function NonTechnicalChallenge({
       {/* ─── Document Q&A ─── */}
       <DocumentQA hackathonId={hackathonId} />
     </div>
-  );
+
+  </div>
+);
 }

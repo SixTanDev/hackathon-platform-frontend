@@ -3,7 +3,8 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-client';
-import { listChallenges, deleteChallenge, exportChallenges, importChallenges } from '@/lib/api/challenge-admin-services';
+import { listChallenges, deleteChallenge, exportChallenges, importChallenges, approveChallenge } from '@/lib/api/challenge-admin-services';
+
 import type { ChallengeListParams } from '@/lib/api/challenge-admin-services';
 import type { Challenge, ChallengeType, ChallengeDifficulty, ChallengeSource } from '@/types/api';
 import { PageHeader } from '@/components/shared/page-header';
@@ -16,12 +17,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useMediaQuery } from '@/hooks/use-media-query';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   Plus, Sparkles, Upload, Download, Trash2, Search, LayoutGrid, List as ListIcon,
   MoreHorizontal, Pencil, Eye, Copy, Code2, FileText, ChevronLeft, ChevronRight,
-  Filter, X
+  Filter, X, CheckCircle2
 } from 'lucide-react';
 
 const DIFFICULTY_LABELS: Record<ChallengeDifficulty, string> = {
@@ -54,11 +56,13 @@ const PAGE_SIZE = 20;
 
 export default function ChallengeLibraryPage() {
   const qc = useQueryClient();
+  const isMobile = useMediaQuery('(max-width: 767px)');
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categorySearch, setCategorySearch] = useState('');
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -71,9 +75,10 @@ export default function ChallengeLibraryPage() {
     if (typeFilter !== 'all') p.type = typeFilter as ChallengeType;
     if (difficultyFilter !== 'all') p.difficulty = difficultyFilter as ChallengeDifficulty;
     if (sourceFilter !== 'all') p.source = sourceFilter as ChallengeSource;
+    if (statusFilter !== 'all') p.status = statusFilter as any;
     if (categorySearch) p.category = categorySearch;
     return p;
-  }, [search, typeFilter, difficultyFilter, sourceFilter, categorySearch, page]);
+  }, [search, typeFilter, difficultyFilter, sourceFilter, statusFilter, categorySearch, page]);
 
   const { data, isLoading } = useQuery({
     queryKey: queryKeys.challenges.list(params as Record<string, unknown>),
@@ -92,6 +97,15 @@ export default function ChallengeLibraryPage() {
       setSelected(new Set());
     },
     onError: () => toast.error('Error al eliminar'),
+  });
+
+  const approveMut = useMutation({
+    mutationFn: (id: string) => approveChallenge(id),
+    onSuccess: () => {
+      toast.success('Reto aprobado');
+      qc.invalidateQueries({ queryKey: queryKeys.challenges.all });
+    },
+    onError: () => toast.error('Error al aprobar'),
   });
 
   const toggleSelect = useCallback((id: string) => {
@@ -130,8 +144,9 @@ export default function ChallengeLibraryPage() {
     } catch { toast.error('Error al importar'); }
   };
 
-  const hasFilters = typeFilter !== 'all' || difficultyFilter !== 'all' || sourceFilter !== 'all' || !!categorySearch;
-  const clearFilters = () => { setTypeFilter('all'); setDifficultyFilter('all'); setSourceFilter('all'); setCategorySearch(''); setPage(0); };
+  const hasFilters = typeFilter !== 'all' || difficultyFilter !== 'all' || sourceFilter !== 'all' || statusFilter !== 'all' || !!categorySearch;
+  const clearFilters = () => { setTypeFilter('all'); setDifficultyFilter('all'); setSourceFilter('all'); setStatusFilter('all'); setCategorySearch(''); setPage(0); };
+
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -141,28 +156,28 @@ export default function ChallengeLibraryPage() {
       />
 
       {/* Action bar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Link href="/admin/challenges/create">
-          <Button><Plus className="h-4 w-4 mr-2" />Crear Reto</Button>
+          <Button className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" />Crear Reto</Button>
         </Link>
         <Link href="/admin/challenges/generate">
-          <Button variant="outline" className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
+          <Button variant="outline" className="w-full sm:w-auto border-purple-500/30 text-purple-400 hover:bg-purple-500/10">
             <Sparkles className="h-4 w-4 mr-2" />Generar con IA
           </Button>
         </Link>
-        <Button variant="outline" onClick={() => setImportDialog(true)}>
+        <Button variant="outline" onClick={() => setImportDialog(true)} className="w-full sm:w-auto">
           <Upload className="h-4 w-4 mr-2" />Importar
         </Button>
         <Link href="/admin/challenges/review">
-          <Button variant="outline" className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
+          <Button variant="outline" className="w-full sm:w-auto border-amber-500/30 text-amber-400 hover:bg-amber-500/10">
             <Eye className="h-4 w-4 mr-2" />Cola de Revisión
           </Button>
         </Link>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:ml-auto sm:justify-end">
           {selected.size > 0 && (
             <>
-              <span className="text-sm text-muted-foreground">{selected.size} seleccionado(s)</span>
+              <span className="w-full text-sm text-muted-foreground sm:w-auto">{selected.size} seleccionado(s)</span>
               <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download className="h-4 w-4 mr-1" />Exportar
               </Button>
@@ -186,21 +201,21 @@ export default function ChallengeLibraryPage() {
               <Input placeholder="Buscar por título..." value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} className="pl-9" />
             </div>
             <Select value={typeFilter} onValueChange={v => { setTypeFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-[160px]"><Filter className="h-3.5 w-3.5 mr-1.5" /><SelectValue placeholder="Tipo" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[160px]"><Filter className="h-3.5 w-3.5 mr-1.5" /><SelectValue placeholder="Tipo" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
                 {Object.entries(TYPE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={difficultyFilter} onValueChange={v => { setDifficultyFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-[150px]"><SelectValue placeholder="Dificultad" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[150px]"><SelectValue placeholder="Dificultad" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 {Object.entries(DIFFICULTY_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
             <Select value={sourceFilter} onValueChange={v => { setSourceFilter(v); setPage(0); }}>
-              <SelectTrigger className="w-[140px]"><SelectValue placeholder="Fuente" /></SelectTrigger>
+              <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Fuente" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="manual">Manual</SelectItem>
@@ -208,7 +223,14 @@ export default function ChallengeLibraryPage() {
                 <SelectItem value="imported">Importado</SelectItem>
               </SelectContent>
             </Select>
-            <Input placeholder="Categoría..." value={categorySearch} onChange={e => { setCategorySearch(e.target.value); setPage(0); }} className="w-[160px]" />
+            <Select value={statusFilter} onValueChange={v => { setStatusFilter(v); setPage(0); }}>
+              <SelectTrigger className="w-full sm:w-[140px]"><SelectValue placeholder="Estado" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                {Object.entries(STATUS_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Input placeholder="Categoría..." value={categorySearch} onChange={e => { setCategorySearch(e.target.value); setPage(0); }} className="w-full sm:w-[160px]" />
             {hasFilters && <Button variant="ghost" size="sm" onClick={clearFilters}><X className="h-3.5 w-3.5 mr-1" />Limpiar</Button>}
           </div>
         </CardContent>
@@ -221,7 +243,7 @@ export default function ChallengeLibraryPage() {
         </div>
       ) : challenges.length === 0 ? (
         <Card><CardContent className="py-12 text-center text-muted-foreground">No se encontraron retos</CardContent></Card>
-      ) : viewMode === 'table' ? (
+      ) : viewMode === 'table' && !isMobile ? (
         <Card>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -239,22 +261,32 @@ export default function ChallengeLibraryPage() {
                 </tr>
               </thead>
               <tbody>
-                {challenges.map(c => <ChallengeRow key={c.id} challenge={c} isSelected={selected.has(c.id)} onToggle={() => toggleSelect(c.id)} onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })} />)}
+                {challenges.map(c => (
+                  <ChallengeRow 
+                    key={c.id} 
+                    challenge={c} 
+                    isSelected={selected.has(c.id)} 
+                    onToggle={() => toggleSelect(c.id)} 
+                    onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })}
+                    onApprove={() => approveMut.mutate(c.id)}
+                    isApproving={approveMut.isPending}
+                  />
+                ))}
               </tbody>
             </table>
           </div>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {challenges.map(c => <ChallengeCard key={c.id} challenge={c} isSelected={selected.has(c.id)} onToggle={() => toggleSelect(c.id)} onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })} />)}
+          {challenges.map(c => <ChallengeCard key={c.id} challenge={c} isSelected={selected.has(c.id)} onToggle={() => toggleSelect(c.id)} onDelete={() => setDeleteDialog({ open: true, ids: [c.id] })} onApprove={() => approveMut.mutate(c.id)} isApproving={approveMut.isPending} />)}
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">{total} reto(s) total</span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 sm:justify-end">
             <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}><ChevronLeft className="h-4 w-4" /></Button>
             <span className="text-sm">Página {page + 1} de {totalPages}</span>
             <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}><ChevronRight className="h-4 w-4" /></Button>
@@ -294,7 +326,12 @@ export default function ChallengeLibraryPage() {
   );
 }
 
-function ChallengeRow({ challenge: c, isSelected, onToggle, onDelete }: { challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void }) {
+function ChallengeRow({ 
+  challenge: c, isSelected, onToggle, onDelete, onApprove, isApproving 
+}: { 
+  challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void;
+  onApprove: () => void; isApproving: boolean;
+}) {
   const src = SOURCE_CONFIG[c.source] ?? SOURCE_CONFIG.manual;
   const st = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.draft;
   return (
@@ -320,6 +357,13 @@ function ChallengeRow({ challenge: c, isSelected, onToggle, onDelete }: { challe
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild><Link href={`/admin/challenges/create?edit=${c.id}`}><Pencil className="h-4 w-4 mr-2" />Editar</Link></DropdownMenuItem>
             <DropdownMenuItem asChild><Link href={`/admin/challenges/create?edit=${c.id}`}><Eye className="h-4 w-4 mr-2" />Ver Detalle</Link></DropdownMenuItem>
+
+            {c.status !== 'approved' && (
+              <DropdownMenuItem onClick={onApprove} disabled={isApproving}>
+                <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                Aprobar
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem><Copy className="h-4 w-4 mr-2" />Duplicar</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={onDelete}><Trash2 className="h-4 w-4 mr-2" />Eliminar</DropdownMenuItem>
@@ -330,7 +374,8 @@ function ChallengeRow({ challenge: c, isSelected, onToggle, onDelete }: { challe
   );
 }
 
-function ChallengeCard({ challenge: c, isSelected, onToggle, onDelete }: { challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void }) {
+
+function ChallengeCard({ challenge: c, isSelected, onToggle, onDelete, onApprove, isApproving }: { challenge: Challenge; isSelected: boolean; onToggle: () => void; onDelete: () => void; onApprove: () => void; isApproving: boolean }) {
   const src = SOURCE_CONFIG[c.source] ?? SOURCE_CONFIG.manual;
   const st = STATUS_CONFIG[c.status] ?? STATUS_CONFIG.draft;
   return (
@@ -345,6 +390,14 @@ function ChallengeCard({ challenge: c, isSelected, onToggle, onDelete }: { chall
             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild><Link href={`/admin/challenges/create?edit=${c.id}`}><Pencil className="h-4 w-4 mr-2" />Editar</Link></DropdownMenuItem>
+
+              {c.status !== 'approved' && (
+                <DropdownMenuItem onClick={onApprove} disabled={isApproving}>
+                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-500" />
+                  Aprobar
+                </DropdownMenuItem>
+              )}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive" onClick={onDelete}><Trash2 className="h-4 w-4 mr-2" />Eliminar</DropdownMenuItem>
             </DropdownMenuContent>
