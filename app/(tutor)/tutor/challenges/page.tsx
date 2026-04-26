@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
-import { Search, Code2, FileText, BookOpen, Filter, X, ChevronLeft, ChevronRight, AlertCircle, Plus, Sparkles } from 'lucide-react';
+import { Search, Code2, FileText, BookOpen, Filter, X, ChevronLeft, ChevronRight, AlertCircle, Plus, Sparkles, LayoutGrid, List as ListIcon } from 'lucide-react';
 
 
 /* ── OpenAPI: GET /challenges ── */
@@ -54,6 +54,7 @@ export default function TutorChallengesPage() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [page, setPage] = useState(1);
   const [activeTab, setActiveTab] = useState('library');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const pageSize = 9;
 
   // OpenAPI: GET /challenges with exact query params
@@ -104,7 +105,7 @@ export default function TutorChallengesPage() {
         title="Biblioteca de Retos" 
         description="Consulta y filtra retos aprobados para su uso en competencias."
       >
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
           <Link href="/tutor/challenges/create">
             <Button size="sm" className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-2" />Nuevo Reto</Button>
           </Link>
@@ -113,6 +114,15 @@ export default function TutorChallengesPage() {
               <Sparkles className="h-4 w-4 mr-2" />IA
             </Button>
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setViewMode((current) => current === 'grid' ? 'list' : 'grid')}
+            aria-label={viewMode === 'grid' ? 'Cambiar a vista de lista' : 'Cambiar a vista de cuadrícula'}
+            className="self-end sm:ml-auto"
+          >
+            {viewMode === 'grid' ? <ListIcon className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
+          </Button>
         </div>
       </PageHeader>
 
@@ -150,7 +160,7 @@ export default function TutorChallengesPage() {
           </Card>
 
           {isLoading ? (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
             </div>
           ) : isError ? (
@@ -164,22 +174,45 @@ export default function TutorChallengesPage() {
             <Card><CardContent className="py-16 text-center text-muted-foreground"><BookOpen className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" /> No se encontraron retos</CardContent></Card>
           ) : (
             <>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
                 {challenges.map((c) => (
                   <Card key={c.id} className="hover:border-primary/50 transition-colors group h-full">
-                    <CardContent className="p-5 flex flex-col h-full border border-transparent">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
-                        </div>
-                        <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
-                      </div>
-                      <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{c.title}</h3>
-                      {c.category && <span className="text-[10px] text-muted-foreground mb-3">{c.category}</span>}
-                      <div className="mt-auto flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">{TYPE_LABELS[c.type] ?? c.type}</span>
-                        <span className="text-xs font-mono font-medium text-primary">{c.points_base} pts</span>
-                      </div>
+                    <CardContent className={viewMode === 'grid' ? 'p-5 flex flex-col h-full border border-transparent' : 'flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between'}>
+                      {viewMode === 'grid' ? (
+                        <>
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="p-2 rounded-lg bg-primary/10">
+                              {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
+                            </div>
+                            <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
+                          </div>
+                          <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{c.title}</h3>
+                          {c.category && <span className="text-[10px] text-muted-foreground mb-3">{c.category}</span>}
+                          <div className="mt-auto flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">{TYPE_LABELS[c.type] ?? c.type}</span>
+                            <span className="text-xs font-mono font-medium text-primary">{c.points_base} pts</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex min-w-0 items-start gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                              {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
+                            </div>
+                            <div className="min-w-0 space-y-2">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
+                                <span className="text-xs text-muted-foreground">{TYPE_LABELS[c.type] ?? c.type}</span>
+                              </div>
+                              <h3 className="truncate text-sm font-semibold group-hover:text-primary transition-colors">{c.title}</h3>
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                <span>{c.category || 'Sin categoría'}</span>
+                                <span className="font-mono font-medium text-primary">{c.points_base} pts</span>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
@@ -199,7 +232,7 @@ export default function TutorChallengesPage() {
 
         <TabsContent value="my-challenges" className="space-y-6">
           {loadingMy ? (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-xl" />)}
             </div>
           ) : errorMy ? (
@@ -220,43 +253,96 @@ export default function TutorChallengesPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
               {myChallenges.map((c) => (
                 <Card key={c.id} className="hover:border-primary/50 transition-colors group h-full">
-                  <CardContent className="p-5 flex flex-col h-full border border-transparent space-y-3">
-                    <div className="flex items-start justify-between">
-                      <div className="p-2 rounded-lg bg-primary/10">
-                        {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
-                      </div>
-                      <div className="flex flex-col items-end gap-1.5">
-                        <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
-                        <Badge variant="secondary" className={`text-[10px] ${
-                          c.status === 'approved' ? 'bg-green-500/10 text-green-400' :
-                          c.status === 'rejected' ? 'bg-red-500/10 text-red-400' :
-                          c.status === 'pending_approval' ? 'bg-amber-500/10 text-amber-400' :
-                          'bg-gray-500/10 text-gray-400'
-                        }`}>
-                          {c.status === 'approved' ? 'Aprobado' :
-                           c.status === 'rejected' ? 'Rechazado' :
-                           c.status === 'pending_approval' ? 'En Revisión' :
-                           'Borrador'}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{c.title}</h3>
-                      {c.category && <span className="text-[10px] text-muted-foreground">{c.category}</span>}
-                    </div>
-                    <div className="mt-auto pt-2 flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">{TYPE_LABELS[c.type] ?? c.type}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-medium text-primary">{c.points_base} pts</span>
-                        <div className="flex items-center">
+                  <CardContent className={viewMode === 'grid' ? 'p-5 flex flex-col h-full border border-transparent space-y-3' : 'flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between'}>
+                    {viewMode === 'grid' ? (
+                      <>
+                        <div className="flex items-start justify-between">
+                          <div className="p-2 rounded-lg bg-primary/10">
+                            {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
+                          </div>
+                          <div className="flex flex-col items-end gap-1.5">
+                            <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
+                            <Badge variant="secondary" className={`text-[10px] ${
+                              c.status === 'approved' ? 'bg-green-500/10 text-green-400' :
+                              c.status === 'rejected' ? 'bg-red-500/10 text-red-400' :
+                              c.status === 'pending_approval' ? 'bg-amber-500/10 text-amber-400' :
+                              'bg-gray-500/10 text-gray-400'
+                            }`}>
+                              {c.status === 'approved' ? 'Aprobado' :
+                               c.status === 'rejected' ? 'Rechazado' :
+                               c.status === 'pending_approval' ? 'En Revisión' :
+                               'Borrador'}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors truncate">{c.title}</h3>
+                          {c.category && <span className="text-[10px] text-muted-foreground">{c.category}</span>}
+                        </div>
+                        <div className="mt-auto pt-2 flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">{TYPE_LABELS[c.type] ?? c.type}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono font-medium text-primary">{c.points_base} pts</span>
+                            <div className="flex items-center">
+                              {c.status === 'draft' && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-7 w-7 text-amber-400 hover:text-amber-500 hover:bg-amber-500/10"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    submitForReviewMut.mutate(c.id);
+                                  }}
+                                  disabled={submitForReviewMut.isPending}
+                                >
+                                  <Sparkles className="h-3.5 w-3.5" />
+                                </Button>
+                              )}
+                              <Link href={`/tutor/challenges/create?edit=${c.id}`}>
+                                <Button variant="ghost" size="icon" className="h-7 w-7"><Search className="h-3.5 w-3.5" /></Button>
+                              </Link>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex min-w-0 items-start gap-4">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                            {c.type === 'coding' ? <Code2 className="h-4 w-4 text-primary" /> : <FileText className="h-4 w-4 text-primary" />}
+                          </div>
+                          <div className="min-w-0 space-y-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="outline" className={DIFFICULTY_COLORS[c.difficulty]}>{DIFFICULTY_LABELS[c.difficulty]}</Badge>
+                              <Badge variant="secondary" className={`text-[10px] ${
+                                c.status === 'approved' ? 'bg-green-500/10 text-green-400' :
+                                c.status === 'rejected' ? 'bg-red-500/10 text-red-400' :
+                                c.status === 'pending_approval' ? 'bg-amber-500/10 text-amber-400' :
+                                'bg-gray-500/10 text-gray-400'
+                              }`}>
+                                {c.status === 'approved' ? 'Aprobado' :
+                                 c.status === 'rejected' ? 'Rechazado' :
+                                 c.status === 'pending_approval' ? 'En Revisión' :
+                                 'Borrador'}
+                              </Badge>
+                            </div>
+                            <h3 className="truncate text-sm font-semibold group-hover:text-primary transition-colors">{c.title}</h3>
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                              <span>{TYPE_LABELS[c.type] ?? c.type}</span>
+                              <span>{c.category || 'Sin categoría'}</span>
+                              <span className="font-mono font-medium text-primary">{c.points_base} pts</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 sm:shrink-0">
                           {c.status === 'draft' && (
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-7 w-7 text-amber-400 hover:text-amber-500 hover:bg-amber-500/10"
+                              className="h-8 w-8 text-amber-400 hover:text-amber-500 hover:bg-amber-500/10"
                               onClick={(e) => {
                                 e.preventDefault();
                                 submitForReviewMut.mutate(c.id);
@@ -267,11 +353,13 @@ export default function TutorChallengesPage() {
                             </Button>
                           )}
                           <Link href={`/tutor/challenges/create?edit=${c.id}`}>
-                            <Button variant="ghost" size="icon" className="h-7 w-7"><Search className="h-3.5 w-3.5" /></Button>
+                            <Button variant="ghost" size="sm" className="w-full gap-1.5 sm:w-auto">
+                              Ver <Search className="h-3.5 w-3.5" />
+                            </Button>
                           </Link>
                         </div>
-                      </div>
-                    </div>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
               ))}
