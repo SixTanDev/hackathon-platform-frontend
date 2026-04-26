@@ -101,6 +101,8 @@ export function HackathonCreationWizard({
   const router = useRouter();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const currentRole = useAuthStore((s) => s.currentRole);
+  const currentSede = useAuthStore((s) => s.currentSede);
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
@@ -360,6 +362,21 @@ export function HackathonCreationWizard({
 
       const errorMessage = err?.message || err?.detail || 'Ocurrió un error inesperado al intentar crear el hackathon. Por favor intenta de nuevo.';
 
+      const isAdminPermissionError =
+        err?.status === 403 &&
+        typeof detail === 'string' &&
+        detail.toLowerCase().includes('required role') &&
+        detail.toLowerCase().includes('admin');
+
+      if (isAdminPermissionError) {
+        toast({
+          title: `Error (${err?.status || 'API'})`,
+          description: `La API rechazó la creación porque el contexto actual (${currentRole ?? 'sin rol'}) no tiene permisos de administrador${currentSede?.name ? ` en ${currentSede.name}` : ''}. En el backend actual, crear hackathones todavía exige rol admin.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
       toast({
         title: `Error (${err?.status || 'API'})`,
         description: errorMessage,
@@ -371,9 +388,9 @@ export function HackathonCreationWizard({
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 overflow-x-hidden animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4" />
         </Button>
@@ -408,8 +425,8 @@ export function HackathonCreationWizard({
       </div>
 
       {/* Step Content */}
-      <Card className="border-border/50 shadow-lg shadow-black/5 dark:shadow-none">
-        <CardContent className="pt-6">
+      <Card className="overflow-hidden border-border/50 shadow-lg shadow-black/5 dark:shadow-none">
+        <CardContent className="overflow-x-hidden px-4 pt-6 sm:px-6">
           {step === 1 && (
             <div className="space-y-5 max-w-2xl">
               <div className="space-y-2">
@@ -420,12 +437,12 @@ export function HackathonCreationWizard({
                 <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Descripción</Label>
                 <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Describe el hackathon..." rows={4} className="rounded-xl resize-none" />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Alcance</Label>
                   <Select value={scope} onValueChange={(v) => setScope(v as HackathonScope)}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="h-11 w-full rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] sm:max-w-none">
                       {allowedScopes.includes('internal') && <SelectItem value="internal">Interno (solo mi sede)</SelectItem>}
                       {allowedScopes.includes('zonal') && <SelectItem value="zonal">Zonal (mi zona)</SelectItem>}
                       {allowedScopes.includes('open') && <SelectItem value="open">Abierto (nacional)</SelectItem>}
@@ -435,8 +452,8 @@ export function HackathonCreationWizard({
                 <div className="space-y-2">
                   <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Modo de Competencia</Label>
                   <Select value={mode} onValueChange={(v) => setMode(v as HackathonMode)}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="h-11 w-full rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent className="max-w-[calc(100vw-2rem)] sm:max-w-none">
                       <SelectItem value="live">En Vivo (Hackathon Real)</SelectItem>
                       <SelectItem value="practice">Práctica (Autogestionado)</SelectItem>
                     </SelectContent>
@@ -851,23 +868,23 @@ export function HackathonCreationWizard({
         </CardContent>
 
         {/* Navigation Toolbar */}
-        <div className="flex items-center justify-between p-6 border-t border-border/50 bg-muted/5 rounded-b-[inherit]">
-          <Button variant="outline" size="lg" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="rounded-2xl px-10 h-14 border-border/50 text-xs font-bold uppercase transition-all active:scale-95">
+        <div className="flex flex-col gap-3 border-t border-border/50 bg-muted/5 p-4 rounded-b-[inherit] sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <Button variant="outline" size="lg" onClick={() => setStep((s) => Math.max(1, s - 1))} disabled={step === 1} className="h-12 w-full rounded-2xl border-border/50 px-4 text-xs font-bold uppercase transition-all active:scale-95 sm:h-14 sm:w-auto sm:min-w-[11rem] sm:px-8">
             <ArrowLeft className="w-4 h-4 mr-2" /> Regresar
           </Button>
-          <div className="flex gap-4">
+          <div className="grid w-full grid-cols-1 gap-3 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-4">
             {step < 6 ? (
-              <Button size="lg" onClick={() => setStep((s) => Math.min(6, s + 1))} disabled={!canNext()} className="rounded-2xl px-12 h-14 bg-primary hover:shadow-xl shadow-primary/20 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
+              <Button size="lg" onClick={() => setStep((s) => Math.min(6, s + 1))} disabled={!canNext()} className="h-12 w-full rounded-2xl bg-primary px-4 text-xs font-bold uppercase tracking-widest shadow-primary/20 transition-all active:scale-95 hover:shadow-xl sm:h-14 sm:min-w-[11rem] sm:px-8">
                 Siguiente <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
               <>
-                <Button variant="outline" size="lg" onClick={() => handleSubmit(false)} disabled={submitting} className="rounded-2xl px-8 h-14 border-border/50 text-[10px] font-bold uppercase text-muted-foreground hover:bg-muted transition-all active:scale-95">
+                <Button variant="outline" size="lg" onClick={() => handleSubmit(false)} disabled={submitting} className="h-12 w-full rounded-2xl border-border/50 px-4 text-[10px] font-bold uppercase text-muted-foreground transition-all active:scale-95 hover:bg-muted sm:h-14 sm:min-w-[11rem] sm:px-8">
                   {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                   Solo Borrador
                 </Button>
                 {canLaunchImmediately && (
-                  <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="rounded-2xl px-14 h-14 bg-primary hover:shadow-2xl shadow-primary/30 text-xs font-bold uppercase tracking-widest transition-all active:scale-95">
+                  <Button size="lg" onClick={() => handleSubmit(true)} disabled={submitting} className="h-12 w-full rounded-2xl bg-primary px-4 text-xs font-bold uppercase tracking-widest shadow-primary/30 transition-all active:scale-95 hover:shadow-2xl sm:h-14 sm:min-w-[11rem] sm:px-8">
                     {submitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                     Lanzar Evento
                   </Button>

@@ -128,6 +128,10 @@ function getNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean)
   }
 }
 
+function getMobileNavForRole(role: RoleName | null | undefined, isSuperAdmin: boolean): NavItem[] {
+  return getNavForRole(role, isSuperAdmin);
+}
+
 
 interface SidebarProps {
   collapsed: boolean;
@@ -179,7 +183,7 @@ export function DashboardSidebar({ collapsed, onToggle, role }: SidebarProps) {
           return (
             <Link key={item?.href ?? ''} href={item?.href ?? '/dashboard'}>
               <div
-                className={cn(<
+                className={cn(
                   'flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200',
                   isActive
                     ? activeStyles
