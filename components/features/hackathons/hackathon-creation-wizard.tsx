@@ -204,8 +204,26 @@ export function HackathonCreationWizard({
   }
 
   // --- Validation ---
+  const registrationDatesInvalid = useMemo(() => (
+    !!regStartsAt && !!regEndsAt && new Date(regStartsAt) >= new Date(regEndsAt)
+  ), [regStartsAt, regEndsAt]);
+
+  const eventDatesInvalid = useMemo(() => (
+    !!startsAt && !!endsAt && new Date(startsAt) >= new Date(endsAt)
+  ), [startsAt, endsAt]);
+
+  const registrationMustEndBeforeHackathonStarts = useMemo(() => (
+    !!regEndsAt && !!startsAt && new Date(startsAt) <= new Date(regEndsAt)
+  ), [regEndsAt, startsAt]);
+
   function canNext(): boolean {
-    if (step === 1) return name.trim().length > 0;
+    if (step === 1) {
+      if (!name.trim().length) return false;
+      if (registrationDatesInvalid) return false;
+      if (mode === 'live' && registrationMustEndBeforeHackathonStarts) return false;
+      if (mode === 'live' && eventDatesInvalid) return false;
+      return true;
+    }
     if (step === 3) return selectedChallenges.length > 0;
     return true;
   }
@@ -216,6 +234,33 @@ export function HackathonCreationWizard({
     setSubmitting(true);
 
     try {
+      if (registrationDatesInvalid) {
+        toast({
+          title: 'Fechas de inscripción inválidas',
+          description: 'La fecha de inicio de inscripciones debe ser anterior a la fecha de fin de inscripciones.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (eventDatesInvalid) {
+        toast({
+          title: 'Fechas del hackathon inválidas',
+          description: 'La fecha de inicio del hackathon debe ser anterior a la fecha de finalización.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      if (mode === 'live' && registrationMustEndBeforeHackathonStarts) {
+        toast({
+          title: 'Cronograma inválido',
+          description: 'La fecha de inicio del hackathon debe ser posterior a la fecha de fin de inscripciones.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       // API expects ISO-8601 strings (YYYY-MM-DDTHH:mm:ssZ).
       // datetime-local input provides YYYY-MM-DDTHH:mm.
       const formatIso = (val: string) => val ? `${val}:00Z` : null;
@@ -396,18 +441,6 @@ export function HackathonCreationWizard({
                   </Select>
                 </div>
               </div>
-              {mode === 'live' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
-                  <div className="space-y-2">
-                    <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Fecha Inicio</Label>
-                    <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="h-11 rounded-xl" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Fecha Fin</Label>
-                    <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="h-11 rounded-xl" />
-                  </div>
-                </div>
-              )}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Inicio inscripciones</Label>
@@ -418,6 +451,35 @@ export function HackathonCreationWizard({
                   <Input type="datetime-local" value={regEndsAt} onChange={(e) => setRegEndsAt(e.target.value)} className="h-11 rounded-xl" />
                 </div>
               </div>
+              {registrationDatesInvalid && (
+                <p className="text-xs font-medium text-destructive">
+                  La fecha final no puede ser menor o igual a la fecha de inicio de inscripciones.
+                </p>
+              )}
+              {mode === 'live' && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-1">
+                    <div className="space-y-2">
+                      <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Fecha Inicio</Label>
+                      <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="h-11 rounded-xl" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Fecha Fin</Label>
+                      <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="h-11 rounded-xl" />
+                    </div>
+                  </div>
+                  {eventDatesInvalid && (
+                    <p className="text-xs font-medium text-destructive">
+                      La fecha final no puede ser menor o igual a la fecha de inicio del hackathon.
+                    </p>
+                  )}
+                  {registrationMustEndBeforeHackathonStarts && !eventDatesInvalid && (
+                    <p className="text-xs font-medium text-destructive">
+                      La fecha de inicio del hackathon debe ser posterior a la fecha de fin de inscripciones.
+                    </p>
+                  )}
+                </>
+              )}
               <div className="space-y-2">
                 <Label className="text-zinc-500 uppercase text-[10px] font-bold tracking-widest">Reglas y Condiciones (markdown)</Label>
                 <Textarea value={rulesText} onChange={(e) => setRulesText(e.target.value)} placeholder="Reglas del hackathon..." rows={3} className="rounded-xl resize-none font-mono text-xs" />
