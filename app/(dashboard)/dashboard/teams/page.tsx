@@ -70,21 +70,21 @@ export default function StudentTeamsPage() {
         </EmptyState>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {teams.map((t: MentorTeamSummary) => {
-            const status = STATUS_CONFIG[t.status] ?? { labelKey: t.status, color: 'bg-muted text-muted-foreground' };
+          {teams.map((team: MentorTeamSummary) => {
+            const status = STATUS_CONFIG[team.status] ?? { labelKey: team.status, color: 'bg-muted text-muted-foreground' };
             return (
-              <Card key={t.id} className="group border-border/50 transition-all hover:border-primary/20 hover:shadow-md">
+              <Card key={team.id} className="group border-border/50 transition-all hover:border-primary/20 hover:shadow-md">
                 <CardContent className="pt-6">
                   <div className="mb-4 flex items-start justify-between">
                     <div>
                       <div className="mb-1 flex items-center gap-2">
                         <Trophy className="h-4 w-4 text-primary" />
                         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                          {t.hackathon_name || 'Hackathon Event'}
+                          {team.hackathon_name || 'Hackathon Event'}
                         </span>
                       </div>
                       <h3 className="text-lg font-bold transition-colors group-hover:text-primary">
-                        {t.name}
+                        {team.name}
                       </h3>
                     </div>
                     <Badge variant="outline" className={`${status.color} border-0 capitalize text-[10px]`}>
@@ -95,26 +95,27 @@ export default function StudentTeamsPage() {
                   <div className="mb-4 flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <Users className="h-4 w-4" />
-                      <span>{t('teams.card.members', { count: t.member_count })}</span>
+                      <span>{t('teams.card.members', { count: team.member_count })}</span>
                     </div>
                   </div>
 
-                  {typeof t.progress_percent === 'number' && (
+                  {typeof team.progress_percent === 'number' && (
                     <div className="mb-4 space-y-2">
                       <div className="flex justify-between text-xs font-medium">
                         <span>{t('teams.card.progress')}</span>
-                        <span>{t.progress_percent}%</span>
+                        <span>{team.progress_percent}%</span>
                       </div>
-                      <Progress value={t.progress_percent} className="h-1.5" />
+                      <Progress value={team.progress_percent} className="h-1.5" />
                     </div>
                   )}
 
                   <div className="flex gap-2 border-t border-border/50 pt-2">
-                    <Link href={`/dashboard/teams/${t.id}/progress`} className="flex-1">
+                    <Link href={`/dashboard/teams/${team.id}/progress`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+                        <BarChart3 className="h-3.5 w-3.5" /> {t('teams.card.progress')}
                       </Button>
                     </Link>
-                    <Link href={`/dashboard/teams/${t.id}`} className="flex-1">
+                    <Link href={`/dashboard/teams/${team.id}`} className="flex-1">
                       <Button variant="default" size="sm" className="w-full gap-1.5 text-xs">
                         <MessageSquare className="h-3.5 w-3.5" /> {t('teams.card.manage')}
                       </Button>

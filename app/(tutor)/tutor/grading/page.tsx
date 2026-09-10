@@ -116,7 +116,7 @@ export default function GradingInboxPage() {
 
   const { data: submissionsData, isLoading: submissionsLoading } = useQuery({
     queryKey: queryKeys.grading.submissions(
-      submissionsParams as Record<string, unknown>,
+      submissionsParams as unknown as Record<string, unknown>,
     ),
     queryFn: () => getGradingSubmissions(submissionsParams!),
     enabled: !!submissionsParams,
