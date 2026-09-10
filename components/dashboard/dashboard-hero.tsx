@@ -39,7 +39,9 @@ export function DashboardHero({
     .filter(h => h.status === 'active' && h.ends_at)
     .sort((a, b) => new Date(a.ends_at!).getTime() - new Date(b.ends_at!).getTime())[0];
 
-  const firstName = user?.full_name?.split(' ')[0] || 'Coder';
+
+  const isDemoUser = user?.full_name?.toLowerCase().includes('demo');
+  const firstName = isDemoUser || !user?.full_name ? t('roles.student') : user.full_name.split(' ')[0];
   const rank = profile?.sede_rank ? `#${profile.sede_rank}` : '--';
   const totalPoints = profile?.total_points || 0;
   
@@ -61,9 +63,10 @@ export function DashboardHero({
         {/* Left Side: Content */}
         <div className="flex-1 space-y-6">
           <div className="space-y-4">
-            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-3 py-1 animate-in fade-in slide-in-from-left-4 duration-500">
+
+            <Badge variant="outline" className="mb-2 bg-primary/5 text-primary border-primary/20 px-3 py-1.5 animate-in fade-in slide-in-from-left-4 duration-500 shadow-sm">
               <Rocket className="w-3.5 h-3.5 mr-2" />
-              <span className="font-bold tracking-wide uppercase text-[10px]">
+              <span className="font-bold tracking-[0.1em] uppercase text-[10px]">
                 {displayEventTitle} • {urgentHackathon ? t('dashboard.hero.roadTo', { goal: displayNextGoal }) : t('dashboard.hero.defaultSubtitle')}
               </span>
             </Badge>
@@ -72,7 +75,8 @@ export function DashboardHero({
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.1]">
                 {t('dashboard.hero.greeting', { name: firstName })}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed font-medium">
+              <p className="text-base md:text-lg text-muted-foreground/80 max-w-xl leading-relaxed font-medium italic border-l-2 border-primary/20 pl-4 py-1">
+
                 {urgentHackathon 
                   ? displayEventSubtitle 
                   : t('dashboard.hero.defaultSubtitle')}

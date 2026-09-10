@@ -52,7 +52,7 @@ export async function transitionHackathon(
   targetStatus: HackathonStatus
 ): Promise<Hackathon> {
   const { data } = await apiClient.patch<Hackathon>(`/hackathons/${id}/status`, {
-    status: targetStatus,
+    target_status: targetStatus,
   });
   return data;
 }

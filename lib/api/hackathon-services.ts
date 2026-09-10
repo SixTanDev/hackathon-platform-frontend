@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { toArray } from './response-utils';
+import { getHackathons } from './services';
 import type {
   Hackathon,
   HackathonChallenge,
@@ -51,7 +52,9 @@ export async function registerForHackathon(
 ): Promise<Registration> {
   const { data } = await apiClient.post<Registration>(
     `/hackathons/${hackathonId}/register`,
-    teamId ? { team_id: teamId } : {}
+
+    { team_id: teamId ?? null }
+
   );
   return data;
 }
@@ -213,6 +216,126 @@ export async function getMentorTeams(): Promise<MentorTeamSummary[]> {
   return toArray<MentorTeamSummary>(data, ['items', 'teams', 'results']);
 }
 
+
+export async function getTutorTeams(params?: {
+  status?: string;
+  limit?: number;
+}): Promise<MentorTeamSummary[]> {
+  const hackathons = await getHackathons({
+    status: params?.status,
+    limit: params?.limit ?? 50,
+  });
+
+  if (!hackathons.length) {
+    return [];
+  }
+
+  const teamResults = await Promise.allSettled(
+    hackathons.map(async (hackathon) => {
+      const teams = await getHackathonTeams(hackathon.id);
+
+      return teams.map((team) => {
+        const acceptedMembers = team.members?.filter((member) => member.status === 'accepted').length ?? 0;
+
+        return {
+          id: team.id,
+          name: team.name,
+          hackathon_id: hackathon.id,
+          hackathon_name: hackathon.name,
+          member_count: acceptedMembers,
+          status: team.status,
+          progress_percent: undefined,
+        } satisfies MentorTeamSummary;
+      });
+    })
+  );
+
+  const uniqueTeams = new Map<string, MentorTeamSummary>();
+
+  teamResults.forEach((result) => {
+    if (result.status === 'fulfilled') {
+      result.value.forEach((team) => {
+        uniqueTeams.set(team.id, team);
+      });
+    }
+  });
+
+  return Array.from(uniqueTeams.values());
+}
+
+export async function getStudentTeams(
+  hackathonIds: string[],
+  userId?: string | null
+): Promise<MentorTeamSummary[]> {
+  if (!userId || hackathonIds.length === 0) {
+    return [];
+  }
+
+  const uniqueHackathonIds = [...new Set(hackathonIds)];
+
+  const registrationResults = await Promise.allSettled(
+    uniqueHackathonIds.map(async (hackathonId) => {
+      const [registrations, hackathon] = await Promise.all([
+        getHackathonRegistrations(hackathonId),
+        getHackathon(hackathonId).catch(() => null),
+      ]);
+
+      const myRegistration = registrations.find(
+        (registration) =>
+          registration.user_global_id === userId &&
+          registration.status !== 'cancelled' &&
+          registration.team_id
+      );
+
+      return myRegistration
+        ? {
+            teamId: myRegistration.team_id as string,
+            hackathonId,
+            hackathonName: hackathon?.name,
+          }
+        : null;
+    })
+  );
+
+  const assignedTeams = registrationResults.flatMap((result) => {
+    if (result.status !== 'fulfilled' || !result.value) {
+      return [];
+    }
+
+    return [result.value];
+  });
+
+  if (assignedTeams.length === 0) {
+    return [];
+  }
+
+  const teamDetails = await Promise.allSettled(
+    assignedTeams.map(async ({ teamId, hackathonId, hackathonName }) => {
+      const team = await getTeamDetail(teamId);
+      const acceptedMembers = team.members?.filter((member) => member.status === 'accepted').length ?? 0;
+
+      return {
+        id: team.id,
+        name: team.name,
+        hackathon_id: hackathonId,
+        hackathon_name: hackathonName,
+        member_count: acceptedMembers,
+        status: team.status,
+        progress_percent: undefined,
+      } satisfies MentorTeamSummary;
+    })
+  );
+
+  const uniqueTeams = new Map<string, MentorTeamSummary>();
+
+  teamDetails.forEach((result) => {
+    if (result.status === 'fulfilled') {
+      uniqueTeams.set(result.value.id, result.value);
+    }
+  });
+
+  return Array.from(uniqueTeams.values());
+}
 // ─── Sede / Zone Leaderboard ──────────────────────────────────────────────
 
 export async function getSedeLeaderboard(

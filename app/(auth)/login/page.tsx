@@ -157,10 +157,13 @@ export default function LoginPage() {
         />
       )}
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-6 py-5 lg:px-10">
-        <header className="grid grid-cols-1 items-center gap-4 md:grid-cols-3">
+
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-4 py-5 sm:px-6 lg:px-10 gap-0">
+        {/* ── Header: visible en todos los tamaños ── */}
+        <header className="flex w-full items-center justify-between gap-4 md:grid md:grid-cols-3">
           <Link href="/" className="flex items-center gap-4 transition-opacity hover:opacity-90 justify-start">
-            <Logo size={64} className="brightness-110 drop-shadow-sm" />
+            <Logo size={56} className="brightness-110 drop-shadow-sm md:h-[64px] md:w-[64px]" />
+
           </Link>
 
           <div className="hidden justify-center text-center md:flex">
@@ -169,11 +172,13 @@ export default function LoginPage() {
             </span>
           </div>
 
-          <div className="flex items-center justify-end gap-3">
+
+          <div className="flex items-center justify-end gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+              className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+
               onClick={() => setLocale(locale === 'es' ? 'en' : 'es')}
               aria-label={t('common.language')}
             >
@@ -183,7 +188,9 @@ export default function LoginPage() {
             {mounted && (
               <button
                 onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+
+                className="flex h-10 w-10 md:h-11 md:w-11 items-center justify-center rounded-full border border-border/30 bg-card/75 text-primary shadow-[0_10px_28px_rgba(0,0,0,0.1)] transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary/80"
+
                 aria-label="Toggle theme"
               >
                 {resolvedTheme === 'dark' ? (
@@ -196,7 +203,9 @@ export default function LoginPage() {
             <Button
               variant="outline"
               size="sm"
-              className="rounded-full border-primary/30 bg-primary/10 px-4 py-2 text-xs font-bold tracking-[0.12em] text-primary transition-all duration-300 hover:bg-accent hover:text-white hover:border-accent hover:shadow-glow"
+
+              className="hidden sm:flex rounded-full border-primary/30 bg-primary/10 px-4 py-2 text-xs font-bold tracking-[0.12em] text-primary transition-all duration-300 hover:bg-accent hover:text-white hover:border-accent hover:shadow-glow"
+
               asChild
             >
               <Link href="/">
@@ -207,9 +216,13 @@ export default function LoginPage() {
           </div>
         </header>
 
-        <main className="flex flex-1 items-center py-8 lg:py-9">
-          <div className="grid w-full items-center gap-8 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-12 lg:items-stretch lg:gap-10 xl:gap-12">
-            <section className="flex flex-col justify-center lg:col-span-7 lg:pr-4 xl:pr-10">
+
+        <main className="flex flex-1 items-center py-4 md:py-8 lg:py-9">
+          <div className="grid w-full items-center gap-6 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-12 lg:items-stretch lg:gap-10 xl:gap-12">
+
+            {/* ── Left section: HIDDEN on mobile, visible on lg+ ── */}
+            <section className="hidden lg:flex flex-col justify-center lg:col-span-7 lg:pr-4 xl:pr-10 text-left items-start">
+
               <span className="inline-flex self-start items-center rounded-md border border-border/50 bg-muted/80 px-4 py-2 text-[11px] font-semibold tracking-[0.05em] text-primary">
                 {t('auth.portalInstitutional')}
               </span>
@@ -220,8 +233,9 @@ export default function LoginPage() {
                 {t('login.hero.subtitle')}
               </p>
 
-              <div className="mt-3 grid max-w-[30rem] grid-cols-1 gap-3 sm:mt-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85">
+              <div className="mt-3 grid max-w-[30rem] grid-cols-2 gap-3 w-full">
+                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85 flex flex-col items-start">
+
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Network className="h-4.5 w-4.5" />
                   </div>
@@ -230,7 +244,9 @@ export default function LoginPage() {
                     {t('login.features.multisede.desc')}
                   </p>
                 </div>
-                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85">
+
+                <div className="rounded-2xl border border-border/35 bg-card/65 p-3.5 shadow-[0_12px_35px_rgba(15,23,42,0.06)] transition-colors hover:bg-card/85 flex flex-col items-start">
+
                   <div className="mb-3 flex h-8 w-8 items-center justify-center rounded-lg bg-secondary/10 text-secondary">
                     <Clock3 className="h-4.5 w-4.5" />
                   </div>
@@ -243,15 +259,24 @@ export default function LoginPage() {
             </section>
 
             <section className="mx-auto flex w-full max-w-md flex-col items-center justify-center lg:col-span-5 lg:max-w-[33rem] lg:justify-self-center xl:-translate-x-4">
-              <div className="mb-8 text-center lg:hidden">
-                <Logo size={56} className="mx-auto opacity-95" />
-                <h1 className="mt-4 text-3xl font-extrabold tracking-[-0.06em] text-foreground">SAMP</h1>
-                <p className="mt-2 text-sm text-muted-foreground">Sistema Académico de Maratones de Programación</p>
+
+              {/* ── Mobile-only compact heading above the form ── */}
+              <div className="mb-6 w-full text-left lg:hidden">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">
+                  {t('auth.portalInstitutional')}
+                </p>
+                <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+                  {t('auth.loginTitle')}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {t('auth.loginDescription')}
+                </p>
               </div>
 
               <Card className="group relative overflow-hidden rounded-[1.6rem] border border-border/35 bg-card/80 text-card-foreground shadow-[0_24px_72px_rgba(0,0,0,0.15)] dark:shadow-[0_24px_72px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-[box-shadow,border-color,background-color] duration-300 hover:border-primary/25 hover:bg-card/85 hover:shadow-[0_36px_110px_rgba(0,0,0,0.24),0_0_0_1px_rgba(14,116,144,0.08)] dark:hover:border-primary/30 dark:hover:shadow-[0_36px_110px_rgba(0,0,0,0.5),0_0_0_1px_rgba(125,211,252,0.08)]">
                 <div className="absolute inset-x-0 top-0 h-20 bg-primary/[0.03] blur-3xl transition-opacity duration-300 group-hover:opacity-100 opacity-70" />
-                <CardHeader className="relative z-10 space-y-2 pb-4 pt-7">
+
+                <CardHeader className="relative z-10 space-y-2 pb-4 pt-7 lg:block hidden">
                   <CardTitle className="text-[1.65rem] font-bold tracking-tight text-foreground md:text-[1.7rem]">
                     {t('auth.loginTitle')}
                   </CardTitle>

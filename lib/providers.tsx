@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from '@/components/theme-provider';
-import { Toaster } from 'sonner';
+import { Toaster as SonnerToaster } from 'sonner';
+import { Toaster as AppToaster } from '@/components/ui/toaster';
 import { makeQueryClient } from '@/lib/query-client';
 import { WSProvider } from '@/components/ws-provider';
 import { I18nProvider } from '@/lib/i18n/context';
@@ -20,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       >
         <I18nProvider>
           <WSProvider>{children}</WSProvider>
-          <Toaster
+          <SonnerToaster
             position="top-right"
             richColors
             closeButton
@@ -29,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               className: 'font-sans',
             }}
           />
+          <AppToaster />
         </I18nProvider>
       </ThemeProvider>
     </QueryClientProvider>
