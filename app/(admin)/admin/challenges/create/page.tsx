@@ -55,6 +55,15 @@ interface LocalTestCase extends TestCaseCreate {
 interface RubricLevel { label: string; points: number; description: string; }
 interface RubricCriterionLocal { _key: string; name: string; description: string; max_points: number; scoring_levels: RubricLevel[]; }
 
+function formatTimeLimit(seconds: number): string {
+  if (!seconds || seconds <= 0) return '0s';
+  if (seconds < 60) return `${seconds}s`;
+  const mins = Math.floor(seconds / 60);
+  const rem = seconds % 60;
+  if (rem === 0) return `${mins} min (${seconds}s)`;
+  return `${mins} min ${rem}s (${seconds}s)`;
+}
+
 export default function ChallengeCreateEditPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -70,7 +79,7 @@ export default function ChallengeCreateEditPage() {
   const [points, setPoints] = useState(250);
   const [category, setCategory] = useState('');
   const [showCatSuggestions, setShowCatSuggestions] = useState(false);
-  const [timeLimit, setTimeLimit] = useState(10);
+  const [timeLimit, setTimeLimit] = useState(300);
   const [memoryLimit, setMemoryLimit] = useState(256);
   const [descTab, setDescTab] = useState<string>('edit');
 
@@ -257,6 +266,15 @@ export default function ChallengeCreateEditPage() {
   const handleSave = async () => {
     if (!title.trim()) { toast.error('El título es obligatorio'); return; }
     if (!description.trim()) { toast.error('La descripción es obligatoria'); return; }
+
+    if (isCoding && testCases.length > 0) {
+      const invalidTcIndex = testCases.findIndex(tc => !tc.input_data.trim() || !tc.expected_output.trim());
+      if (invalidTcIndex !== -1) {
+        toast.error(`El caso de prueba #${invalidTcIndex + 1} debe tener entrada y salida esperada.`);
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const metadataJson: Record<string, unknown> = {};
@@ -274,30 +292,86 @@ export default function ChallengeCreateEditPage() {
         }
       }
 
+      const validTestCases = testCases
+        .filter(tc => tc.input_data.trim() && tc.expected_output.trim())
+        .map((tc, i) => ({
+          input_data: tc.input_data,
+          expected_output: tc.expected_output,
+          is_hidden: tc.is_hidden,
+          is_example: tc.is_example,
+          points_weight: tc.points_weight || 1,
+          order_index: i,
+          explanation: tc.explanation || null,
+        }));
+
       const payload = {
-        title, description_markdown: description, type, difficulty,
-        points_base: points, category: category || null,
-        time_limit_seconds: isCoding ? timeLimit : 0,
-        memory_limit_mb: isCoding ? memoryLimit : 0,
-        allowed_languages: isCoding ? ['python'] : [],
+        title: title.trim(),
+        description_markdown: description.trim(),
+        type,
+        difficulty,
+        points_base: points || 100,
+        category: category.trim() || null,
+        time_limit_seconds: isCoding ? Math.min(Math.max(timeLimit || 10, 5), 30) : 10,
+        memory_limit_mb: isCoding ? (memoryLimit || 256) : 256,
+        allowed_languages: isCoding ? ['python'] : ['python'],
         metadata_json: Object.keys(metadataJson).length > 0 ? metadataJson : null,
-        ...(!isEdit && isCoding ? { test_cases: testCases.map((tc, i) => ({
-          input_data: tc.input_data, expected_output: tc.expected_output,
-          is_hidden: tc.is_hidden, is_example: tc.is_example,
-          points_weight: tc.points_weight, order_index: i, explanation: tc.explanation || null,
-        })) } : {}),
+        ...(!isEdit && isCoding && validTestCases.length > 0 ? { test_cases: validTestCases } : {}),
       };
 
       if (isEdit) {
         await updateChallenge(editId!, payload);
-        toast.success('Reto actualizado');
+
+        // Sync test cases for existing challenge
+        if (isCoding) {
+          for (const tc of validTestCases) {
+            const localTc = testCases.find(t => t.input_data === tc.input_data && t.expected_output === tc.expected_output);
+            if (localTc?._saved_id) {
+              await updateTestCase(editId!, localTc._saved_id, {
+                input_data: tc.input_data,
+                expected_output: tc.expected_output,
+                is_hidden: tc.is_hidden,
+                is_example: tc.is_example,
+                points_weight: tc.points_weight,
+                order_index: tc.order_index,
+                explanation: tc.explanation || null,
+              }).catch(() => {});
+            } else {
+              await addTestCase(editId!, tc).catch(() => {});
+            }
+          }
+        }
+
+        if (isCoding && solutionCode.trim()) {
+          await submitSolution(editId!, {
+            source_code: solutionCode,
+            language: 'python',
+            time_complexity: timeComplexity || undefined,
+            space_complexity: spaceComplexity || undefined,
+          }).catch(() => {});
+        }
+
+        toast.success('Reto actualizado exitosamente');
       } else {
         const created = await createChallenge(payload);
-        toast.success('Reto creado');
+
+        if (isCoding && solutionCode.trim()) {
+          await submitSolution(created.id, {
+            source_code: solutionCode,
+            language: 'python',
+            time_complexity: timeComplexity || undefined,
+            space_complexity: spaceComplexity || undefined,
+          }).catch(() => {});
+        }
+
+        toast.success('Reto creado exitosamente');
         router.replace(`/admin/challenges/create?edit=${created.id}`);
       }
       qc.invalidateQueries({ queryKey: queryKeys.challenges.all });
-    } catch { toast.error('Error al guardar'); }
+    } catch (error: any) {
+      console.error('[Challenge Create/Update Error]', error);
+      const detailMsg = error?.detail || error?.message || 'Error al guardar el reto';
+      toast.error(typeof detailMsg === 'string' ? detailMsg : JSON.stringify(detailMsg));
+    }
     setSaving(false);
   };
 
@@ -428,12 +502,101 @@ export default function ChallengeCreateEditPage() {
             <CardHeader><CardTitle className="text-base">Límites de Ejecución</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <div className="flex justify-between"><Label>Tiempo límite</Label><span className="text-sm font-mono text-muted-foreground">{timeLimit}s</span></div>
-                <Slider value={[timeLimit]} onValueChange={([v]) => setTimeLimit(v)} min={5} max={30} step={1} />
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <Label>Tiempo límite</Label>
+                    <p className="text-xs font-mono text-primary mt-0.5">{formatTimeLimit(timeLimit)}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      type="number"
+                      min={5}
+                      max={600}
+                      value={timeLimit || ''}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setTimeLimit(isNaN(val) ? 0 : val);
+                      }}
+                      className="w-20 h-7 text-xs font-mono text-right"
+                    />
+                    <span className="text-xs text-muted-foreground">s</span>
+                  </div>
+                </div>
+                <Slider
+                  value={[Math.min(Math.max(timeLimit, 5), 600)]}
+                  onValueChange={([v]) => setTimeLimit(v)}
+                  min={5}
+                  max={600}
+                  step={5}
+                />
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: '30s', value: 30 },
+                    { label: '1 min', value: 60 },
+                    { label: '2 min', value: 120 },
+                    { label: '5 min', value: 300 },
+                    { label: '10 min', value: 600 },
+                  ].map((preset) => (
+                    <Button
+                      key={preset.value}
+                      type="button"
+                      variant={timeLimit === preset.value ? 'default' : 'outline'}
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setTimeLimit(preset.value)}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-3">
-                <div className="flex justify-between"><Label>Memoria límite</Label><span className="text-sm font-mono text-muted-foreground">{memoryLimit} MB</span></div>
-                <Slider value={[memoryLimit]} onValueChange={([v]) => setMemoryLimit(v)} min={128} max={512} step={64} />
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <Label>Memoria límite</Label>
+                    <p className="text-xs font-mono text-primary mt-0.5">{memoryLimit} MB</p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      type="number"
+                      min={64}
+                      max={1024}
+                      step={64}
+                      value={memoryLimit || ''}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setMemoryLimit(isNaN(val) ? 0 : val);
+                      }}
+                      className="w-20 h-7 text-xs font-mono text-right"
+                    />
+                    <span className="text-xs text-muted-foreground">MB</span>
+                  </div>
+                </div>
+                <Slider
+                  value={[Math.min(Math.max(memoryLimit, 128), 512)]}
+                  onValueChange={([v]) => setMemoryLimit(v)}
+                  min={128}
+                  max={512}
+                  step={64}
+                />
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: '128 MB', value: 128 },
+                    { label: '256 MB', value: 256 },
+                    { label: '512 MB', value: 512 },
+                  ].map((preset) => (
+                    <Button
+                      key={preset.value}
+                      type="button"
+                      variant={memoryLimit === preset.value ? 'default' : 'outline'}
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => setMemoryLimit(preset.value)}
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-2 md:col-span-2">
                 <Label>Lenguajes Permitidos</Label>

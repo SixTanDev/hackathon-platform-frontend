@@ -36,6 +36,22 @@ const TYPE_LABELS: Record<string, string> = {
   legal_argument: 'Legal',
 };
 
+function formatChallengeTime(challenge: { difficulty?: ChallengeDifficulty; time_limit_seconds?: number | null }): string {
+  const seconds = challenge.time_limit_seconds;
+  if (seconds && seconds > 30) {
+    const mins = Math.floor(seconds / 60);
+    const rem = seconds % 60;
+    return rem === 0 ? `${mins} min` : `${mins} min ${rem}s`;
+  }
+  switch (challenge.difficulty) {
+    case 'easy': return '10 min';
+    case 'medium': return '15 min';
+    case 'hard': return '20 min';
+    case 'expert': return '30 min';
+    default: return '10 min';
+  }
+}
+
 export default function StudentChallengesPage() {
   const [search, setSearch] = useState('');
   const [difficulty, setDifficulty] = useState<string>('all');
@@ -170,7 +186,7 @@ export default function StudentChallengesPage() {
                     </h3>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 mb-4 h-10">
                       <span className="flex items-center gap-1 text-primary font-medium">
-                        <Clock className="w-3 h-3" /> {(c as any).time_limit_seconds ? `${Math.floor((c as any).time_limit_seconds / 60)} min` : '5 min'}
+                        <Clock className="w-3 h-3" /> {formatChallengeTime(c as any)}
                       </span>
                       <span>•</span>
                       <span className="truncate">{c.category || 'Sin categoría'}</span>
@@ -209,7 +225,7 @@ export default function StudentChallengesPage() {
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
                           <span className="flex items-center gap-1 text-primary font-medium">
-                            <Clock className="w-3 h-3" /> {(c as any).time_limit_seconds ? `${Math.floor((c as any).time_limit_seconds / 60)} min` : '5 min'}
+                            <Clock className="w-3 h-3" /> {formatChallengeTime(c as any)}
                           </span>
                           <span>{TYPE_LABELS[c.type] ?? c.type}</span>
                           <span>{c.category || 'Sin categoría'}</span>

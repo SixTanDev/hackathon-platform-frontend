@@ -432,7 +432,14 @@ function DescriptionPanel({
         <div className="grid grid-cols-1 gap-1.5 text-xs">
           <div className="flex items-center gap-2 p-2 rounded-md bg-muted/30">
             <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-            <span>Límite de tiempo: <strong>{challenge.time_limit_seconds}s</strong></span>
+            <span>
+              Límite de tiempo:{' '}
+              <strong>
+                {challenge.time_limit_seconds >= 60
+                  ? `${challenge.time_limit_seconds}s (${Math.floor(challenge.time_limit_seconds / 60)} min${challenge.time_limit_seconds % 60 > 0 ? ` ${challenge.time_limit_seconds % 60}s` : ''})`
+                  : `${challenge.time_limit_seconds}s`}
+              </strong>
+            </span>
           </div>
           <div className="flex items-center gap-2 p-2 rounded-md bg-muted/30">
             <Cpu className="w-3.5 h-3.5 text-muted-foreground" />

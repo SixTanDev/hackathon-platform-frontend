@@ -351,6 +351,27 @@ Un diccionario en Python con el formato:
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const getDevelopmentTimeSeconds = (ch?: { difficulty?: string; time_limit_seconds?: number | null } | null): number => {
+    if (!ch) return 600;
+    if (ch.time_limit_seconds && ch.time_limit_seconds > 30) {
+      return ch.time_limit_seconds;
+    }
+    const diffTimeMap: Record<string, number> = {
+      easy: 600,     // 10 min
+      medium: 900,   // 15 min
+      hard: 1200,    // 20 min
+      expert: 1800,  // 30 min
+    };
+    return diffTimeMap[ch.difficulty || 'easy'] ?? 600;
+  };
+
+  const formatDevelopmentTime = (ch?: { difficulty?: string; time_limit_seconds?: number | null } | null) => {
+    const s = getDevelopmentTimeSeconds(ch);
+    const mins = Math.floor(s / 60);
+    const rem = s % 60;
+    return rem === 0 ? `${mins} min` : `${mins} min ${rem}s`;
+  };
+
   const editorRef = useRef<any>(null);
   const monacoRef = useRef<any>(null);
   const latestCodeRef = useRef(code);
@@ -470,8 +491,8 @@ Un diccionario en Python con el formato:
 
   useEffect(() => {
     if (!challenge?.id) return;
-    setTimeLeft(Math.max(challenge.time_limit_seconds ?? 300, 0));
-  }, [challenge?.id, challenge?.time_limit_seconds]);
+    setTimeLeft(getDevelopmentTimeSeconds(challenge));
+  }, [challenge?.id, challenge?.time_limit_seconds, challenge?.difficulty]);
 
   const handleRun = useCallback(async () => {
     if (isRunning || !challengeId) return;
@@ -812,7 +833,7 @@ Un diccionario en Python con el formato:
                   <div className="p-3 rounded-xl border border-border/50 bg-muted/20">
                     <p className="text-[10px] text-muted-foreground uppercase mb-1 font-bold">Tiempo Desarrollo</p>
                     <div className="flex items-center gap-2 text-sm font-mono font-medium">
-                      <Clock className="w-3.5 h-3.5 text-primary" /> {Math.max(Math.ceil((challenge.time_limit_seconds ?? 300) / 60), 1)} min
+                      <Clock className="w-3.5 h-3.5 text-primary" /> {formatDevelopmentTime(challenge)}
                     </div>
                   </div>
                   <div className="p-3 rounded-xl border border-border/50 bg-muted/20">
@@ -1033,7 +1054,7 @@ Un diccionario en Python con el formato:
                   <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
                     <p className="mb-1 text-[10px] font-bold uppercase text-muted-foreground">Tiempo Desarrollo</p>
                     <div className="flex items-center gap-2 text-sm font-mono font-medium">
-                      <Clock className="w-3.5 h-3.5 text-primary" /> {Math.max(Math.ceil((challenge.time_limit_seconds ?? 300) / 60), 1)} min
+                      <Clock className="w-3.5 h-3.5 text-primary" /> {formatDevelopmentTime(challenge)}
                     </div>
                   </div>
                   <div className="rounded-xl border border-border/50 bg-muted/20 p-3">
