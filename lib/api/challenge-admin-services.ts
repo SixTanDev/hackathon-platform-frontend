@@ -147,15 +147,30 @@ export async function deleteTestCase(challengeId: string, tcId: string): Promise
 
 // ─── Solution & Validation ──────────────────────────────────────────────────
 
-export async function submitSolution(challengeId: string, payload: { source_code: string; language: string; time_complexity?: string; space_complexity?: string }): Promise<ChallengeSolution> {
-  const res = await apiClient.post(`/challenges/${challengeId}/solution`, payload);
-  return res.data;
+export async function submitSolution(challengeId: string, payload: { source_code?: string; solution_code?: string; language: string; time_complexity?: string; space_complexity?: string }): Promise<ChallengeSolution> {
+  const code = payload.solution_code || payload.source_code || '';
+  const body = {
+    solution_code: code,
+    source_code: code,
+    language: payload.language,
+    time_complexity: payload.time_complexity,
+    space_complexity: payload.space_complexity,
+  };
+  const res = await apiClient.post(`/challenges/${challengeId}/solution`, body);
+  return {
+    ...res.data,
+    source_code: res.data.solution_code || res.data.source_code || code,
+  };
 }
 
 export async function getSolution(challengeId: string): Promise<ChallengeSolution | null> {
   try {
     const res = await apiClient.get(`/challenges/${challengeId}/solution`);
-    return res.data;
+    if (!res.data) return null;
+    return {
+      ...res.data,
+      source_code: res.data.solution_code || res.data.source_code || '',
+    };
   } catch {
     return null;
   }

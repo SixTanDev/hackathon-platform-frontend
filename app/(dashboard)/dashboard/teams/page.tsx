@@ -112,7 +112,7 @@ export default function StudentTeamsPage() {
                   <div className="flex gap-2 border-t border-border/50 pt-2">
                     <Link href={`/dashboard/teams/${team.id}/progress`} className="flex-1">
                       <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
-                        <BarChart3 className="h-3.5 w-3.5" /> {t('teams.card.progress')}
+                        <BarChart3 className="h-3.5 w-3.5" /> {t('teams.card.viewProgress')}
                       </Button>
                     </Link>
                     <Link href={`/dashboard/teams/${team.id}`} className="flex-1">
