@@ -216,7 +216,7 @@ export async function listSedeMembers(sedeId: string): Promise<SedeMemberEntry[]
 /** Legacy: list sede users — combines /admin/users + /admin/sedes/{id}/members client-side */
 export async function listSedeUsers(sedeId: string, params?: { role?: string; search?: string; skip?: number; limit?: number }): Promise<{ items: AdminUser[]; total: number }> {
   const [usersRes, membersRes] = await Promise.all([
-    apiClient.get('/admin/users', { params: { skip: params?.skip ?? 0, limit: params?.limit ?? 50 } }),
+    apiClient.get('/admin/users', { params: { skip: 0, limit: 500, ...(params?.search ? { search: params.search } : {}) } }),
     apiClient.get(`/admin/sedes/${sedeId}/members`),
   ]);
 
@@ -274,7 +274,14 @@ export async function listSedeUsers(sedeId: string, params?: { role?: string; se
     items = items.filter((u) => u.full_name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
   }
 
-  return { items, total: items.length };
+  const total = items.length;
+  if (params?.skip !== undefined || params?.limit !== undefined) {
+    const skip = params.skip ?? 0;
+    const limit = params.limit ?? 20;
+    items = items.slice(skip, skip + limit);
+  }
+
+  return { items, total };
 }
 
 export async function createSedeUser(payload: AdminUserCreate): Promise<AdminUser> {

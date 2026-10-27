@@ -841,7 +841,7 @@ export default function HackathonDetailPage() {
 
 
   // Auth & Role
-  const { enrolledHackathonIds, addEnrolledHackathon, currentRole } = useAuthStore();
+  const { enrolledHackathonIds, addEnrolledHackathon, removeEnrolledHackathon, currentRole } = useAuthStore();
   const isStudent = currentRole === 'student';
 
   // Fetch registrations (Disabled for students to avoid 403)
@@ -849,19 +849,16 @@ export default function HackathonDetailPage() {
     queryKey: queryKeys.hackathons.registrations(hackathonId),
     queryFn: () => getHackathonRegistrations(hackathonId),
     enabled: !!hackathonId && !isStudent,
-
   });
 
   const myRegistration = registrations?.find(
     (r) => r.user_global_id === userId && r.status !== 'cancelled'
   ) ?? null;
 
-
   // For students, we rely on local persistence since we can't fetch the list
   const isEnrolled = isStudent 
     ? enrolledHackathonIds.includes(hackathonId) 
     : !!myRegistration;
-
 
   // Register mutation
   const registerMutation = useMutation({
@@ -874,10 +871,18 @@ export default function HackathonDetailPage() {
         queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.registrations(hackathonId) });
         toast({ title: '¡Inscripción exitosa!', description: 'Ya estás inscrito en este hackathon.' });
       }
-
     },
     onError: (err: any) => {
-      toast({ title: 'Error', description: err?.detail ?? 'No se pudo completar la inscripción.', variant: 'destructive' });
+      const detail = String(err?.detail ?? err?.message ?? '');
+      // If user is already registered in backend (409 Conflict), sync the state
+      if (detail.toLowerCase().includes('already registered')) {
+        if (isStudent) {
+          addEnrolledHackathon(hackathonId);
+        }
+        toast({ title: '¡Ya estás inscrito!', description: 'Tu registro en este hackathon ya se encuentra activo.' });
+      } else {
+        toast({ title: 'Error', description: err?.detail ?? 'No se pudo completar la inscripción.', variant: 'destructive' });
+      }
     },
   });
 
@@ -885,6 +890,9 @@ export default function HackathonDetailPage() {
   const cancelMutation = useMutation({
     mutationFn: () => cancelRegistration(hackathonId),
     onSuccess: () => {
+      if (isStudent) {
+        removeEnrolledHackathon(hackathonId);
+      }
       toast({ title: 'Inscripción cancelada' });
       queryClient.invalidateQueries({ queryKey: queryKeys.hackathons.registrations(hackathonId) });
     },

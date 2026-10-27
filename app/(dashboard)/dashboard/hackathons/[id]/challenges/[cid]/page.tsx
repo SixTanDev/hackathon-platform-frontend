@@ -673,11 +673,20 @@ export default function ChallengeSolvingPage() {
         });
       }
     } catch (err: any) {
-      toast({
-        title: 'Error al enviar',
-        description: err?.detail ?? 'No se pudo enviar la solución.',
-        variant: 'destructive',
-      });
+      const detail = err?.detail ?? 'No se pudo enviar la solución.';
+      if (String(detail).toLowerCase().includes('not registered')) {
+        toast({
+          title: 'No estás inscrito en este hackathon',
+          description: 'Debes inscribirte al hackathon antes de poder realizar entregas oficiales.',
+          variant: 'destructive',
+        });
+      } else {
+        toast({
+          title: 'Error al enviar',
+          description: detail,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -78,9 +78,9 @@ export function middleware(request: NextRequest) {
 
     const isAllowed =
       roleCookie === 'superadmin'
-        ? rolePrefix === 'superadmin' || rolePrefix === 'admin'
+        ? rolePrefix === 'superadmin' || rolePrefix === 'admin' || (rolePrefix === 'dashboard' && pathname.includes('/hackathons'))
         : roleCookie === 'admin'
-          ? rolePrefix === 'admin'
+          ? rolePrefix === 'admin' || (rolePrefix === 'dashboard' && pathname.includes('/hackathons'))
           : roleCookie === 'tutor'
             ? rolePrefix === 'tutor' || (rolePrefix === 'dashboard' && (pathname.includes('/challenges') || pathname.includes('/documents')))
             : roleCookie === 'director_semillero'

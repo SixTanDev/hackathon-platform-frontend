@@ -41,6 +41,7 @@ import {
   WifiOff,
   BookOpen,
   UserCheck,
+  Trophy,
 } from 'lucide-react';
 import type { ChallengePublic } from '@/types/api';
 
@@ -114,6 +115,9 @@ export default function MonitorDashboard() {
               <><WifiOff className="w-3.5 h-3.5 text-destructive" /><span className="text-destructive">Desconectado</span></>
             )}
           </div>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/hackathons/${hackathonId}`)} className="gap-1.5">
+            <Trophy className="w-4 h-4 text-unad-gold" /> Ver Tabla de Posiciones
+          </Button>
           <Button onClick={() => setFlashOpen(true)} className="gap-1.5 bg-accent hover:bg-accent/90">
             <Zap className="w-4 h-4" /> Reto Relámpago
           </Button>

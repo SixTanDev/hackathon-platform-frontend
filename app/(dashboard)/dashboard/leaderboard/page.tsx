@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StreakIndicator } from '@/components/gamification/streak-indicator';
 import { Trophy, Award, MapPin, Globe, AlertCircle } from 'lucide-react';
+import { resolveUserName } from '@/lib/utils/user-name-resolver';
 import type { LeaderboardEntryResponse } from '@/types/api';
 
 function LeaderboardTable({ entries, currentUserId }: { entries: LeaderboardEntryResponse[]; currentUserId?: string }) {
@@ -27,7 +28,7 @@ function LeaderboardTable({ entries, currentUserId }: { entries: LeaderboardEntr
       <table className="w-full text-xs sm:text-sm min-w-[400px]">
         <thead>
           <tr className="border-b border-border text-muted-foreground">
-            <th className="px-4 py-3 text-left w-16">#</th>
+            <th className="px-4 py-3 text-left w-20">#</th>
             <th className="px-4 py-3 text-left">Miembro</th>
             <th className="px-4 py-3 text-right">Puntaje</th>
             <th className="px-4 py-3 text-right">Insignias</th>
@@ -45,17 +46,29 @@ function LeaderboardTable({ entries, currentUserId }: { entries: LeaderboardEntr
                 } ${entry.rank <= 3 ? 'bg-unad-gold/5' : ''}`}
               >
                 <td className="px-4 py-3">
-                  <span className={`${
+                  <span className={`inline-flex items-center gap-1.5 ${
                     entry.rank === 1 ? 'text-unad-gold font-bold' :
                     entry.rank === 2 ? 'text-slate-300 font-bold' :
                     entry.rank === 3 ? 'text-amber-600 font-bold' : ''
                   }`}>
-                    {entry.rank}
+                    {entry.rank === 1 && <span>🥇</span>}
+                    {entry.rank === 2 && <span>🥈</span>}
+                    {entry.rank === 3 && <span>🥉</span>}
+                    #{entry.rank}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span>{entry.member_id}</span>
+                    <span className="font-medium">{resolveUserName(entry.member_id, entry.rank)}</span>
+                    {entry.rank <= 3 && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                        entry.rank === 1 ? 'bg-unad-gold/20 text-unad-gold border border-unad-gold/40' :
+                        entry.rank === 2 ? 'bg-slate-300/20 text-slate-300 border border-slate-400/40' :
+                        'bg-amber-700/20 text-amber-600 border border-amber-700/40'
+                      }`}>
+                        {entry.rank === 1 ? 'Oro' : entry.rank === 2 ? 'Plata' : 'Bronce'}
+                      </span>
+                    )}
                     {isMe && (
                       <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">Tú</span>
                     )}

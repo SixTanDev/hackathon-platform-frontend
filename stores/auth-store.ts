@@ -34,6 +34,7 @@ export interface AuthState {
   setUser: (user: User) => void;
 
   addEnrolledHackathon: (hackathonId: string) => void;
+  removeEnrolledHackathon: (hackathonId: string) => void;
 
   /** Set the zone selected by superadmin for cross-zone ops (does NOT require context token) */
   setSuperadminZone: (zone: { id: string; code: string; name: string } | null) => void;
@@ -92,6 +93,10 @@ export const useAuthStore = create<AuthState>()(
           enrolledHackathonIds: state.enrolledHackathonIds.includes(hackathonId)
             ? state.enrolledHackathonIds
             : [...state.enrolledHackathonIds, hackathonId],
+        })),
+      removeEnrolledHackathon: (hackathonId: string) =>
+        set((state) => ({
+          enrolledHackathonIds: state.enrolledHackathonIds.filter((id) => id !== hackathonId),
         })),
       setSuperadminZone: (zone) => set({ superadminSelectedZone: zone }),
     }),
