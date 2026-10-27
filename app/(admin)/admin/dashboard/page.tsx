@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth-store';
 import { useTranslation } from '@/lib/i18n/context';
 import { queryKeys } from '@/lib/query-client';
@@ -136,14 +137,16 @@ export default function AdminDashboardPage() {
             bg="bg-primary/10"
             sub={overview?.users_by_role ? Object.entries(overview.users_by_role).map(([r, c]) => `${r}: ${c}`).join(' · ') : undefined}
           />
-          <StatCard
-            label={t('tutor.dashboard.activeHackathons')}
-            value={overview?.hackathons_active ?? 0}
-            icon={Trophy}
-            color="text-unad-gold"
-            bg="bg-unad-gold/10"
-            sub={`${overview?.hackathons_completed ?? 0} ${t('admin.metrics.completed')} · ${overview?.hackathons_total ?? 0} ${t('admin.metrics.total')}`}
-          />
+          <Link href="/admin/hackathons" className="block transition-transform hover:scale-[1.02]">
+            <StatCard
+              label={t('tutor.dashboard.activeHackathons')}
+              value={overview?.hackathons_active ?? 0}
+              icon={Trophy}
+              color="text-unad-gold"
+              bg="bg-unad-gold/10"
+              sub={`${overview?.hackathons_completed ?? 0} ${t('admin.metrics.completed')} · ${overview?.hackathons_total ?? 0} ${t('admin.metrics.total')}`}
+            />
+          </Link>
           <StatCard
             label={t('admin.metrics.challengesTotal')}
             value={overview?.challenges_total ?? 0}

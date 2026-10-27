@@ -225,6 +225,9 @@ export default function AdminHackathonsPage() {
                               <DropdownMenuItem onClick={() => router.push(`/admin/hackathons/${h.id}/edit`)}>
                                 <Pencil className="w-4 h-4 mr-2" /> Editar
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/hackathons/${h.id}`)}>
+                                <Trophy className="w-4 h-4 mr-2 text-unad-gold" /> Ver Tabla de Posiciones
+                              </DropdownMenuItem>
                               {h.status === 'active' && (
                                 <DropdownMenuItem onClick={() => router.push(`/admin/hackathons/${h.id}/monitor`)}>
                                   <Activity className="w-4 h-4 mr-2" /> Monitorear

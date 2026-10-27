@@ -38,6 +38,7 @@ import {
   Archive,
   RotateCcw,
   CheckCircle2,
+  Trophy,
 } from 'lucide-react';
 import type { Hackathon, HackathonStatus, HackathonUpdate, HackathonMode } from '@/types/api';
 import Link from 'next/link';
@@ -160,14 +161,20 @@ export default function EditHackathonPage() {
   });
 
   function handleSave() {
+    const toIso = (val: string | null) => {
+      if (!val) return null;
+      const d = new Date(val);
+      return isNaN(d.getTime()) ? null : d.toISOString();
+    };
+
     updateMut.mutate({
       name: name.trim() || null,
       description: description || null,
       rules_text: rulesText || null,
-      starts_at: startsAt || null,
-      ends_at: endsAt || null,
-      registration_starts_at: regStartsAt || null,
-      registration_ends_at: regEndsAt || null,
+      starts_at: toIso(startsAt),
+      ends_at: toIso(endsAt),
+      registration_starts_at: toIso(regStartsAt),
+      registration_ends_at: toIso(regEndsAt),
       is_team_based: isTeamBased,
       allow_individual: allowIndividual,
       min_team_size: isTeamBased ? minTeamSize : null,
@@ -205,6 +212,11 @@ export default function EditHackathonPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href={`/dashboard/hackathons/${id}`}>
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Trophy className="w-4 h-4 text-unad-gold" /> Ver Tabla de Posiciones
+            </Button>
+          </Link>
           {hackathon.status === 'active' && (
             <Link href={`/admin/hackathons/${id}/monitor`}>
               <Button variant="outline" size="sm" className="gap-1.5">

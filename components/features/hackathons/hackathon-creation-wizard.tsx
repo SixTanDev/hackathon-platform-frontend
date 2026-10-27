@@ -266,8 +266,12 @@ export function HackathonCreationWizard({
         return;
       }
       // API expects ISO-8601 strings (YYYY-MM-DDTHH:mm:ssZ).
-      // datetime-local input provides YYYY-MM-DDTHH:mm.
-      const formatIso = (val: string) => val ? `${val}:00Z` : null;
+      // datetime-local input provides YYYY-MM-DDTHH:mm in local time.
+      const formatIso = (val: string) => {
+        if (!val) return null;
+        const d = new Date(val);
+        return isNaN(d.getTime()) ? null : d.toISOString();
+      };
 
       const payload: HackathonCreate = {
         name: name.trim(),

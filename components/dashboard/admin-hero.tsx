@@ -11,7 +11,8 @@ import {
   AlertTriangle, 
   CheckCircle2,
   Server,
-  ArrowRight
+  ArrowRight,
+  Trophy,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { User, Sede } from '@/types/api';
@@ -103,9 +104,14 @@ export function AdminHero({
             </div>
           </div>
           <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap sm:gap-4 sm:pt-4">
-            <Link href="/admin/hackathons/create">
+            <Link href="/admin/hackathons">
               <Button size="lg" className="h-12 w-full sm:h-14 sm:w-auto px-5 sm:px-8 text-sm sm:text-base font-bold shadow-xl shadow-primary/20">
-
+                <Trophy className="w-5 h-5 mr-2" />
+                Ver Hackathones
+              </Button>
+            </Link>
+            <Link href="/admin/hackathons/create">
+              <Button size="lg" variant="outline" className="h-12 w-full sm:h-14 sm:w-auto px-5 sm:px-8 text-sm sm:text-base font-bold border-2">
                 <PlusCircle className="w-5 h-5 mr-2" />
                 {t('admin.hero.action.createHackathon')}
               </Button>

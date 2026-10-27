@@ -92,6 +92,7 @@ const ADMIN_NAV: NavItem[] = [
 
 const SUPERADMIN_NAV: NavItem[] = [
   { label: 'nav.globalDashboard', href: '/superadmin', icon: LayoutDashboard },
+  { label: 'nav.hackathons', href: '/admin/hackathons', icon: Trophy },
   { label: 'nav.zones', href: '/superadmin/zones', icon: Globe },
   { label: 'nav.sedes', href: '/superadmin/sedes', icon: Shield },
   { label: 'nav.resources', href: '/superadmin/resources', icon: ClipboardList },
