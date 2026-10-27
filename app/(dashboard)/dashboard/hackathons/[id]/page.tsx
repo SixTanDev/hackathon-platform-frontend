@@ -70,6 +70,7 @@ import {
   Send,
   Crown,
   Shield,
+  RotateCcw,
   XCircle,
   AlertTriangle,
   TrendingUp,
@@ -354,10 +355,10 @@ function LeaderboardTab({
   const userId = useAuthStore((s) => s?.user?.id);
   const [type, setType] = useState<'individual' | 'team'>('individual');
 
-  const { data: entries, isLoading } = useQuery({
+  const { data: entries, isLoading, refetch, isFetching } = useQuery({
     queryKey: queryKeys.hackathons.leaderboard(hackathonId),
     queryFn: () => getHackathonLeaderboard(hackathonId, type),
-    refetchInterval: 30 * 1000,
+    refetchInterval: 15 * 1000,
   });
 
   const RANK_COLORS = ['', 'text-yellow-500', 'text-gray-400', 'text-amber-700'];
@@ -373,16 +374,38 @@ function LeaderboardTab({
 
   return (
     <div className="space-y-4">
-      {isTeamBased ? (
-        <div className="flex gap-2">
-          <Button size="sm" variant={type === 'individual' ? 'default' : 'outline'} onClick={() => setType('individual')}>
-            <UserIcon className="w-3 h-3 mr-1" /> Individual
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {isTeamBased ? (
+          <div className="flex gap-2">
+            <Button size="sm" variant={type === 'individual' ? 'default' : 'outline'} onClick={() => setType('individual')}>
+              <UserIcon className="w-3 h-3 mr-1" /> Individual
+            </Button>
+            <Button size="sm" variant={type === 'team' ? 'default' : 'outline'} onClick={() => setType('team')}>
+              <Users className="w-3 h-3 mr-1" /> Equipos
+            </Button>
+          </div>
+        ) : <div />}
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="h-8 text-xs bg-transparent border border-border/50 hover:bg-muted/40"
+            title="Refrescar posiciones ahora"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isFetching ? 'animate-spin text-primary' : 'text-muted-foreground'}`} />
+            {isFetching ? 'Actualizando...' : 'Refrescar'}
           </Button>
-          <Button size="sm" variant={type === 'team' ? 'default' : 'outline'} onClick={() => setType('team')}>
-            <Users className="w-3 h-3 mr-1" /> Equipos
-          </Button>
+
+          <Link href={`/dashboard/hackathons/${hackathonId}/leaderboard`}>
+            <Button variant="ghost" size="sm" className="h-8 text-xs bg-transparent hover:bg-muted/40 border border-border/40">
+              <Trophy className="w-3.5 h-3.5 mr-1 text-unad-gold" /> Ver Podio
+            </Button>
+          </Link>
         </div>
-      ) : null}
+      </div>
 
       {!entries?.length ? (
         <EmptyState

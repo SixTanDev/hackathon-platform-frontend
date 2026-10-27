@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BadgeDownloadDialog } from '@/components/gamification/badge-download-dialog';
-import { Trophy, Medal, Crown, Lightbulb, CheckCircle2, Users, User as UserIcon, Sparkles } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Medal, Crown, Lightbulb, CheckCircle2, Users, User as UserIcon, Sparkles, RotateCcw } from 'lucide-react';
 import type { LeaderboardEntry } from '@/types/api';
 
 function PodiumPlace({
@@ -112,10 +113,11 @@ export default function HackathonLeaderboardPage() {
     enabled: !!id,
   });
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: [...queryKeys.leaderboards.hackathon(id), type],
     queryFn: () => getHackathonLeaderboard(id, type),
     enabled: !!id,
+    refetchInterval: 15 * 1000,
   });
 
   const entries: LeaderboardEntry[] = Array.isArray(data)
@@ -137,16 +139,30 @@ export default function HackathonLeaderboardPage() {
             Clasificación oficial en tiempo real e insignias institucionales de honor
           </p>
         </div>
-        <Tabs value={type} onValueChange={(v) => setType(v as any)}>
-          <TabsList className="border border-border/50 bg-muted/40">
-            <TabsTrigger value="individual" className="gap-1.5 text-xs">
-              <UserIcon className="w-3.5 h-3.5" /> Individual
-            </TabsTrigger>
-            <TabsTrigger value="team" className="gap-1.5 text-xs">
-              <Users className="w-3.5 h-3.5" /> Equipos
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="h-8 text-xs bg-transparent border border-border/50 hover:bg-muted/40"
+            title="Actualizar tabla ahora"
+          >
+            <RotateCcw className={`w-3.5 h-3.5 mr-1.5 ${isFetching ? 'animate-spin text-primary' : 'text-muted-foreground'}`} />
+            {isFetching ? 'Actualizando...' : 'Actualizar'}
+          </Button>
+
+          <Tabs value={type} onValueChange={(v) => setType(v as any)}>
+            <TabsList className="border border-border/50 bg-muted/40">
+              <TabsTrigger value="individual" className="gap-1.5 text-xs">
+                <UserIcon className="w-3.5 h-3.5" /> Individual
+              </TabsTrigger>
+              <TabsTrigger value="team" className="gap-1.5 text-xs">
+                <Users className="w-3.5 h-3.5" /> Equipos
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </div>
 
       {isLoading ? (
