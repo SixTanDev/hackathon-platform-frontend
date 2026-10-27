@@ -13,6 +13,7 @@ import { BadgeDownloadDialog } from '@/components/gamification/badge-download-di
 import { Trophy, Medal, Crown, Lightbulb, CheckCircle2, Users, User as UserIcon, Sparkles } from 'lucide-react';
 import type { LeaderboardEntry } from '@/types/api';
 
+
 function PodiumPlace({
   entry,
   place,
@@ -56,12 +57,14 @@ function PodiumPlace({
       pillarText: 'text-orange-700 dark:text-orange-400',
       order: 'order-3',
     },
+
   };
 
   const s = styles[place];
   const Icon = place === 1 ? Crown : Medal;
 
   return (
+
     <div className={`flex flex-col items-center gap-2 ${s.order} transition-transform hover:-translate-y-1 duration-200`}>
       {/* Medal Icon Crest */}
       <div className={`relative w-16 h-16 rounded-full ${s.circle} flex items-center justify-center`}>
@@ -96,6 +99,7 @@ function PodiumPlace({
       {/* Podium Pillar */}
       <div className={`w-32 ${s.pillarHeight} rounded-t-2xl ${s.pillarBg} flex flex-col items-center justify-end pb-3 mt-1`}>
         <span className={`text-4xl font-black drop-shadow-sm ${s.pillarText}`}>#{place}</span>
+
       </div>
     </div>
   );
@@ -128,6 +132,7 @@ export default function HackathonLeaderboardPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border/50">
         <div>
+
           <h1 className="text-2xl sm:text-3xl font-extrabold flex items-center gap-2.5 text-foreground">
             <Trophy className="w-7 h-7 text-unad-gold" />
             Tabla de Posiciones y Premiación
@@ -136,6 +141,8 @@ export default function HackathonLeaderboardPage() {
             {hackathon?.name ? <span className="font-semibold text-foreground">{hackathon.name} · </span> : ''}
             Clasificación oficial en tiempo real e insignias institucionales de honor
           </p>
+
+        
         </div>
         <Tabs value={type} onValueChange={(v) => setType(v as any)}>
           <TabsList className="border border-border/50 bg-muted/40">
@@ -172,6 +179,7 @@ export default function HackathonLeaderboardPage() {
         </Card>
       ) : (
         <>
+
           {/* Olympic Podium Display */}
           {top3.length > 0 && (
             <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card/80 to-muted/20 p-6 shadow-sm">
@@ -193,11 +201,13 @@ export default function HackathonLeaderboardPage() {
               <CardTitle className="text-sm sm:text-base font-bold flex items-center gap-2">
                 <span>Clasificación Completa y Entrega de Insignias</span>
               </CardTitle>
+
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
+
                     <tr className="border-b border-border/60 bg-muted/20 text-muted-foreground text-xs uppercase tracking-wider">
                       <th className="px-5 py-3 text-left w-20">#</th>
                       <th className="px-5 py-3 text-left">Participante</th>
@@ -205,6 +215,7 @@ export default function HackathonLeaderboardPage() {
                       <th className="px-5 py-3 text-right">Resueltos</th>
                       <th className="px-5 py-3 text-right">Pistas</th>
                       <th className="px-5 py-3 text-right w-36">Insignia</th>
+
                     </tr>
                   </thead>
                   <tbody>
@@ -217,6 +228,7 @@ export default function HackathonLeaderboardPage() {
                             isMe ? 'bg-primary/5 font-semibold' : ''
                           } ${entry.rank === 1 ? 'bg-amber-500/5' : entry.rank === 2 ? 'bg-slate-400/5' : entry.rank === 3 ? 'bg-orange-500/5' : ''}`}
                         >
+
                           <td className="px-5 py-3.5">
                             <span className={`inline-flex items-center gap-1.5 font-bold ${
                               entry.rank === 1 ? 'text-amber-600 dark:text-amber-400' :
@@ -227,17 +239,20 @@ export default function HackathonLeaderboardPage() {
                               {entry.rank === 1 && <span className="text-base">🥇</span>}
                               {entry.rank === 2 && <span className="text-base">🥈</span>}
                               {entry.rank === 3 && <span className="text-base">🥉</span>}
+
                               #{entry.rank}
                             </span>
                           </td>
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-2">
+
                               <span className="font-semibold text-foreground">{entry.display_name}</span>
                               {entry.rank <= 3 && (
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${
                                   entry.rank === 1 ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 border-amber-300 dark:border-amber-600' :
                                   entry.rank === 2 ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-300 dark:border-slate-600' :
                                   'bg-orange-100 dark:bg-orange-950/80 text-orange-900 dark:text-orange-300 border-orange-300 dark:border-orange-600'
+
                                 }`}>
                                   {entry.rank === 1 ? '1er Puesto' : entry.rank === 2 ? '2do Puesto' : '3er Puesto'}
                                 </span>
@@ -249,7 +264,9 @@ export default function HackathonLeaderboardPage() {
                               )}
                             </div>
                           </td>
+
                           <td className="px-5 py-3.5 text-right font-mono font-bold text-foreground">
+
                             {entry.score.toLocaleString()} pts
                           </td>
                           <td className="px-5 py-3.5 text-right">
