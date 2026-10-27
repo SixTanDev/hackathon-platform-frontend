@@ -59,6 +59,7 @@ import {
   Clock,
   Cpu,
   Maximize2,
+  ShieldCheck,
   Minimize2,
   RotateCcw,
   AlertTriangle,
@@ -498,6 +499,9 @@ export default function ChallengeSolvingPage() {
   // State
   const [code, setCode] = useState(DEFAULT_CODE);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [tabWarningsCount, setTabWarningsCount] = useState(0);
+  const [showSecurityAlertModal, setShowSecurityAlertModal] = useState(false);
+  const isNavigatingBackRef = useRef(false);
   const [resultTab, setResultTab] = useState<'results' | 'submissions'>('results');
   const [runResults, setRunResults] = useState<RunTestResult[] | null>(null);
   const [submitResults, setSubmitResults] = useState<{ results: RunTestResult[]; score: number; maxScore: number } | null>(null);
@@ -533,8 +537,47 @@ export default function ChallengeSolvingPage() {
   // ─── Non-technical challenge detection ───
   const isNonTechnical = challenge != null && challenge.type !== 'coding';
 
-  // Tab tracking
+  // Tab tracking & Proctoring Security Guard
   const { showWarning, dismiss: dismissWarning } = useTabTracking(hackathonId, isLive);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isNavigatingBackRef.current) return;
+      e.preventDefault();
+      e.returnValue = '¿Estás seguro de que deseas salir del IDE? La evaluación está en progreso.';
+      return e.returnValue;
+    };
+
+    const handleVisibility = () => {
+      if (isNavigatingBackRef.current) return;
+      if (document.hidden) {
+        setTabWarningsCount((c) => c + 1);
+        setShowSecurityAlertModal(true);
+        if (hackathonId) {
+          reportTabEvent(hackathonId, 'blur').catch(() => {});
+        }
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (isNavigatingBackRef.current) return;
+      setTabWarningsCount((c) => c + 1);
+      setShowSecurityAlertModal(true);
+      if (hackathonId) {
+        reportTabEvent(hackathonId, 'blur').catch(() => {});
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleWindowBlur);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleWindowBlur);
+    };
+  }, [hackathonId]);
 
   // Load saved code from localStorage
   useEffect(() => {
@@ -763,7 +806,62 @@ export default function ChallengeSolvingPage() {
           theme="vs-dark"
           value={code}
           onChange={(value) => setCode(value ?? '')}
-          onMount={(editor) => { editorRef.current = editor; }}
+          onMount={(editor, monaco) => {
+            editorRef.current = editor;
+
+            const showBlockAlert = (actionName: string) => {
+              toast({
+                title: '🚫 Acción Restringida',
+                description: `${actionName} está deshabilitado en este entorno de evaluación para garantizar la integridad de la prueba.`,
+                variant: 'destructive',
+              });
+            };
+
+            // Intercept keyboard shortcuts for copy, paste, cut
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC, () => {
+              showBlockAlert('Copiar código (Ctrl+C)');
+            });
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV, () => {
+              showBlockAlert('Pegar código (Ctrl+V)');
+            });
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX, () => {
+              showBlockAlert('Cortar código (Ctrl+X)');
+            });
+            editor.addCommand(monaco.KeyMod.Shift | monaco.KeyCode.Insert, () => {
+              showBlockAlert('Pegar código (Shift+Insert)');
+            });
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Insert, () => {
+              showBlockAlert('Copiar código (Ctrl+Insert)');
+            });
+
+            // Intercept DOM events inside Monaco container
+            const domNode = editor.getDomNode();
+            if (domNode) {
+              domNode.addEventListener('contextmenu', (e: MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showBlockAlert('El clic derecho');
+              }, true);
+
+              domNode.addEventListener('paste', (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showBlockAlert('Pegar contenido');
+              }, true);
+
+              domNode.addEventListener('copy', (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showBlockAlert('Copiar contenido');
+              }, true);
+
+              domNode.addEventListener('cut', (e: ClipboardEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                showBlockAlert('Cortar contenido');
+              }, true);
+            }
+          }}
           options={{
             fontSize: 14,
             fontFamily: '"JetBrains Mono", monospace',
@@ -777,6 +875,8 @@ export default function ChallengeSolvingPage() {
             bracketPairColorization: { enabled: true },
             suggest: { showKeywords: true },
             padding: { top: 8 },
+            contextmenu: false,
+            copyWithSyntaxHighlighting: false,
           }}
         />
       </div>
@@ -882,13 +982,52 @@ export default function ChallengeSolvingPage() {
   );
 
   return (
-    <div className={`flex flex-col bg-background ${
-      isFullscreen ? 'fixed inset-0 z-50' : 'h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-8rem)]'
-    }`}>
-      {/* Top bar - Compact on mobile */}
+    <div
+      onContextMenu={(e) => {
+        e.preventDefault();
+        toast({
+          title: '🚫 Clic derecho bloqueado',
+          description: 'El menú contextual está deshabilitado durante la prueba.',
+          variant: 'destructive',
+        });
+      }}
+      onCopy={(e) => {
+        e.preventDefault();
+        toast({
+          title: '🚫 Copiar bloqueado',
+          description: 'No está permitido copiar texto ni código durante la evaluación.',
+          variant: 'destructive',
+        });
+      }}
+      onPaste={(e) => {
+        e.preventDefault();
+        toast({
+          title: '🚫 Pegar bloqueado',
+          description: 'No está permitido pegar contenido externo en el entorno.',
+          variant: 'destructive',
+        });
+      }}
+      onCut={(e) => {
+        e.preventDefault();
+        toast({
+          title: '🚫 Cortar bloqueado',
+          description: 'La función de cortar está deshabilitada durante la evaluación.',
+          variant: 'destructive',
+        });
+      }}
+      className={`flex flex-col bg-background select-none ${
+        isFullscreen ? 'fixed inset-0 z-50' : 'h-[calc(100vh-3.5rem)] sm:h-[calc(100vh-8rem)]'
+      }`}
+    >
+      {/* Top bar - Compact on mobile with Security Shield */}
       <div className="flex items-center justify-between px-3 py-1 sm:py-1.5 border-b border-border/50 bg-card/30 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <Link href={`/dashboard/hackathons/${hackathonId}`}>
+          <Link
+            href={`/dashboard/hackathons/${hackathonId}`}
+            onClick={() => {
+              isNavigatingBackRef.current = true;
+            }}
+          >
             <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-7 sm:w-auto sm:px-2 text-xs">
               <ArrowLeft className="w-4 h-4 sm:w-3 sm:h-3 sm:mr-1" />
               <span className="hidden sm:inline">Hackathon</span>
@@ -898,6 +1037,20 @@ export default function ChallengeSolvingPage() {
             <span className="text-sm font-semibold truncate text-foreground/90">{challenge.title}</span>
           ) : (
             <Skeleton className="h-4 w-24" />
+          )}
+        </div>
+
+        {/* Security Shield Indicator */}
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 text-xs font-semibold">
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            <span>Entorno Seguro SAM</span>
+          </div>
+          {tabWarningsCount > 0 && (
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-destructive/10 border border-destructive/30 text-destructive text-[11px] font-bold animate-pulse">
+              <AlertTriangle className="w-3 h-3" />
+              <span>{tabWarningsCount} {tabWarningsCount === 1 ? 'aviso de ventana' : 'avisos de ventana'}</span>
+            </div>
           )}
         </div>
       </div>
@@ -944,6 +1097,39 @@ export default function ChallengeSolvingPage() {
           {mobileTab === 'problem' ? descriptionPanel : editorPanel}
         </div>
       </div>
+
+      {/* Security Alert Dialog (Tab switch / Window blur) */}
+      <Dialog open={showSecurityAlertModal} onOpenChange={setShowSecurityAlertModal}>
+        <DialogContent className="max-w-md border-destructive/40 bg-card">
+          <DialogHeader>
+            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-2">
+              <AlertTriangle className="w-6 h-6 text-destructive" />
+            </div>
+            <DialogTitle className="text-center text-lg font-bold text-destructive">
+              ⚠️ Advertencia de Seguridad · Proctoring SAM
+            </DialogTitle>
+            <DialogDescription className="text-center text-xs space-y-2 pt-2 text-foreground/80">
+              <p className="font-semibold text-foreground">
+                Has cambiado de pestaña o salido de la ventana de la evaluación.
+              </p>
+              <p className="text-muted-foreground">
+                Esta acción queda registrada en el registro de auditoría institucional del hackatón (Incidencia #{tabWarningsCount}).
+              </p>
+              <p className="text-amber-500 font-semibold text-[11px] pt-1">
+                Para que tu entrega sea calificada y válida, no debes consultar fuentes externas, ventanas secundarias ni asistentes de IA.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-center pt-2">
+            <Button
+              onClick={() => setShowSecurityAlertModal(false)}
+              className="w-full bg-destructive hover:bg-destructive/90 text-white font-bold text-xs"
+            >
+              Entendido, volver a la prueba
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Confirm Submit Dialog */}
       <Dialog open={showConfirmSubmit} onOpenChange={setShowConfirmSubmit}>
