@@ -43,6 +43,7 @@ import {
 } from '@/components/ui/dialog';
 import { PageHeader } from '@/components/shared/page-header';
 import { EmptyState } from '@/components/shared/empty-state';
+import { BadgeDownloadDialog } from '@/components/gamification/badge-download-dialog';
 import Link from 'next/link';
 import { format, formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -344,9 +345,11 @@ function ChallengesTab({
 function LeaderboardTab({
   hackathonId,
   isTeamBased,
+  hackathonTitle,
 }: {
   hackathonId: string;
   isTeamBased: boolean;
+  hackathonTitle?: string;
 }) {
   const userId = useAuthStore((s) => s?.user?.id);
   const [type, setType] = useState<'individual' | 'team'>('individual');
@@ -397,6 +400,7 @@ function LeaderboardTab({
                 <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground">Puntos</th>
                 <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground hidden sm:table-cell">Resueltos</th>
                 <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground hidden md:table-cell">Pistas</th>
+                <th className="text-right py-2 px-2 text-xs font-medium text-muted-foreground w-32">Insignia</th>
               </tr>
             </thead>
             <tbody>
@@ -433,6 +437,15 @@ function LeaderboardTab({
                     </td>
                     <td className="py-2.5 px-2 text-right text-muted-foreground hidden md:table-cell">
                       {entry.hints_used ?? 0}
+                    </td>
+                    <td className="py-2.5 px-2 text-right">
+                      <BadgeDownloadDialog
+                        entry={entry}
+                        rank={entry.rank}
+                        hackathonTitle={hackathonTitle}
+                        triggerLabel="Descargar"
+                        className="h-6 text-[11px] px-2"
+                      />
                     </td>
                   </tr>
                 );
@@ -991,6 +1004,7 @@ export default function HackathonDetailPage() {
           <LeaderboardTab
             hackathonId={hackathonId}
             isTeamBased={hackathon.is_team_based}
+            hackathonTitle={hackathon?.name}
           />
         </TabsContent>
 
