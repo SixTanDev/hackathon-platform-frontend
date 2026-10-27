@@ -15,7 +15,7 @@ const ROLE_HOME: Record<string, string> = {
   guest: '/dashboard',
 };
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Skip static files and API routes
